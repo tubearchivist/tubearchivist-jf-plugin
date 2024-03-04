@@ -1,16 +1,16 @@
 ---
-name: "Template"
-guid: "eb5d7894-8eef-4b36-aa6f-5d124e828ce1"
+name: "TubeArchivistMetadata"
+guid: "dc97d0c6-28b0-4242-afb4-5833ae1b3715"
 version: "1.0.0.0"
 targetAbi: "10.8.0.0"
 framework: "net6.0"
-overview: "Short description about your plugin"
+overview: "Metadata for your TubeArchivist library"
 description: >
-  This is a longer description that can span more than one
-  line and include details about your plugin.
+  TubeArchivistMetadata is a plugin that automatically manages
+  metadata for videos downloaded with TubeArchivist from YouTube.
 category: "General"
 owner: "jellyfin"
 artifacts:
-- "Jellyfin.Plugin.Template.dll"
+- "Jellyfin.Plugin.TubeArchivistMetadata.dll"
 changelog: >
   changelog

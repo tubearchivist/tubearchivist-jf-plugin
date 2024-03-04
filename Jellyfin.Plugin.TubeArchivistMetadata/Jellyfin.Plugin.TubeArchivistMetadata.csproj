@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <RootNamespace>Jellyfin.Plugin.Template</RootNamespace>
+    <RootNamespace>Jellyfin.Plugin.TubeArchivistMetadata</RootNamespace>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Nullable>enable</Nullable>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Template</title>
+</head>
+
+<body>
+    <div id="TemplateConfigPage" data-role="page" class="page type-interior pluginConfigurationPage"
+        data-require="emby-input,emby-button,emby-select,emby-checkbox">
+        <div data-role="content">
+            <div class="content-primary">
+                <form id="TemplateConfigForm">
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="CollectionTitle">Collection Title</label>
+                        <input id="CollectionTitle" name="CollectionTitle" type="text" is="emby-input" />
+                        <div class="fieldDescription">TubeArchivist collection display name</div>
+                    </div>
+                    <div>
+                        <button is="emby-button" type="submit" class="raised button-submit block emby-button">
+                            <span>Save</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <script type="text/javascript">
+            var TemplateConfig = {
+                pluginUniqueId: 'dc97d0c6-28b0-4242-afb4-5833ae1b3715'
+            };
+
+            document.querySelector('#TemplateConfigPage')
+                .addEventListener('pageshow', function () {
+                    Dashboard.showLoadingMsg();
+                    ApiClient.getPluginConfiguration(TemplateConfig.pluginUniqueId).then(function (config) {
+                        document.querySelector('#CollectionTitle').value = config.CollectionTitle;
+                        Dashboard.hideLoadingMsg();
+                    });
+                });
+
+            document.querySelector('#TemplateConfigForm')
+                .addEventListener('submit', function (e) {
+                    Dashboard.showLoadingMsg();
+                    ApiClient.getPluginConfiguration(TemplateConfig.pluginUniqueId).then(function (config) {
+                        config.CollectionTitle = document.querySelector('#CollectionTitle').value
+                        ApiClient.updatePluginConfiguration(TemplateConfig.pluginUniqueId, config).then(function (result) {
+                            Dashboard.processPluginConfigurationUpdateResult(result);
+                        });
+                    });
+
+                    e.preventDefault();
+                    return false;
+                });
+        </script>
+    </div>
+</body>
+
+</html>
