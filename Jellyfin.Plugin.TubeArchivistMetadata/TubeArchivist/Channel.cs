@@ -1,3 +1,8 @@
+using System.Collections.Generic;
+using MediaBrowser.Controller.Entities;
+using MediaBrowser.Controller.Entities.TV;
+using MediaBrowser.Model.Entities;
+using MediaBrowser.Model.Providers;
 using Newtonsoft.Json;
 
 namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
@@ -67,5 +72,47 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
         /// </summary>
         [JsonProperty(PropertyName = "channel_tvart_url")]
         public string TvartUrl { get; set; }
+
+        /// <summary>
+        /// Converts the TubeArchivist API channel to a Jellyfin <see cref="RemoteSearchResult"/> object.
+        /// </summary>
+        /// <returns>The channel equivalent Jellyfin <see cref="RemoteSearchResult"/> object.</returns>
+        public RemoteSearchResult ToSearchResult()
+        {
+            return new RemoteSearchResult
+            {
+                Name = Name,
+                SearchProviderName = Constants.ProviderName,
+                ImageUrl = ThumbUrl,
+                ProviderIds = new Dictionary<string, string>() { { Constants.ProviderName, Id } }
+            };
+        }
+
+        /// <summary>
+        /// Converts the TubeArchivist API channel to a Jellyfin <see cref="Series"/> object.
+        /// </summary>
+        /// <returns>The channel equivalent Jellyfin <see cref="Series"/> object.</returns>
+        public Series ToSeries()
+        {
+            return new Series
+            {
+                Name = Name,
+                Studios = new[] { Name },
+                ProviderIds = new Dictionary<string, string>()
+                {
+                    {
+                        Constants.ProviderName, Id
+                    }
+                },
+                ImageInfos = new[]
+                {
+                    new ItemImageInfo
+                    {
+                        Path = ThumbUrl,
+                        Type = ImageType.Primary
+                    }
+                }
+            };
+        }
     }
 }
