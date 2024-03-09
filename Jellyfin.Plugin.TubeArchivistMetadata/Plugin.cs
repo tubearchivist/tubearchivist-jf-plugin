@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Net.Http;
 using Jellyfin.Plugin.TubeArchivistMetadata.Configuration;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
@@ -23,6 +24,11 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
             : base(applicationPaths, xmlSerializer)
         {
             Instance = this;
+            HttpClientHandler handler = new HttpClientHandler();
+            handler.AllowAutoRedirect = false;
+            handler.CheckCertificateRevocationList = true;
+            HttpClient = new HttpClient(handler);
+            HttpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Token", Instance?.Configuration.TubeArchivistApiKey);
         }
 
         /// <inheritdoc />
@@ -35,6 +41,11 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
         /// Gets the current plugin instance.
         /// </summary>
         public static Plugin? Instance { get; private set; }
+
+        /// <summary>
+        /// Gets the HTTP client used globally in the plugin.
+        /// </summary>
+        public HttpClient HttpClient { get; }
 
         /// <inheritdoc />
         public IEnumerable<PluginPageInfo> GetPages() => new[]
