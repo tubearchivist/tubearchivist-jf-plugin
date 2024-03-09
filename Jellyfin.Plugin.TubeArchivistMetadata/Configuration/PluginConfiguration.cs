@@ -3,22 +3,6 @@ using MediaBrowser.Model.Plugins;
 namespace Jellyfin.Plugin.TubeArchivistMetadata.Configuration
 {
     /// <summary>
-    /// The configuration options.
-    /// </summary>
-    public enum SomeOptions
-    {
-        /// <summary>
-        /// Option one.
-        /// </summary>
-        OneOption,
-
-        /// <summary>
-        /// Second option.
-        /// </summary>
-        AnotherOption
-    }
-
-    /// <summary>
     /// Plugin configuration.
     /// </summary>
     public class PluginConfiguration : BasePluginConfiguration
@@ -29,11 +13,23 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Configuration
         public PluginConfiguration()
         {
             CollectionTitle = "YouTube";
+            TubeArchivistUrl = string.Empty;
+            TubeArchivistApiKey = string.Empty;
         }
 
         /// <summary>
-        /// Gets or sets TubeArchivist collection dispay name.
+        /// Gets or sets TubeArchivist collection display name.
         /// </summary>
         public string CollectionTitle { get; set; }
+
+        /// <summary>
+        /// Gets or sets TubeArchivist URL.
+        /// </summary>
+        public string TubeArchivistUrl { get; set; }
+
+        /// <summary>
+        /// Gets or sets TubeArchivist API key.
+        /// </summary>
+        public string TubeArchivistApiKey { get; set; }
     }
 }

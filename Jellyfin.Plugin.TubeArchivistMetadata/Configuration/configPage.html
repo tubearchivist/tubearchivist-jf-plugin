@@ -17,6 +17,16 @@
                         <input id="CollectionTitle" name="CollectionTitle" type="text" is="emby-input" />
                         <div class="fieldDescription">TubeArchivist collection display name</div>
                     </div>
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="TubeArchivistUrl">TubeArchivist URL</label>
+                        <input id="TubeArchivistUrl" name="TubeArchivistUrl" type="text" is="emby-input" />
+                        <div class="fieldDescription">TubeArchivist collection display name</div>
+                    </div>
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="TubeArchivistApiKey">TubeArchivist API key</label>
+                        <input id="TubeArchivistApiKey" name="TubeArchivistApiKey" type="text" is="emby-input" />
+                        <div class="fieldDescription">TubeArchivist API key</div>
+                    </div>
                     <div>
                         <button is="emby-button" type="submit" class="raised button-submit block emby-button">
                             <span>Save</span>
@@ -26,15 +36,17 @@
             </div>
         </div>
         <script type="text/javascript">
-            var TemplateConfig = {
+            var TAMetadataConfig = {
                 pluginUniqueId: 'dc97d0c6-28b0-4242-afb4-5833ae1b3715'
             };
 
             document.querySelector('#TemplateConfigPage')
                 .addEventListener('pageshow', function () {
                     Dashboard.showLoadingMsg();
-                    ApiClient.getPluginConfiguration(TemplateConfig.pluginUniqueId).then(function (config) {
+                    ApiClient.getPluginConfiguration(TAMetadataConfig.pluginUniqueId).then(function (config) {
                         document.querySelector('#CollectionTitle').value = config.CollectionTitle;
+                        document.querySelector('#TubeArchivistUrl').value = config.TubeArchivistUrl;
+                        document.querySelector('#TubeArchivistApiKey').value = config.TubeArchivistApiKey;
                         Dashboard.hideLoadingMsg();
                     });
                 });
@@ -42,9 +54,11 @@
             document.querySelector('#TemplateConfigForm')
                 .addEventListener('submit', function (e) {
                     Dashboard.showLoadingMsg();
-                    ApiClient.getPluginConfiguration(TemplateConfig.pluginUniqueId).then(function (config) {
-                        config.CollectionTitle = document.querySelector('#CollectionTitle').value
-                        ApiClient.updatePluginConfiguration(TemplateConfig.pluginUniqueId, config).then(function (result) {
+                    ApiClient.getPluginConfiguration(TAMetadataConfig.pluginUniqueId).then(function (config) {
+                        config.CollectionTitle = document.querySelector('#CollectionTitle').value;
+                        config.TubeArchivistUrl = document.querySelector('#TubeArchivistUrl').value;
+                        config.TubeArchivistApiKey = document.querySelector('#TubeArchivistApiKey').value;
+                        ApiClient.updatePluginConfiguration(TAMetadataConfig.pluginUniqueId, config).then(function (result) {
                             Dashboard.processPluginConfigurationUpdateResult(result);
                         });
                     });
