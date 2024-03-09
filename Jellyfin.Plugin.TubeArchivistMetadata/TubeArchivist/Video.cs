@@ -87,6 +87,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
                 SearchProviderName = Constants.ProviderName,
                 ProductionYear = Published.Year,
                 ImageUrl = VidThumbUrl,
+                PremiereDate = Published,
                 ProviderIds = new Dictionary<string, string>() { { Constants.ProviderName, YoutubeId } }
             };
         }
@@ -102,6 +103,9 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
                 Name = Title,
                 SeasonName = Published.Year.ToString(CultureInfo.CurrentCulture),
                 SeriesName = Channel.Name,
+                ProductionYear = Published.Year,
+                PremiereDate = Published,
+                Studios = new[] { Channel.Name },
                 ProviderIds = new Dictionary<string, string>()
                 {
                     {
