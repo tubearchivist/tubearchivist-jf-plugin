@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
@@ -11,6 +12,8 @@ using MediaBrowser.Controller.Entities.TV;
 using MediaBrowser.Controller.Providers;
 using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.Providers;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
 {
@@ -19,6 +22,23 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
     /// </summary>
     public class EpisodeImageProvider : IRemoteImageProvider
     {
+        private ILogger _logger;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EpisodeImageProvider"/> class.
+        /// </summary>
+        public EpisodeImageProvider()
+        {
+            if (Plugin.Instance == null)
+            {
+                throw new DataException("Uninitialized plugin!");
+            }
+            else
+            {
+                _logger = Plugin.Instance.Logger;
+            }
+        }
+
         /// <summary>
         /// Gets the provider name.
         /// </summary>
@@ -40,6 +60,8 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
             var taApi = TubeArchivistApi.GetInstance();
             var videoTAId = item.Path.Split("/").Last().Split(".").First();
             var video = await taApi.GetVideo(videoTAId).ConfigureAwait(true);
+            _logger.LogInformation("{Message}", string.Format(CultureInfo.CurrentCulture, "Getting images for video: {0} ({1})", video?.Title, videoTAId));
+            _logger.LogInformation("{Message}", "Thumb URI: " + video?.VidThumbUrl);
 
             if (video != null)
             {
@@ -49,7 +71,6 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
                     Type = ImageType.Primary,
                     Url = video.VidThumbUrl
                 });
-                Console.WriteLine("ThumbURL: " + video.VidThumbUrl);
             }
 
             return list;

@@ -7,6 +7,7 @@ using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
 using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Serialization;
+using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.TubeArchivistMetadata
 {
@@ -20,10 +21,12 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
         /// </summary>
         /// <param name="applicationPaths">Instance of the <see cref="IApplicationPaths"/> interface.</param>
         /// <param name="xmlSerializer">Instance of the <see cref="IXmlSerializer"/> interface.</param>
-        public Plugin(IApplicationPaths applicationPaths, IXmlSerializer xmlSerializer)
+        /// <param name="logger">Instance of the <see cref="ILogger"/> interface.</param>
+        public Plugin(IApplicationPaths applicationPaths, IXmlSerializer xmlSerializer, ILogger<Plugin> logger)
             : base(applicationPaths, xmlSerializer)
         {
             Instance = this;
+            Logger = logger;
             HttpClientHandler handler = new HttpClientHandler();
             handler.AllowAutoRedirect = false;
             handler.CheckCertificateRevocationList = true;
@@ -43,7 +46,12 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
         public static Plugin? Instance { get; private set; }
 
         /// <summary>
-        /// Gets the HTTP client used globally in the plugin.
+        /// Gets the logger instance used globally by the plugin.
+        /// </summary>
+        public ILogger<Plugin> Logger { get; }
+
+        /// <summary>
+        /// Gets the HTTP client used globally by the plugin.
         /// </summary>
         public HttpClient HttpClient { get; }
 

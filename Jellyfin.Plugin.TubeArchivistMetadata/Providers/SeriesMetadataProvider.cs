@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
@@ -11,6 +12,7 @@ using MediaBrowser.Controller.Entities.TV;
 using MediaBrowser.Controller.Providers;
 using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.Providers;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
@@ -20,6 +22,23 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
     /// </summary>
     public class SeriesMetadataProvider : IRemoteMetadataProvider<Series, SeriesInfo>
     {
+        private ILogger _logger;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SeriesMetadataProvider"/> class.
+        /// </summary>
+        public SeriesMetadataProvider()
+        {
+            if (Plugin.Instance == null)
+            {
+                throw new DataException("Uninitialized plugin!");
+            }
+            else
+            {
+                _logger = Plugin.Instance.Logger;
+            }
+        }
+
         /// <summary>
         /// Gets the provider name.
         /// </summary>
@@ -32,6 +51,8 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
             var taApi = TubeArchivistApi.GetInstance();
             var channelTAId = info.Path.Split("/").Last();
             var channel = await taApi.GetChannel(channelTAId).ConfigureAwait(true);
+            _logger.LogInformation("{Message}", string.Format(CultureInfo.CurrentCulture, "Getting metadata for channel: {0} ({1})", channel?.Name, channelTAId));
+            _logger.LogInformation("{Message}", "Received metadata: \n" + JsonConvert.SerializeObject(channel));
 
             if (channel != null)
             {

@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
 namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
@@ -13,6 +14,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
     /// </summary>
     public class TubeArchivistApi
     {
+        private ILogger _logger;
         private HttpClient client;
         private static TubeArchivistApi _taApiInstance = null!;
 
@@ -22,6 +24,15 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
         /// <param name="httpClient">HTTP client to make requests to TubeArchivist API.</param>
         private TubeArchivistApi(HttpClient httpClient)
         {
+            if (Plugin.Instance == null)
+            {
+                throw new DataException("Uninitialized plugin!");
+            }
+            else
+            {
+                _logger = Plugin.Instance.Logger;
+            }
+
             client = httpClient;
         }
 
@@ -54,34 +65,22 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
         public async Task<Channel?> GetChannel(string channelId)
         {
             ResponseContainer<Channel>? channel = null;
-            Console.WriteLine(Plugin.Instance?.Configuration.TubeArchivistUrl);
-            Console.WriteLine(Plugin.Instance?.Configuration.TubeArchivistApiKey);
-
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Token", Plugin.Instance?.Configuration.TubeArchivistApiKey);
 
             var channelsEndpoint = "/api/channel/";
             var url = new Uri(Plugin.Instance?.Configuration.TubeArchivistUrl + channelsEndpoint + channelId);
             var response = await client.GetAsync(url).ConfigureAwait(true);
-            Console.WriteLine(response.StatusCode);
             while (response.StatusCode == HttpStatusCode.Moved)
             {
-                Console.WriteLine("Received redirect to: " + response.Headers.Location);
+                _logger.LogInformation("{Message}", "Received redirect to: " + response.Headers.Location);
                 response = await client.GetAsync(response.Headers.Location).ConfigureAwait(true);
             }
 
-            Console.WriteLine(url + ": " + response.StatusCode);
+            _logger.LogInformation("{Message}", url + ": " + response.StatusCode);
 
             if (response.IsSuccessStatusCode)
             {
                 string rawData = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
                 channel = JsonConvert.DeserializeObject<ResponseContainer<Channel>>(rawData);
-
-                Console.WriteLine("Channel null? " + channel == null);
-                Console.WriteLine("Channel: " + channel?.Data?.Name);
-                if (channel != null && channel.Data != null)
-                {
-                    Console.WriteLine(JsonConvert.SerializeObject(channel));
-                }
             }
 
             return channel?.Data;
@@ -95,22 +94,17 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
         public async Task<Video?> GetVideo(string videoId)
         {
             ResponseContainer<Video>? video = null;
-            Console.WriteLine(Plugin.Instance?.Configuration.TubeArchivistUrl);
-            Console.WriteLine(Plugin.Instance?.Configuration.TubeArchivistApiKey);
-
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Token", Plugin.Instance?.Configuration.TubeArchivistApiKey);
 
             var videosEndpoint = "/api/video/";
             var url = new Uri(Plugin.Instance?.Configuration.TubeArchivistUrl + videosEndpoint + videoId);
             var response = await client.GetAsync(url).ConfigureAwait(true);
-            Console.WriteLine(response.StatusCode);
             while (response.StatusCode == HttpStatusCode.Moved)
             {
-                Console.WriteLine("Received redirect to: " + response.Headers.Location);
+                _logger.LogInformation("{Message}", "Received redirect to: " + response.Headers.Location);
                 response = await client.GetAsync(response.Headers.Location).ConfigureAwait(true);
             }
 
-            Console.WriteLine(url + ": " + response.StatusCode);
+            _logger.LogInformation("{Message}", url + ": " + response.StatusCode);
 
             if (response.IsSuccessStatusCode)
             {

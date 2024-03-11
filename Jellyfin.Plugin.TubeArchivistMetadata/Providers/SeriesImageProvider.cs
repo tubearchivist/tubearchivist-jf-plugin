@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
@@ -11,6 +12,7 @@ using MediaBrowser.Controller.Entities.TV;
 using MediaBrowser.Controller.Providers;
 using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.Providers;
+using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
 {
@@ -19,6 +21,23 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
     /// </summary>
     public class SeriesImageProvider : IRemoteImageProvider
     {
+        private ILogger _logger;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SeriesImageProvider"/> class.
+        /// </summary>
+        public SeriesImageProvider()
+        {
+            if (Plugin.Instance == null)
+            {
+                throw new DataException("Uninitialized plugin!");
+            }
+            else
+            {
+                _logger = Plugin.Instance.Logger;
+            }
+        }
+
         /// <summary>
         /// Gets the provider name.
         /// </summary>
@@ -40,6 +59,10 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
             var taApi = TubeArchivistApi.GetInstance();
             var channelTAId = item.Path.Split("/").Last();
             var channel = await taApi.GetChannel(channelTAId).ConfigureAwait(true);
+            _logger.LogInformation("{Message}", string.Format(CultureInfo.CurrentCulture, "Getting images for channel: {0} ({1})", channel?.Name, channelTAId));
+            _logger.LogInformation("{Message}", "Thumb URI: " + channel?.ThumbUrl);
+            _logger.LogInformation("{Message}", "TVArt URI: " + channel?.TvartUrl);
+            _logger.LogInformation("{Message}", "Banner URI: " + channel?.BannerUrl);
 
             if (channel != null)
             {
@@ -75,7 +98,6 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
             }
             else
             {
-                Console.WriteLine("Channel images: " + Plugin.Instance.Configuration.TubeArchivistUrl + url);
                 return await Plugin.Instance.HttpClient.GetAsync(new Uri(Plugin.Instance.Configuration.TubeArchivistUrl + url), cancellationToken).ConfigureAwait(false);
             }
         }
