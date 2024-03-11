@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.TV;
 using MediaBrowser.Model.Entities;
@@ -19,6 +21,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
         /// <param name="description">Channel description.</param>
         /// <param name="id">Channel YouTube id.</param>
         /// <param name="name">Channel name.</param>
+        /// <param name="tags">Channel tags.</param>
         /// <param name="thumbUrl">URL of the channel thumb image.</param>
         /// <param name="tvartUrl">URL of the channel tvart image.</param>
         public Channel(
@@ -26,6 +29,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
             string description,
             string id,
             string name,
+            Collection<string> tags,
             string thumbUrl,
             string tvartUrl)
         {
@@ -33,6 +37,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
             this.Description = description;
             this.Id = id;
             this.Name = name;
+            this.Tags = tags;
             this.ThumbUrl = thumbUrl;
             this.TvartUrl = tvartUrl;
         }
@@ -60,6 +65,12 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
         /// </summary>
         [JsonProperty(PropertyName = "channel_name")]
         public string Name { get; set; }
+
+        /// <summary>
+        /// Gets channel tags.
+        /// </summary>
+        [JsonProperty(PropertyName = "channel_tags")]
+        public Collection<string> Tags { get; }
 
         /// <summary>
         /// Gets or sets the URL of the channel thumb image.
@@ -111,7 +122,8 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
                         Path = ThumbUrl,
                         Type = ImageType.Primary
                     }
-                }
+                },
+                Tags = this.Tags.ToArray<string>()
             };
         }
     }
