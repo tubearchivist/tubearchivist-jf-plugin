@@ -9,7 +9,7 @@
         "imageUrl": "https://raw.githubusercontent.com/DarkFighterLuke/TubeArchivistMetadata/master/images/logo.jpg",
         "versions": [
             {
-                "checksum": "072919c94b2cfe739df0d35191ea264b",
+                "checksum": "a85150b7aef0b65dd89dd0ac087e8b85",
                 "changelog": "First release",
                 "targetAbi": "10.8.0.0",
                 "sourceUrl": "https://github.com/DarkFighterLuke/TubeArchivistMetadata/releases/download/v1.0.0/TubeArchivistMetadata-1.0.0.zip",
