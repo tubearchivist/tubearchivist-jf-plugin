@@ -7,9 +7,9 @@
 
 ## About
 
-<p>This plugin adds the metadata provider for [TubeArchivist](https://www.tubearchivist.com/).</p>
-<p>This plugin offers improved flexibility and native integration with Jellyfin compared to [tubearchivist-jf](https://github.com/tubearchivist/tubearchivist-jf) solution. This solution runs also more smoothly than the cited one since it is direcly integrated in Jellyfin and it is not based on strict folder paths on the disk.</p>
-<p>Furthermore, it allows to configure a custom collection name.</p>
+<p>This plugin adds the metadata provider for <a href="https://www.tubearchivist.com/">TubeArchivist</a>.</p>
+<p>This plugin offers improved flexibility and native integration with Jellyfin compared to <a href="https://github.com/tubearchivist/tubearchivist-jf">tubearchivist-jf</a> solution.<br> This solution runs also more smoothly than the cited one since it is direcly integrated in Jellyfin and it is not based on strict folder paths on the disk.<br>
+Furthermore, it allows to configure a custom collection name.</p>
 
 ## How it works
 The media organization is the same used in [tubearchivist-jf](https://github.com/tubearchivist/tubearchivist-jf), so the collection will be a `Shows` collection, where each channel is a show and its videos are the episodes, organized in seasons by year.<br>
