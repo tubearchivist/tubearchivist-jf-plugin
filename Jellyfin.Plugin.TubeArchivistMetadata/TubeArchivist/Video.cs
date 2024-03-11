@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Globalization;
+using System.Linq;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.TV;
 using MediaBrowser.Model.Entities;
@@ -18,6 +20,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
         /// Initializes a new instance of the <see cref="Video"/> class.
         /// </summary>
         /// <param name="channel">Channel the video belongs to.</param>
+        /// <param name="tags">Video tags.</param>
         /// <param name="title">Video title.</param>
         /// <param name="description">Video description.</param>
         /// <param name="published">Video published date.</param>
@@ -25,6 +28,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
         /// <param name="youtubeId">Video YouTube id.</param>
         public Video(
             Channel channel,
+            Collection<string> tags,
             string title,
             string description,
             DateTime published,
@@ -32,6 +36,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
             string youtubeId)
         {
             this.Channel = channel;
+            this.Tags = tags;
             this.Title = title;
             this.Description = description;
             this.Published = published;
@@ -44,6 +49,12 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
         /// </summary>
         [JsonProperty(PropertyName = "channel")]
         public Channel Channel { get; set; }
+
+        /// <summary>
+        /// Gets video tags.
+        /// </summary>
+        [JsonProperty(PropertyName = "tags")]
+        public Collection<string> Tags { get; }
 
         /// <summary>
         /// Gets or sets video title.
@@ -120,7 +131,8 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
                         Path = VidThumbUrl,
                         Type = ImageType.Primary
                     }
-                }
+                },
+                Tags = this.Tags.ToArray<string>()
             };
         }
     }
