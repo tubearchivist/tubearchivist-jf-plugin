@@ -4,13 +4,13 @@ guid: "dc97d0c6-28b0-4242-afb4-5833ae1b3715"
 version: "1.0.0.0"
 targetAbi: "10.8.0.0"
 framework: "net6.0"
-overview: "Metadata for your TubeArchivist library"
+overview: "Metadata for your TubeArchivist library on Jellyfin"
 description: >
   TubeArchivistMetadata is a plugin that automatically manages
   metadata for videos downloaded with TubeArchivist from YouTube.
-category: "General"
-owner: "jellyfin"
+category: "Metadata"
+owner: "DarkFighterLuke"
 artifacts:
 - "Jellyfin.Plugin.TubeArchivistMetadata.dll"
 changelog: >
-  changelog
+  First release
