@@ -1,7 +1,7 @@
 <h1 align="center">Jellyfin TubeArchivist Plugin</h1>
 
 <p align="center">
-<img alt="Plugin Banner" src="https://raw.githubusercontent.com/DarkFighterLuke/TubeArchivistMetadata/master/images/logo.jpg"/>
+<img alt="Plugin Banner" src="https://raw.githubusercontent.com/DarkFighterLuke/TubeArchivistMetadata/master/images/logo.png"/>
 <br/>
 </p>
 
