@@ -6,10 +6,10 @@
         "description": "A new and fully integrated way to manage metadata and organize your TubeArchivist library videos on Jellyfin.",
         "owner": "DarkFighterLuke",
         "overview": "Metadata for your TubeArchivist library on Jellyfin.",
-        "imageUrl": "https://raw.githubusercontent.com/DarkFighterLuke/TubeArchivistMetadata/master/images/logo.jpg",
+        "imageUrl": "https://raw.githubusercontent.com/DarkFighterLuke/TubeArchivistMetadata/master/images/logo.png",
         "versions": [
             {
-                "checksum": "da4343fdab4e8e0fa43b7ceb32777085",
+                "checksum": "444f8980671de494b1875ee7d1657bcf",
                 "changelog": "First release",
                 "targetAbi": "10.8.0.0",
                 "sourceUrl": "https://github.com/DarkFighterLuke/TubeArchivistMetadata/releases/download/v1.0.0/TubeArchivistMetadata-1.0.0.zip",
