@@ -28,7 +28,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Configuration
                 _logger = Plugin.Instance.Logger;
             }
 
-            CollectionTitle = "YouTube";
+            CollectionTitle = string.Empty;
             _tubeArchivistUrl = string.Empty;
             TubeArchivistApiKey = string.Empty;
         }
