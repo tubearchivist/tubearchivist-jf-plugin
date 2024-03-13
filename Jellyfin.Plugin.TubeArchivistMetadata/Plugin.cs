@@ -32,6 +32,8 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
             handler.CheckCertificateRevocationList = true;
             HttpClient = new HttpClient(handler);
             HttpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Token", Instance?.Configuration.TubeArchivistApiKey);
+            logger.LogInformation("{Message}", "Collection display name: " + Instance?.Configuration.CollectionTitle);
+            logger.LogInformation("{Message}", "TubeArchivist API URL: " + Instance?.Configuration.TubeArchivistUrl);
         }
 
         /// <inheritdoc />
