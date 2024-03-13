@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist;
+using Jellyfin.Plugin.TubeArchivistMetadata.Utilities;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.TV;
 using MediaBrowser.Controller.Providers;
@@ -85,7 +86,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
             }
             else
             {
-                return await Plugin.Instance.HttpClient.GetAsync(new Uri(Plugin.Instance.Configuration.TubeArchivistUrl + url), cancellationToken).ConfigureAwait(false);
+                return await Plugin.Instance.HttpClient.GetAsync(new Uri(Utils.SanitizeUrl(Plugin.Instance.Configuration.TubeArchivistUrl + url)), cancellationToken).ConfigureAwait(false);
             }
         }
     }

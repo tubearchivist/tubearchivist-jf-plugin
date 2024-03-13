@@ -2,8 +2,8 @@ using System;
 using System.Data;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using Jellyfin.Plugin.TubeArchivistMetadata.Utilities;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
@@ -67,7 +67,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
             ResponseContainer<Channel>? channel = null;
 
             var channelsEndpoint = "/api/channel/";
-            var url = new Uri(Plugin.Instance?.Configuration.TubeArchivistUrl + channelsEndpoint + channelId);
+            var url = new Uri(Utils.SanitizeUrl(Plugin.Instance?.Configuration.TubeArchivistUrl + channelsEndpoint + channelId));
             var response = await client.GetAsync(url).ConfigureAwait(true);
             while (response.StatusCode == HttpStatusCode.Moved)
             {
@@ -96,7 +96,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
             ResponseContainer<Video>? video = null;
 
             var videosEndpoint = "/api/video/";
-            var url = new Uri(Plugin.Instance?.Configuration.TubeArchivistUrl + videosEndpoint + videoId);
+            var url = new Uri(Utils.SanitizeUrl(Plugin.Instance?.Configuration.TubeArchivistUrl + videosEndpoint + videoId));
             var response = await client.GetAsync(url).ConfigureAwait(true);
             while (response.StatusCode == HttpStatusCode.Moved)
             {
