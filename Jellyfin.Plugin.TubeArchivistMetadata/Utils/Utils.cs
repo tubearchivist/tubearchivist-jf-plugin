@@ -20,6 +20,9 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Utilities
             // Remove double slashes and spaces from the remaining part of the URL
             string cleanedPath = Regex.Replace(inputUrl.Substring(schemaMatch.Length), @"[/\s]+", "/");
 
+            // Remove slashes at the start
+            cleanedPath = cleanedPath.TrimStart('/');
+
             // Add a trailing slash if not already present
             cleanedPath = cleanedPath.TrimEnd('/') + "/";
 
