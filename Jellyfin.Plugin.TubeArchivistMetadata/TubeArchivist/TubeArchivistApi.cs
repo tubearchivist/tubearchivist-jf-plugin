@@ -71,8 +71,9 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
             var response = await client.GetAsync(url).ConfigureAwait(true);
             while (response.StatusCode == HttpStatusCode.Moved)
             {
-                _logger.LogInformation("{Message}", "Received redirect to: " + response.Headers.Location);
-                response = await client.GetAsync(response.Headers.Location).ConfigureAwait(true);
+                url = response.Headers.Location;
+                _logger.LogInformation("{Message}", "Received redirect to: " + url);
+                response = await client.GetAsync(url).ConfigureAwait(true);
             }
 
             _logger.LogInformation("{Message}", url + ": " + response.StatusCode);
@@ -100,8 +101,9 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
             var response = await client.GetAsync(url).ConfigureAwait(true);
             while (response.StatusCode == HttpStatusCode.Moved)
             {
-                _logger.LogInformation("{Message}", "Received redirect to: " + response.Headers.Location);
-                response = await client.GetAsync(response.Headers.Location).ConfigureAwait(true);
+                url = response.Headers.Location;
+                _logger.LogInformation("{Message}", "Received redirect to: " + url);
+                response = await client.GetAsync(url).ConfigureAwait(true);
             }
 
             _logger.LogInformation("{Message}", url + ": " + response.StatusCode);
