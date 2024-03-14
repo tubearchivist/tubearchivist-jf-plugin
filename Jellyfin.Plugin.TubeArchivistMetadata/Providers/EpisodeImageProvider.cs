@@ -86,7 +86,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
             }
             else
             {
-                return await Plugin.Instance.HttpClient.GetAsync(new Uri(Utils.SanitizeUrl(Plugin.Instance.Configuration.TubeArchivistUrl + url)), cancellationToken).ConfigureAwait(false);
+                return await Plugin.Instance.HttpClient.GetAsync(new Uri(Utils.SanitizeUrl(Plugin.Instance.Configuration.TubeArchivistUrl + url).TrimEnd('/')), cancellationToken).ConfigureAwait(false);
             }
         }
     }
