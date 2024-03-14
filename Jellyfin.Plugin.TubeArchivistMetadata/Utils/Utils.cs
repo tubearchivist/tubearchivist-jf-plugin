@@ -31,5 +31,15 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Utilities
 
             return cleanedUrl;
         }
+
+        /// <summary>
+        /// Format episodes and series descriptions replacing newlines with br tags.
+        /// </summary>
+        /// <param name="description">String to format.</param>
+        /// <returns>A string with \n replaced by br tags.</returns>
+        public static string FormatDescription(string description)
+        {
+            return description.Replace("\n", "<br>", System.StringComparison.CurrentCulture);
+        }
     }
 }

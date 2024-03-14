@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
+using Jellyfin.Plugin.TubeArchivistMetadata.Utilities;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.TV;
 using MediaBrowser.Model.Entities;
@@ -113,6 +114,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
             return new Episode
             {
                 Name = Title,
+                Overview = Utils.FormatDescription(Description),
                 SeasonName = Published.Year.ToString(CultureInfo.CurrentCulture),
                 ParentIndexNumber = Published.Year,
                 SeriesName = Channel.Name,

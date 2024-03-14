@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Jellyfin.Plugin.TubeArchivistMetadata.Utilities;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.TV;
 using MediaBrowser.Model.Entities;
@@ -109,6 +110,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
             return new Series
             {
                 Name = Name,
+                Overview = Utils.FormatDescription(Description),
                 Studios = new[] { Name },
                 ProviderIds = new Dictionary<string, string>()
                 {
