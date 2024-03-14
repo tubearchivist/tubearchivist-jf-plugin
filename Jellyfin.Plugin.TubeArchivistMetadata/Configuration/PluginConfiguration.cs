@@ -31,6 +31,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Configuration
             CollectionTitle = string.Empty;
             _tubeArchivistUrl = string.Empty;
             TubeArchivistApiKey = string.Empty;
+            MaxDescriptionLength = 500;
         }
 
         /// <summary>
@@ -66,5 +67,10 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Configuration
         /// Gets or sets TubeArchivist API key.
         /// </summary>
         public string TubeArchivistApiKey { get; set; }
+
+        /// <summary>
+        /// Gets or sets maximum series and episodes overviews length.
+        /// </summary>
+        public int MaxDescriptionLength { get; set; }
     }
 }

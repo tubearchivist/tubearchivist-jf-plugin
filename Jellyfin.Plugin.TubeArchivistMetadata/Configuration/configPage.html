@@ -27,6 +27,11 @@
                         <input id="TubeArchivistApiKey" name="TubeArchivistApiKey" type="text" is="emby-input" />
                         <div class="fieldDescription">TubeArchivist API key</div>
                     </div>
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="MaxDescriptionLength">Maximum overviews length</label>
+                        <input id="MaxDescriptionLength" name="MaxDescriptionLength" type="number" is="emby-input" min="0" />
+                        <div class="fieldDescription">This is the maximum length of the descriptions showed in series and episodes</div>
+                    </div>
                     <div>
                         <button is="emby-button" type="submit" class="raised button-submit block emby-button">
                             <span>Save</span>
@@ -47,6 +52,7 @@
                         document.querySelector('#CollectionTitle').value = config.CollectionTitle;
                         document.querySelector('#TubeArchivistUrl').value = config.TubeArchivistUrl;
                         document.querySelector('#TubeArchivistApiKey').value = config.TubeArchivistApiKey;
+                        document.querySelector('#MaxDescriptionLength').value = config.MaxDescriptionLength;
                         Dashboard.hideLoadingMsg();
                     });
                 });
@@ -58,6 +64,7 @@
                         config.CollectionTitle = document.querySelector('#CollectionTitle').value;
                         config.TubeArchivistUrl = document.querySelector('#TubeArchivistUrl').value;
                         config.TubeArchivistApiKey = document.querySelector('#TubeArchivistApiKey').value;
+                        config.MaxDescriptionLength = document.querySelector('#MaxDescriptionLength').value;
                         ApiClient.updatePluginConfiguration(TAMetadataConfig.pluginUniqueId, config).then(function (result) {
                             Dashboard.processPluginConfigurationUpdateResult(result);
                         });
