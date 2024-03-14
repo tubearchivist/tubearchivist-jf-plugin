@@ -9,6 +9,14 @@
         "imageUrl": "https://raw.githubusercontent.com/DarkFighterLuke/TubeArchivistMetadata/master/images/logo.png",
         "versions": [
             {
+                "version": "1.2.1.0",
+                "changelog": "Make maximum description length configurable\nTruncate descriptions to 500 characters\n",
+                "targetAbi": "10.8.0.0",
+                "sourceUrl": "https://github.com/DarkFighterLuke/TubeArchivistMetadata/releases/download/v1.2.1/TubeArchivistMetadata-1.2.1.zip",
+                "checksum": "cf68d169956f166a6ee68a06192651c2",
+                "timestamp": "2024-03-14 21:50:00"
+            },
+            {
                 "version": "1.2.0.0",
                 "changelog": "Add episodes and series overview\n",
                 "targetAbi": "10.8.0.0",
