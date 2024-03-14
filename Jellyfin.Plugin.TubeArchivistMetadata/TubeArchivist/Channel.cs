@@ -70,6 +70,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
         /// Gets channel tags.
         /// </summary>
         [JsonProperty(PropertyName = "channel_tags")]
+        [JsonConverter(typeof(TagsJsonConverter))]
         public Collection<string> Tags { get; }
 
         /// <summary>

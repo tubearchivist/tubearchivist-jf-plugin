@@ -54,6 +54,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
         /// Gets video tags.
         /// </summary>
         [JsonProperty(PropertyName = "tags")]
+        [JsonConverter(typeof(TagsJsonConverter))]
         public Collection<string> Tags { get; }
 
         /// <summary>
