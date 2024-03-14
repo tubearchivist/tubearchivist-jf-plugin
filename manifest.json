@@ -9,6 +9,14 @@
         "imageUrl": "https://raw.githubusercontent.com/DarkFighterLuke/TubeArchivistMetadata/master/images/logo.png",
         "versions": [
             {
+                "version": "1.1.1.0",
+                "changelog": "Handle empty tags for videos and channels\nFix URL by removing trailing slash for images\n",
+                "targetAbi": "10.8.0.0",
+                "sourceUrl": "https://github.com/DarkFighterLuke/TubeArchivistMetadata/releases/download/v1.1.1/TubeArchivistMetadata-1.1.1.zip",
+                "checksum": "84ce752ce662e834690512c88ba48664",
+                "timestamp": "2024-03-14 16:35:00"
+            },
+            {
                 "version": "1.1.0.0",
                 "changelog": "Fix field name and add placeholders\nFix URL in logs after redirection\nAdd schema to TubeArchivist URL if not present in settings\nFix a particular case\nLog configuration settings at initialization\nSanitize URLs\n",
                 "targetAbi": "10.8.0.0",
