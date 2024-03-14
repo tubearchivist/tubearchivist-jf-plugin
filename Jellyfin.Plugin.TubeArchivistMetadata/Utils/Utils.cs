@@ -7,6 +7,8 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Utilities
     /// </summary>
     public static class Utils
     {
+        private static int maxDescriptionChars = 500;
+
         /// <summary>
         /// Sanitize the given URL.
         /// </summary>
@@ -39,7 +41,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Utilities
         /// <returns>A string with \n replaced by br tags.</returns>
         public static string FormatDescription(string description)
         {
-            return description.Replace("\n", "<br>", System.StringComparison.CurrentCulture);
+            return description.Replace("\n", "<br>", System.StringComparison.CurrentCulture).Substring(0, maxDescriptionChars);
         }
     }
 }
