@@ -9,6 +9,14 @@
         "imageUrl": "https://raw.githubusercontent.com/DarkFighterLuke/TubeArchivistMetadata/master/images/logo.png",
         "versions": [
             {
+                "version": "1.2.0.0",
+                "changelog": "Add episodes and series overview\n",
+                "targetAbi": "10.8.0.0",
+                "sourceUrl": "https://github.com/DarkFighterLuke/TubeArchivistMetadata/releases/download/v1.2.0/TubeArchivistMetadata-1.2.0.zip",
+                "checksum": "75812a4464bf68c43fb9dcdb74d924e3",
+                "timestamp": "2024-03-14 20:00:00"
+            },
+            {
                 "version": "1.1.1.0",
                 "changelog": "Handle empty tags for videos and channels\nFix URL by removing trailing slash for images\n",
                 "targetAbi": "10.8.0.0",

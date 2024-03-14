@@ -1,7 +1,7 @@
 ---
 name: "TubeArchivistMetadata"
 guid: "dc97d0c6-28b0-4242-afb4-5833ae1b3715"
-version: "1.1.1.0"
+version: "1.2.0.0"
 targetAbi: "10.8.0.0"
 framework: "net6.0"
 overview: "Metadata for your TubeArchivist library on Jellyfin"
@@ -13,5 +13,4 @@ owner: "DarkFighterLuke"
 artifacts:
 - "Jellyfin.Plugin.TubeArchivistMetadata.dll"
 changelog: >
-  Fix URL by removing trailing slash for images
-  Handle empty tags for videos and channels
+  Add episodes and series overview
