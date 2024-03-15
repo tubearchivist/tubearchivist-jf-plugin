@@ -45,7 +45,12 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Utilities
                 maxLength = Plugin.Instance.Configuration.MaxDescriptionLength;
             }
 
-            return description.Replace("\n", "<br>", System.StringComparison.CurrentCulture).Substring(0, maxLength);
+            if (description.Length > maxLength)
+            {
+                description = description.Replace("\n", "<br>", System.StringComparison.CurrentCulture).Substring(0, maxLength);
+            }
+
+            return description;
         }
     }
 }
