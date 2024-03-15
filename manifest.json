@@ -9,6 +9,14 @@
         "imageUrl": "https://raw.githubusercontent.com/DarkFighterLuke/TubeArchivistMetadata/master/images/logo.png",
         "versions": [
             {
+                "version": "1.2.2.0",
+                "changelog": "Fix bug on description length substringing\n",
+                "targetAbi": "10.8.0.0",
+                "sourceUrl": "https://github.com/DarkFighterLuke/TubeArchivistMetadata/releases/download/v1.2.2/TubeArchivistMetadata-1.2.2.zip",
+                "checksum": "82d04546916e1ba76d56de28e648447a",
+                "timestamp": "2024-03-15 10:12:00"
+            },
+            {
                 "version": "1.2.1.0",
                 "changelog": "Make maximum description length configurable\nTruncate descriptions to 500 characters\n",
                 "targetAbi": "10.8.0.0",
