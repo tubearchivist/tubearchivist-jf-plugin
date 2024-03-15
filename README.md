@@ -42,11 +42,14 @@ The plugin interacts with TubeArchivist APIs to fetch videos and channels metada
 ## Configuration
 <p>This plugin requires that you have already an instance of TubeArchivist up and running.</p>
 Once installed, you have to configure the following parameters in the plugin configuration:
-- Collection display name
-- TubeArchivist instance address
-- TubeArchivist API key
+<ul>
+    <li>Collection display name</li>
+    <li>TubeArchivist instance address</li>
+    <li>TubeArchivist API key</li>
+    <li>Overviews length (channels and videos descriptions)</li>
+</ul>
 
-![Plugin configuration](https://github.com/DarkFighterLuke/TubeArchivistMetadata/assets/31162436/fbd97e50-4c6f-45e4-9a6a-7067eae2e8f3)
+![Plugin configuration](https://github.com/DarkFighterLuke/TubeArchivistMetadata/assets/31162436/706c1eee-c769-4f40-9909-08198b7ba255)
 
 ## Use the plugin
 <p>Using the plugin is very simple. Let's start from the beginning:</p>
