@@ -9,6 +9,14 @@
         "imageUrl": "https://raw.githubusercontent.com/tubearchivist/tubearchivist-jf-plugin/master/images/logo.png",
         "versions": [
             {
+                "version": "1.2.3.0",
+                "changelog": "Add fix for unclosed HTML breaks\n",
+                "targetAbi": "10.8.0.0",
+                "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.2.3/TubeArchivistMetadata-1.2.3.zip",
+                "checksum": "f5328a662444739eaa7c59855bfcb203",
+                "timestamp": "2024-04-18 21:45:00"
+            },
+            {
                 "version": "1.2.2.0",
                 "changelog": "Fix bug on description length substringing\n",
                 "targetAbi": "10.8.0.0",
