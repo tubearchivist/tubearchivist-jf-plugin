@@ -47,7 +47,8 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Utilities
 
             if (description.Length > maxLength)
             {
-                description = description.Replace("\n", "<br>", System.StringComparison.CurrentCulture).Substring(0, maxLength);
+                description = description.Substring(0, maxLength);
+                description = description.Replace("\n", "<br>", System.StringComparison.CurrentCulture);
             }
 
             return description;
