@@ -62,7 +62,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
                 {
                     Name = channel.Name,
                     ImageUrl = channel.ThumbUrl,
-                    Type = PersonType.Actor,
+                    Type = Data.Enums.PersonKind.Actor,
                 });
                 result.HasMetadata = true;
                 result.Item = channel.ToSeries();
@@ -80,7 +80,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
 
             var taApi = TubeArchivistApi.GetInstance();
             var channelTAId = searchInfo.Path.Split("/").Last();
-            var channel = await taApi.GetChannel(channelTAId).ConfigureAwait(true);
+            var channel = await taApi.GetChannel(channelTAId).ConfigureAwait(false);
             if (channel != null)
             {
                 results.Add(channel.ToSearchResult());
