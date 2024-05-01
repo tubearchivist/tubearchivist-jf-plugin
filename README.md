@@ -68,7 +68,7 @@ _NOTE: If you are using Docker containers, it is important to mount the TubeArch
 
 2. Build plugin with following command
   ```
-  dotnet publish Jellyfin.Plugin.tubearchivist-jf-plugin --configuration Release --output bin
+  $ dotnet publish Jellyfin.Plugin.TubeArchivistMetadata --configuration Release --output bin
   ```
 
 3. Place the dll-file in the `plugins/tubearchivist-jf-plugin` folder (you might need to create the folders) of your Jellyfin installation

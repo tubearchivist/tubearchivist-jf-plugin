@@ -1,0 +1,34 @@
+name: Feature Request
+description: I have an idea for a great addition to this project
+title: "[Feature Request]: "
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to help improve this project! This project is *very* selective with accepting new feature requests. Please read the [how to open an issue](https://github.com/tubearchivist/tubearchivist/blob/master/CONTRIBUTING.md#how-to-open-an-issue) guide carefully before continuing.
+
+  - type: checkboxes
+    id: already
+    attributes:
+      label: "I've read the documentation"
+      options:
+        - label: I have read the [how to open an issue](https://github.com/tubearchivist/tubearchivist/blob/master/CONTRIBUTING.md#how-to-open-an-issue) guide, particularly the [feature request](https://github.com/tubearchivist/tubearchivist/blob/master/CONTRIBUTING.md#feature-request) section.
+          required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Your Feature Request
+      value: "## Is your feature request related to a problem? Please describe.\n\n## Describe the solution you'd like\n\n## Additional context"
+      placeholder: Tell us what you see!
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Your help is needed!
+      description: This project is ambitious as it is, please contribute.
+      options:
+        - label: Yes I will work on this in the next few days or weeks.
