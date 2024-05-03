@@ -58,7 +58,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
         {
             var list = new List<RemoteImageInfo>();
             var taApi = TubeArchivistApi.GetInstance();
-            var channelTAId = item.Path.Split("/").Last();
+            var channelTAId = Utils.GetChannelNameFromPath(item.Path);
             var channel = await taApi.GetChannel(channelTAId).ConfigureAwait(true);
             _logger.LogInformation("{Message}", string.Format(CultureInfo.CurrentCulture, "Getting images for channel: {0} ({1})", channel?.Name, channelTAId));
             _logger.LogInformation("{Message}", "Thumb URI: " + channel?.ThumbUrl);

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
@@ -50,7 +51,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
         {
             var result = new MetadataResult<Episode>();
             var taApi = TubeArchivistApi.GetInstance();
-            var videoTAId = info.Path.Split("/").Last().Split(".").First();
+            var videoTAId = Utils.GetVideoNameFromPath(info.Path);
             var video = await taApi.GetVideo(videoTAId).ConfigureAwait(true);
             _logger.LogInformation("{Message}", string.Format(CultureInfo.CurrentCulture, "Getting metadata for video: {0} ({1})", video?.Title, videoTAId));
             _logger.LogInformation("{Message}", "Received metadata: \n" + JsonConvert.SerializeObject(video));
@@ -79,7 +80,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
             var results = new List<RemoteSearchResult>();
 
             var taApi = TubeArchivistApi.GetInstance();
-            var videoTAId = searchInfo.Path.Split("/").Last().Split(".").First();
+            var videoTAId = Utils.GetVideoNameFromPath(searchInfo.Path);
             var video = await taApi.GetVideo(videoTAId).ConfigureAwait(true);
             if (video != null)
             {

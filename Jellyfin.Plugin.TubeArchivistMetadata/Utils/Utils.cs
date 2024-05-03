@@ -1,3 +1,5 @@
+using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Jellyfin.Plugin.TubeArchivistMetadata.Utilities
@@ -52,6 +54,26 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Utilities
             }
 
             return description;
+        }
+
+        /// <summary>
+        /// Get video name from file path on the disk.
+        /// </summary>
+        /// <param name="path">File path on disk.</param>
+        /// <returns></returns>
+        public static string GetVideoNameFromPath(string path)
+        {
+            return path.Split(Path.DirectorySeparatorChar).Last().Split(".").First();
+        }
+
+        /// <summary>
+        /// Get channel name from directory path on the disk.
+        /// </summary>
+        /// <param name="path">Directory path on disk.</param>
+        /// <returns></returns>
+        public static string GetChannelNameFromPath(string path)
+        {
+            return path.Split(Path.DirectorySeparatorChar).Last();
         }
     }
 }
