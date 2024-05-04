@@ -1,0 +1,53 @@
+name: Stable Release
+
+on:
+  release:
+    types:
+      - released
+    branches: master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build & Release
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Get release version
+        id: currenttag
+        uses: "WyriHaximus/github-action-get-previous-tag@v1"
+
+      - name: Setup .Net
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Restore Nuget Packages
+        run: dotnet restore Jellyfin.Plugin.TubeArchivistMetadata/Jellyfin.Plugin.TubeArchivistMetadata.csproj
+
+      - name: Build Jellyfin Plugin
+        uses: oddstr13/jellyfin-plugin-repository-manager@843260fcdfda7cba229c5abd77bdd9c6fc4e850b # v1.1.0
+        id: jprm
+        with:
+          dotnet-target: "${{ inputs.dotnet-target }}"
+
+      - name: Upload Release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: ${{ steps.jprm.outputs.artifact }}
+          tag: ${{ github.ref }}
+          file_glob: true
+
+      - name: Update manifest.json
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          branch: master
+          commit_message: "Update manifest.json"
+          file_pattern: manifest.json
+          skip_fetch: true
