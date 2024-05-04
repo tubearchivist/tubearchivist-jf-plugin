@@ -34,7 +34,8 @@ jobs:
         uses: oddstr13/jellyfin-plugin-repository-manager@843260fcdfda7cba229c5abd77bdd9c6fc4e850b # v1.1.0
         id: jprm
         with:
-          dotnet-target: "${{ inputs.dotnet-target }}"
+          dotnet-target: net6.0
+          path: Jellyfin.Plugin.TubeArchivistMetadata/
 
       - name: Upload Release
         uses: svenstaro/upload-release-action@v2
