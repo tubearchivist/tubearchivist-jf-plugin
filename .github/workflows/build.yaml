@@ -19,7 +19,7 @@ jobs:
           fetch-depth: 0
 
       - name: Get release version
-        id: currenttag
+        id: newtag
         uses: "WyriHaximus/github-action-get-previous-tag@v1"
 
       - name: Setup .Net
@@ -27,15 +27,13 @@ jobs:
         with:
           dotnet-version: 6.0.x
 
-      - name: Restore Nuget Packages
-        run: dotnet restore Jellyfin.Plugin.TubeArchivistMetadata/Jellyfin.Plugin.TubeArchivistMetadata.csproj
-
       - name: Build Jellyfin Plugin
         uses: oddstr13/jellyfin-plugin-repository-manager@843260fcdfda7cba229c5abd77bdd9c6fc4e850b # v1.1.0
         id: jprm
         with:
           dotnet-target: net6.0
-          path: Jellyfin.Plugin.TubeArchivistMetadata/
+          version: ${{ steps.newtag.outputs.tag }}
+
 
       - name: Upload Release
         uses: svenstaro/upload-release-action@v2
