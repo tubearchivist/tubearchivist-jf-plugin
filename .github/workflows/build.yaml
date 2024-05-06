@@ -27,12 +27,18 @@ jobs:
         with:
           dotnet-version: 6.0.x
 
+      - name: Get version number only
+        run: |
+          TAG=${{ github.event.release.tag_name }}
+          echo "VERSION=${TAG#v}" >> $GITHUB_ENV
+
+
       - name: Build Jellyfin Plugin
         uses: oddstr13/jellyfin-plugin-repository-manager@843260fcdfda7cba229c5abd77bdd9c6fc4e850b # v1.1.0
         id: jprm
         with:
           dotnet-target: net6.0
-          version: ${{ steps.newtag.outputs.tag }}
+          version: ${VERSION}
 
 
       - name: Upload Release
