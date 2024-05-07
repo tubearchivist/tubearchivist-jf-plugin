@@ -10,7 +10,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     name: Build & Release
-    upload.permissions:
+    permissions:
       contents: write
 
     steps:
