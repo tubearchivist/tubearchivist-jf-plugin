@@ -10,6 +10,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
     name: Build & Release
+    upload.permissions:
+      contents: write
 
     steps:
       - name: Checkout
@@ -40,9 +42,9 @@ jobs:
           dotnet-target: net6.0
           version: ${VERSION}
 
-
       - name: Upload Release
         uses: svenstaro/upload-release-action@v2
+        id: upload
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ${{ steps.jprm.outputs.artifact }}
