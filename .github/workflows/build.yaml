@@ -49,8 +49,7 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ${{ steps.jprm.outputs.artifact }}
           tag: ${{ github.ref }}
-          version: ${VERSION}
-          asset_name: TubeArchivistMetadata-$version.zip
+          asset_name: TubeArchivistMetadata-${{ env.VERSION }}.zip
 
       - name: Update manifest.json
         uses: stefanzweifel/git-auto-commit-action@v4
