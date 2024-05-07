@@ -34,13 +34,25 @@ jobs:
           TAG=${{ github.event.release.tag_name }}
           echo "VERSION=${TAG#v}" >> $GITHUB_ENV
 
-
       - name: Build Jellyfin Plugin
         uses: oddstr13/jellyfin-plugin-repository-manager@843260fcdfda7cba229c5abd77bdd9c6fc4e850b # v1.1.0
         id: jprm
         with:
           dotnet-target: net6.0
           version: ${VERSION}
+
+      - name: Generate release message
+        run: |
+          # Read the YAML file and extract the value of the 'changelog' field
+          changelog=$(awk '/changelog:/ {flag=1; next} /^[^ ]/ {flag=0} flag' build.yaml | awk '{$1=$1};1')
+
+          # Check if changelog contains multiple lines
+          if [[ $(echo "$changelog" | wc -l) -gt 1 ]]; then
+              changelog=$(echo "$changelog" | sed 's/^/*/')
+          else
+              changelog="*$changelog"
+          fi
+          echo "RELEASE_MESSAGE=$(echo Changelog:; echo $changelog)" >> GITHUB_ENV
 
       - name: Upload Release
         uses: svenstaro/upload-release-action@v2
@@ -50,6 +62,7 @@ jobs:
           file: ${{ steps.jprm.outputs.artifact }}
           tag: ${{ github.ref }}
           asset_name: TubeArchivistMetadata-${{ env.VERSION }}.zip
+          body: ${{ env.RELEASE_MESSAGE }}
 
       - name: Update manifest.json
         uses: stefanzweifel/git-auto-commit-action@v4
