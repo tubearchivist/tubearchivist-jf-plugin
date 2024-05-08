@@ -45,7 +45,7 @@ jobs:
           else
               changelog="*$changelog"
           fi
-          echo "RELEASE_MESSAGE=$(echo Changelog:; echo "$changelog")" >> $GITHUB_ENV
+          export RELEASE_MESSAGE=$(printf "Changelog:\n$changelog")
 
       - name: Build Jellyfin Plugin
         uses: oddstr13/jellyfin-plugin-repository-manager@843260fcdfda7cba229c5abd77bdd9c6fc4e850b # v1.1.0
