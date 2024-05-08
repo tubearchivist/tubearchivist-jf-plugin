@@ -60,7 +60,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           artifacts: ${{ steps.jprm.outputs.artifact }}
           makeLatest: latest
-          body: ${{ env.RELEASE_MESSAGE }} 
+          body: ${{ env.RELEASE_MESSAGE }}
 
       - name: Update manifest.json
         uses: stefanzweifel/git-auto-commit-action@v4
