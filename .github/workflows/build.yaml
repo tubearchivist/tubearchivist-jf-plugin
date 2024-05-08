@@ -62,6 +62,7 @@ jobs:
           makeLatest: latest
           body: ${{ env.RELEASE_MESSAGE }}
           tag: ${{ steps.newtag.outputs.tag }}
+          allowUpdates: true
 
       - name: Update manifest.json
         uses: stefanzweifel/git-auto-commit-action@v4
