@@ -60,20 +60,35 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Utilities
         /// Get video name from file path on the disk.
         /// </summary>
         /// <param name="path">File path on disk.</param>
-        /// <returns></returns>
+        /// <returns>The video name.</returns>
         public static string GetVideoNameFromPath(string path)
         {
-            return path.Split(Path.DirectorySeparatorChar).Last().Split(".").First();
+            return path.Split(DetectDirectorySeparator(path)).Last().Split(".").First();
         }
 
         /// <summary>
         /// Get channel name from directory path on the disk.
         /// </summary>
         /// <param name="path">Directory path on disk.</param>
-        /// <returns></returns>
+        /// <returns>The channel name.</returns>
         public static string GetChannelNameFromPath(string path)
         {
-            return path.Split(Path.DirectorySeparatorChar).Last();
+            return path.Split(DetectDirectorySeparator(path)).Last();
+        }
+
+        private static char DetectDirectorySeparator(string path)
+        {
+            int backslashCount = path.Count(c => c == '\\');
+            int forwardSlashCount = path.Count(c => c == '/');
+
+            if (backslashCount > forwardSlashCount)
+            {
+                return '\\'; // Windows directory separator
+            }
+            else
+            {
+                return '/'; // Unix directory separator
+            }
         }
     }
 }
