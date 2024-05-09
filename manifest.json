@@ -12,7 +12,7 @@
                 "version": "1.2.4.0",
                 "changelog": "Fix issues with directory separators\n",
                 "targetAbi": "10.8.0.0",
-                "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.2.3/TubeArchivistMetadata-1.2.4.zip",
+                "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.2.3/tubearchivistmetadata_1.2.4.0.zip",
                 "checksum": "b418a46d458fe28354580d70748b1ced",
                 "timestamp": "2024-05-09 15:41:00"
             },
