@@ -15,3 +15,4 @@ artifacts:
 - "Jellyfin.Plugin.TubeArchivistMetadata.dll"
 changelog: >
   Add fix for unclosed HTML breaks
+  Second line for test
