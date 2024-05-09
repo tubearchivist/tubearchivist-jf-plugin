@@ -47,7 +47,7 @@ jobs:
 
           # Create release-changelog.md
           echo "Changelog:" > release-changelog.md
-          echo "$changelog" | sed 's/^/* /' >> release-changelog.md
+          echo "$changelog" >> release-changelog.md
 
 
       - name: Build Jellyfin Plugin
