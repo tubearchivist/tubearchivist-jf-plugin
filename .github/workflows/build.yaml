@@ -42,7 +42,7 @@ jobs:
           if [[ $(echo "$changelog" | wc -l) -gt 1 ]]; then
               changelog=$(echo "$changelog" | sed 's/^/* /')
           else
-              changelog="*$changelog"
+              changelog="* $changelog"
           fi
 
           # Create release-changelog.md
