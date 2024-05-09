@@ -30,11 +30,11 @@ The plugin interacts with TubeArchivist APIs to fetch videos and channels metada
 
 3. Go to the `Catalog` tab
 4. Find `TubeArchivistMetadata` in the `Metadata` section and install it
-![Find plugin](https://github.com/tubearchivist/tubearchivist-jf-plugin/assets/31162436/86897215-bac5-4cef-8bd3-ffec731b0875)
+![Find plugin](https://github.com/tubearchivist/tubearchivist-jf-plugin/assets/31162436/a30a14c2-33cd-44c1-b96a-406662726e5e)
 5. Restart Jellyfin to apply the changes
 
 ### From ZIP in GitHub releases
-1. Download the latest available release (`TubeArchivistMetadata-*.zip`) from the repository releases section
+1. Download the latest available release (`tubearchivistmetadata_*.zip`) from the repository releases section
 2. Extract the contained files in the `plugins/TubeArchivistMetadata` folder (you might need to create the folders) of your Jellyfin installation
 3. Restart Jellyfin to apply the changes
 

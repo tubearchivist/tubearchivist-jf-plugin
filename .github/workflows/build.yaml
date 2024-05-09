@@ -1,0 +1,76 @@
+name: TubeArchivistMetadata Release
+
+on:
+  push:
+    tags:
+      - v*
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Build & Release
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+
+      - name: Get release version
+        id: newtag
+        uses: "WyriHaximus/github-action-get-previous-tag@v1"
+
+      - name: Setup .Net
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Get version number only
+        run: |
+          TAG=${{ steps.newtag.outputs.tag }}
+          echo "VERSION=${TAG#v}" >> $GITHUB_ENV
+
+      - name: Generate release message
+        run: |
+          # Read the YAML file and extract the value of the 'changelog' field
+          changelog=$(awk '/changelog:/ {flag=1; next} /^[^ ]/ {flag=0} flag' build.yaml | awk '{$1=$1};1')
+
+          # Check if changelog contains multiple lines
+          if [[ $(echo "$changelog" | wc -l) -gt 1 ]]; then
+              changelog=$(echo "$changelog" | sed 's/^/* /')
+          else
+              changelog="* $changelog"
+          fi
+
+          # Create release-changelog.md
+          echo "Changelog:" > release-changelog.md
+          echo "$changelog" >> release-changelog.md
+
+
+      - name: Build Jellyfin Plugin
+        uses: oddstr13/jellyfin-plugin-repository-manager@843260fcdfda7cba229c5abd77bdd9c6fc4e850b # v1.1.0
+        id: jprm
+        with:
+          dotnet-target: net6.0
+          version: ${VERSION}
+
+      - name: Create release
+        uses: ncipollo/release-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: ${{ steps.jprm.outputs.artifact }}
+          makeLatest: latest
+          bodyFile: release-changelog.md
+          tag: ${{ steps.newtag.outputs.tag }}
+          allowUpdates: true
+
+      - name: Update manifest.json
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          branch: master
+          commit_message: "Update manifest.json"
+          file_pattern: manifest.json
+          skip_fetch: true

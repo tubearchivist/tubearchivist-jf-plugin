@@ -3,7 +3,7 @@
         "category": "Metadata",
         "guid": "dc97d0c6-28b0-4242-afb4-5833ae1b3715",
         "name": "TubeArchivistMetadata",
-        "description": "A new and fully integrated way to manage metadata and organize your TubeArchivist library videos on Jellyfin.",
+        "description": "TubeArchivistMetadata is a plugin that automatically manages metadata for videos downloaded with TubeArchivist from YouTube.\n",
         "owner": "DarkFighterLuke",
         "overview": "Metadata for your TubeArchivist library on Jellyfin",
         "imageUrl": "https://raw.githubusercontent.com/tubearchivist/tubearchivist-jf-plugin/master/images/logo.png",
