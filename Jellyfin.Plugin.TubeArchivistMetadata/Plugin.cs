@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Jellyfin.Plugin.TubeArchivistMetadata.Configuration;
+using Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Common.Plugins;
 using MediaBrowser.Model.Plugins;
@@ -34,6 +36,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
             HttpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Token", Instance?.Configuration.TubeArchivistApiKey);
             logger.LogInformation("{Message}", "Collection display name: " + Instance?.Configuration.CollectionTitle);
             logger.LogInformation("{Message}", "TubeArchivist API URL: " + Instance?.Configuration.TubeArchivistUrl);
+            logger.LogInformation("{Message}", "Pinging TubeArchivist API...");
         }
 
         /// <inheritdoc />
@@ -66,5 +69,28 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
                 EmbeddedResourcePath = string.Format(CultureInfo.InvariantCulture, "{0}.Configuration.configPage.html", GetType().Namespace)
             }
         };
+
+        /// <summary>
+        /// Logs the TubeArchivist API connection status.
+        /// </summary>
+        public void LogTAApiConnectionStatus()
+        {
+            Logger.LogInformation("{Message}", "Ping...");
+
+            var api = TubeArchivistApi.GetInstance();
+            Task.Run(() => api.Ping()).ContinueWith(
+                task =>
+                {
+                    if (task.Result != null)
+                    {
+                        Logger.LogInformation("{Message}", "TubeArchivist API said: " + task.Result.Response + "!");
+                    }
+                    else
+                    {
+                        Logger.LogCritical("{Message}", "TubeArchivist API was unreachable!");
+                    }
+                },
+                TaskScheduler.Default);
+        }
     }
 }

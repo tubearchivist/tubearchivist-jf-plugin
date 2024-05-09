@@ -13,6 +13,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Configuration
     {
         private ILogger _logger;
         private string _tubeArchivistUrl;
+        private string _tubeArchivistApiKey;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PluginConfiguration"/> class.
@@ -30,7 +31,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Configuration
 
             CollectionTitle = string.Empty;
             _tubeArchivistUrl = string.Empty;
-            TubeArchivistApiKey = string.Empty;
+            _tubeArchivistApiKey = string.Empty;
             MaxDescriptionLength = 500;
         }
 
@@ -60,13 +61,27 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Configuration
                     _logger.LogInformation("{Message}", "Given TubeArchivist URL contains no schema. Adding http://...");
                     _tubeArchivistUrl = Utils.SanitizeUrl("http://" + value);
                 }
+
+                Plugin.Instance?.LogTAApiConnectionStatus();
             }
         }
 
         /// <summary>
         /// Gets or sets TubeArchivist API key.
         /// </summary>
-        public string TubeArchivistApiKey { get; set; }
+        public string TubeArchivistApiKey
+        {
+            get
+            {
+                return _tubeArchivistApiKey;
+            }
+
+            set
+            {
+                _tubeArchivistApiKey = value;
+                Plugin.Instance?.LogTAApiConnectionStatus();
+            }
+        }
 
         /// <summary>
         /// Gets or sets maximum series and episodes overviews length.

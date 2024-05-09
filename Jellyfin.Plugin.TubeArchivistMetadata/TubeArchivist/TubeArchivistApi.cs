@@ -116,5 +116,35 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
 
             return video?.Data;
         }
+
+        /// <summary>
+        /// Validates connection and authentication to TubeArchivist.
+        /// </summary>
+        /// <returns>The ping response.</returns>
+        public async Task<PingResponse?> Ping()
+        {
+            PingResponse? pong = null;
+
+            var pingEndpoint = "/api/ping/";
+            var url = new Uri(Utils.SanitizeUrl(Plugin.Instance!.Configuration.TubeArchivistUrl + pingEndpoint));
+            var response = await client.GetAsync(url).ConfigureAwait(true);
+
+            while (response.StatusCode == HttpStatusCode.Moved)
+            {
+                url = response.Headers.Location;
+                _logger.LogInformation("{Message}", "Received redirect to: " + url);
+                response = await client.GetAsync(url).ConfigureAwait(true);
+            }
+
+            _logger.LogInformation("{Message}", url + ": " + response.StatusCode);
+
+            if (response.IsSuccessStatusCode)
+            {
+                string rawData = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
+                pong = JsonConvert.DeserializeObject<PingResponse>(rawData);
+            }
+
+            return pong;
+        }
     }
 }
