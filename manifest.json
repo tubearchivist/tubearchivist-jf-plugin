@@ -12,7 +12,7 @@
                 "version": "1.2.5.0",
                 "changelog": "Ping the TA API to validate connection\n",
                 "targetAbi": "10.8.0.0",
-                "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/tag/v1.2.5/tubearchivistmetadata_1.2.5.0.zip",
+                "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.2.5/tubearchivistmetadata_1.2.5.0.zip",
                 "checksum": "e4a0d076ffd84c976ad66dde91dfb840",
                 "timestamp": "2024-05-14T17:37:17Z"
             },
