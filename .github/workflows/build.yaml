@@ -11,6 +11,7 @@ jobs:
     name: Build & Release
     permissions:
       contents: write
+      packages: read
 
     steps:
       - name: Checkout
