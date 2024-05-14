@@ -74,4 +74,4 @@ jobs:
           add: manifest.json
           commit: --signoff
           message: "Update manifest.json"
-          tag_push: "origin HEAD:master"
+          push: "origin HEAD:master"
