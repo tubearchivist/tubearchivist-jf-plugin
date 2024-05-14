@@ -26,7 +26,7 @@ jobs:
       - name: Setup .Net
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 6.0.x
+          dotnet-version: 8.0.x
 
       - name: Get version number only
         run: |
