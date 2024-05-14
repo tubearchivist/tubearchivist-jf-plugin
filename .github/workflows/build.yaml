@@ -75,4 +75,4 @@ jobs:
           commit: --signoff
           message: "Update manifest.json"
           push: "origin HEAD:master"
-          pull: "-X ours"
+          pull: "-X ours origin HEAD:master"
