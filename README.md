@@ -6,7 +6,7 @@
 </p>
 
 > [!IMPORTANT]
-> Jellyfin 10.9.1 has been finally released, since the plugin is maintained only for the latest Jellyfin release, in order to continue using this plugin with all the latest features you will need to upgrade your Jellyfin installation.
+> Jellyfin 10.9.1 has been finally released and since starting with the version 1.3.0 the plugin supports only the latest Jellyfin release, in order to continue using this plugin with all the latest features you will need to upgrade your Jellyfin installation.
 
 ## About
 
