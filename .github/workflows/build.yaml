@@ -28,6 +28,14 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
+      - name: Add Jellyfin GitHub Nuget registry to sources
+        run: |
+          dotnet nuget add source \
+            --username DarkFighterLuke \
+            --password ${{ secrets.GITHUB_TOKEN }} \
+            --store-password-in-clear-text \
+            --name github https://nuget.pkg.github.com/jellyfin/index.json
+
       - name: Get version number only
         run: |
           TAG=${{ steps.newtag.outputs.tag }}
