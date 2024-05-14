@@ -14,9 +14,9 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
-          ref: ${{ github.ref }}
+          ref: master
           fetch-depth: 0
 
       - name: Get release version
@@ -74,5 +74,4 @@ jobs:
           add: manifest.json
           commit: --signoff
           message: "Update manifest.json"
-          push: "origin HEAD:master"
-          pull: "--no-rebase -X ours origin HEAD:master"
+          pull: "--no-rebase -X ours origin master"
