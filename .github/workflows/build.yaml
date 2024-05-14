@@ -56,7 +56,7 @@ jobs:
         with:
           dotnet-target: net6.0
           version: ${VERSION}
-          update-manifest: true
+          update-manifest: "true"
 
       - name: Create release
         uses: ncipollo/release-action@v1
