@@ -51,11 +51,12 @@ jobs:
 
 
       - name: Build Jellyfin Plugin
-        uses: oddstr13/jellyfin-plugin-repository-manager@843260fcdfda7cba229c5abd77bdd9c6fc4e850b # v1.1.0
+        uses: DarkFighterLuke/jellyfin-plugin-repository-manager@ef1fec5dbea85409dcbae8dacb1fc5b0446397b4 # v1.1.0
         id: jprm
         with:
           dotnet-target: net6.0
           version: ${VERSION}
+          update-manifest: true
 
       - name: Create release
         uses: ncipollo/release-action@v1
