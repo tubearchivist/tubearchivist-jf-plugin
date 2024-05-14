@@ -64,7 +64,7 @@ _NOTE: If you are using Docker containers, it is important to mount the TubeArch
 
 ## Build
 
-1. To build this plugin you will need [.Net 6.x](https://dotnet.microsoft.com/download/dotnet/6.0).
+1. To build this plugin you will need [.Net 8.x](https://dotnet.microsoft.com/download/dotnet/8.0).
 
 2. Build plugin with following command
   ```

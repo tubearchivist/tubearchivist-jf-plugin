@@ -62,7 +62,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
                 {
                     Name = channel.Name,
                     ImageUrl = channel.ThumbUrl,
-                    Type = PersonType.Actor,
+                    Type = Data.Enums.PersonKind.Actor,
                 });
                 result.HasMetadata = true;
                 result.Item = channel.ToSeries();
