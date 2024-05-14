@@ -68,10 +68,9 @@ jobs:
           tag: ${{ steps.newtag.outputs.tag }}
           allowUpdates: true
 
-      - name: Update manifest.json
-        uses: stefanzweifel/git-auto-commit-action@v4
+      - name: Commit manifest.json
+        uses: EndBug/add-and-commit@v9
         with:
-          branch: master
-          commit_message: "Update manifest.json"
-          file_pattern: manifest.json
-          skip_fetch: true
+          add: manifest.json
+          commit: --signoff
+          message: "Update manifest.json"
