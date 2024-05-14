@@ -54,7 +54,7 @@ jobs:
         uses: DarkFighterLuke/jellyfin-plugin-repository-manager@7a96768accc155ac7b597351b5033532f3c48173
         id: jprm
         with:
-          dotnet-target: net6.0
+          dotnet-target: net8.0
           version: ${VERSION}
           update-manifest: "true"
 
