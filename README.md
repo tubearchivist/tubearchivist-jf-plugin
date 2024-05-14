@@ -5,6 +5,9 @@
 <br/>
 </p>
 
+> [!IMPORTANT]
+> Jellyfin 10.9.1 has been finally released, since the plugin is maintained only for the latest Jellyfin release, in order to continue using this plugin with all the latest features you will need to upgrade your Jellyfin installation.
+
 ## About
 
 <p>This plugin adds the metadata provider for <a href="https://www.tubearchivist.com/">TubeArchivist</a>, offering improved flexibility and native integration with Jellyfin compared to previous solutions.</p>
