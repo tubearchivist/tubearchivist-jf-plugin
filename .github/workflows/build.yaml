@@ -51,7 +51,7 @@ jobs:
 
 
       - name: Build Jellyfin Plugin
-        uses: DarkFighterLuke/jellyfin-plugin-repository-manager@ef1fec5dbea85409dcbae8dacb1fc5b0446397b4 # v1.1.0
+        uses: DarkFighterLuke/jellyfin-plugin-repository-manager@867156b5f59fbf97181864ec5ca13d3568d703ad # v1.1.0
         id: jprm
         with:
           dotnet-target: net6.0
