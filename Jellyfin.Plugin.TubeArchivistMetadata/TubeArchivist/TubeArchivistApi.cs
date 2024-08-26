@@ -159,12 +159,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
         {
             var progressEndpoint = $"/api/video/{videoId}/progress/";
             var url = new Uri(Utils.SanitizeUrl(Plugin.Instance!.Configuration.TubeArchivistUrl + progressEndpoint));
-            var body = JsonConvert.SerializeObject(new
-            {
-                position = progress
-            });
-
-            var sc = new StringContent(body, Encoding.UTF8, "application/json");
+            var body = JsonConvert.SerializeObject(new Progress(progress));
 
             var response = await client.PostAsync(url, new StringContent(body, Encoding.UTF8, "application/json")).ConfigureAwait(true);
 
