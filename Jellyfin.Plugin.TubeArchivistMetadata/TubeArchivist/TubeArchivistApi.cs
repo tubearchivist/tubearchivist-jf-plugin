@@ -2,6 +2,7 @@ using System;
 using System.Data;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.TubeArchivistMetadata.Utilities;
 using Microsoft.Extensions.Logging;
@@ -145,6 +146,29 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
             }
 
             return pong;
+        }
+
+        /// <summary>
+        /// Send video playback progress to TubeArchivist.
+        /// </summary>
+        /// <param name="videoId">Video id.</param>
+        /// <param name="progress">Progress in seconds.</param>
+        /// <returns>Nothing if successful.</returns>
+        /// <exception cref="HttpRequestException">Throws this exception if the request was not successful.</exception>
+        public async Task<HttpStatusCode> SetProgress(string videoId, long progress)
+        {
+            var progressEndpoint = $"/api/video/{videoId}/progress/";
+            var url = new Uri(Utils.SanitizeUrl(Plugin.Instance!.Configuration.TubeArchivistUrl + progressEndpoint));
+            var body = JsonConvert.SerializeObject(new
+            {
+                position = progress
+            });
+
+            var sc = new StringContent(body, Encoding.UTF8, "application/json");
+
+            var response = await client.PostAsync(url, new StringContent(body, Encoding.UTF8, "application/json")).ConfigureAwait(true);
+
+            return response.StatusCode;
         }
     }
 }
