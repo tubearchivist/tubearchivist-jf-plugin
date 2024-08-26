@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.TubeArchivistMetadata.Configuration;
+using Jellyfin.Plugin.TubeArchivistMetadata.Tasks;
 using Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist;
 using Jellyfin.Plugin.TubeArchivistMetadata.Utilities;
 using MediaBrowser.Common.Configuration;
@@ -13,7 +15,7 @@ using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.Session;
 using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Serialization;
-using MediaBrowser.Model.Session;
+using MediaBrowser.Model.Tasks;
 using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.TubeArchivistMetadata
@@ -31,7 +33,18 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
         /// <param name="logger">Instance of the <see cref="ILogger"/> interface.</param>
         /// <param name="sessionManager">Instance of the <see cref="ISessionManager"/> interface.</param>
         /// <param name="libraryManager">Instance of the <see cref="ILibraryManager"/> interface.</param>
-        public Plugin(IApplicationPaths applicationPaths, IXmlSerializer xmlSerializer, ILogger<Plugin> logger, ISessionManager sessionManager, ILibraryManager libraryManager)
+        /// <param name="taskManager">Instance of the <see cref="ITaskManager"/> interface.</param>
+        /// <param name="userManager">Instance of the <see cref="IUserManager"/> interface.</param>
+        /// <param name="userDataManager">Instance of the <see cref="IUserDataManager"/> interface.</param>
+        public Plugin(
+            IApplicationPaths applicationPaths,
+            IXmlSerializer xmlSerializer,
+            ILogger<Plugin> logger,
+            ISessionManager sessionManager,
+            ILibraryManager libraryManager,
+            ITaskManager taskManager,
+            IUserManager userManager,
+            IUserDataManager userDataManager)
             : base(applicationPaths, xmlSerializer)
         {
             Instance = this;
@@ -44,6 +57,10 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
             SessionManager = sessionManager;
             sessionManager.PlaybackProgress += OnPlaybackProgress;
             LibraryManager = libraryManager;
+            taskManager.AddTasks([new TAToJellyfinProgressSyncTask(logger, libraryManager, userManager, userDataManager)]);
+            taskManager.Execute<TAToJellyfinProgressSyncTask>();
+            logger.LogInformation("Enabled tasks: {Tasks}", string.Join(", ", taskManager.ScheduledTasks.ToList().Select(t => t.Name)));
+
             logger.LogInformation("{Message}", "Collection display name: " + Instance?.Configuration.CollectionTitle);
             logger.LogInformation("{Message}", "TubeArchivist API URL: " + Instance?.Configuration.TubeArchivistUrl);
             logger.LogInformation("{Message}", "Pinging TubeArchivist API...");
