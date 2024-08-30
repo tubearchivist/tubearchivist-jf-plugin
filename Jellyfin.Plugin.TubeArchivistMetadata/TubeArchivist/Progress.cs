@@ -13,6 +13,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
         /// <param name="position">Playback progress in seconds.</param>
         /// <param name="youtubeId">Video YouTube id.</param>
         /// <param name="userId">Playback progress user id.</param>
+        [JsonConstructor]
         public Progress(
             long position,
             string? youtubeId,
