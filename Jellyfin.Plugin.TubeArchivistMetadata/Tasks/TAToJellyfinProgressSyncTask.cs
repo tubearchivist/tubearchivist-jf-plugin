@@ -55,79 +55,82 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
         /// <inheritdoc/>
         public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
         {
-            // TODO: Check if the TA->JF synchronization is enabled from the configuration before proceeding
-            _logger.LogInformation("Starting TubeArchivist playback progresses synchronization.");
-            // TODO: Replace with the lists from configuration
-            var jfUsernames = new[] { "c", "c" };
-            var taUsernames = new[] { "c", "c" };
-            var taApi = TubeArchivistApi.GetInstance();
-            foreach (var jfUsername in jfUsernames)
+            if (Plugin.Instance!.Configuration.TAJFSync)
             {
-                var user = _userManager.GetUserByName(jfUsername);
-                if (user == null)
+                _logger.LogInformation("Starting TubeArchivist playback progresses synchronization.");
+                var taApi = TubeArchivistApi.GetInstance();
+                foreach (var jfUsername in Plugin.Instance!.Configuration.GetJFUsernamesToArray())
                 {
-                    _logger.LogInformation("{Message}", $"Jellyfin user with username {jfUsername} not found");
-                    continue;
-                }
-
-                var collectionItem = _libraryManager.GetItemList(new InternalItemsQuery
-                {
-                    Name = Plugin.Instance?.Configuration.CollectionTitle,
-                    IncludeItemTypes = new[] { BaseItemKind.CollectionFolder }
-                }).FirstOrDefault();
-
-                if (collectionItem == null)
-                {
-                    var message = $"Collection '{Plugin.Instance?.Configuration.CollectionTitle}' not found.";
-                    _logger.LogCritical("{Message}", message);
-                }
-                else
-                {
-                    var channels = _libraryManager.GetItemList(new InternalItemsQuery
+                    var user = _userManager.GetUserByName(jfUsername);
+                    if (user == null)
                     {
-                        ParentId = collectionItem.Id,
-                        IncludeItemTypes = new[] { BaseItemKind.Series }
-                    });
+                        _logger.LogInformation("{Message}", $"Jellyfin user with username {jfUsername} not found");
+                        continue;
+                    }
 
-                    foreach (var channel in channels)
+                    var collectionItem = _libraryManager.GetItemList(new InternalItemsQuery
                     {
-                        var years = _libraryManager.GetItemList(new InternalItemsQuery
+                        Name = Plugin.Instance?.Configuration.CollectionTitle,
+                        IncludeItemTypes = new[] { BaseItemKind.CollectionFolder }
+                    }).FirstOrDefault();
+
+                    if (collectionItem == null)
+                    {
+                        var message = $"Collection '{Plugin.Instance?.Configuration.CollectionTitle}' not found.";
+                        _logger.LogCritical("{Message}", message);
+                    }
+                    else
+                    {
+                        var channels = _libraryManager.GetItemList(new InternalItemsQuery
                         {
-                            ParentId = channel.Id,
-                            IncludeItemTypes = new[] { BaseItemKind.Season }
+                            ParentId = collectionItem.Id,
+                            IncludeItemTypes = new[] { BaseItemKind.Series }
                         });
+                        _logger.LogInformation("Analyzing collection {Id} with name {Name}", collectionItem.Id, collectionItem.Name);
+                        _logger.LogInformation("Found {Message} channels", channels.Count);
 
-                        foreach (var year in years)
+                        foreach (var channel in channels)
                         {
-                            var videos = _libraryManager.GetItemList(new InternalItemsQuery
+                            var years = _libraryManager.GetItemList(new InternalItemsQuery
                             {
-                                ParentId = year.Id,
-                                IncludeItemTypes = new[] { BaseItemKind.Episode }
+                                ParentId = channel.Id,
+                                IncludeItemTypes = new[] { BaseItemKind.Season }
                             });
+                            _logger.LogInformation("Found {Message} years", years.Count);
 
-                            foreach (var video in videos)
+                            foreach (var year in years)
                             {
-                                var playbackProgress = await taApi.GetProgress(Utils.GetVideoNameFromPath(video.Path)).ConfigureAwait(true);
-                                if (playbackProgress != null)
+                                var videos = _libraryManager.GetItemList(new InternalItemsQuery
                                 {
-                                    var userItemData = _userDataManager.GetUserData(user, video);
-                                    var userUpdateData = new UpdateUserItemDataDto
-                                    {
-                                        PlaybackPositionTicks = playbackProgress.Position * TimeSpan.TicksPerSecond
-                                    };
+                                    ParentId = year.Id,
+                                    IncludeItemTypes = new[] { BaseItemKind.Episode }
+                                });
+                                _logger.LogInformation("Found {Message} videos", videos.Count);
 
-                                    // TODO: Also last played datetime should be updated once TA will return it
-                                    if (userItemData.PlaybackPositionTicks >= video.RunTimeTicks)
+                                foreach (var video in videos)
+                                {
+                                    var playbackProgress = await taApi.GetProgress(Utils.GetVideoNameFromPath(video.Path)).ConfigureAwait(true);
+                                    if (playbackProgress != null)
                                     {
-                                        userUpdateData.Played = true;
-                                    }
-                                    else
-                                    {
-                                        userUpdateData.Played = false;
-                                    }
+                                        var userItemData = _userDataManager.GetUserData(user, video);
+                                        var userUpdateData = new UpdateUserItemDataDto
+                                        {
+                                            PlaybackPositionTicks = playbackProgress.Position * TimeSpan.TicksPerSecond
+                                        };
 
-                                    _userDataManager.SaveUserData(user, video, userUpdateData, UserDataSaveReason.UpdateUserData);
-                                    _logger.LogInformation("{Message}", $"Playback progress for video {video.Name} set to {userItemData.PlaybackPositionTicks / TimeSpan.TicksPerSecond} seconds for user {jfUsername}.");
+                                        // TODO: Also last played datetime should be updated once TA will return it
+                                        if (userItemData.PlaybackPositionTicks >= video.RunTimeTicks)
+                                        {
+                                            userUpdateData.Played = true;
+                                        }
+                                        else
+                                        {
+                                            userUpdateData.Played = false;
+                                        }
+
+                                        _userDataManager.SaveUserData(user, video, userUpdateData, UserDataSaveReason.UpdateUserData);
+                                        _logger.LogInformation("{Message}", $"Playback progress for video {video.Name} set to {userItemData.PlaybackPositionTicks / TimeSpan.TicksPerSecond} seconds for user {jfUsername}.");
+                                    }
                                 }
                             }
                         }

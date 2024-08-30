@@ -132,15 +132,19 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
 
         private async void OnPlaybackProgress(object? sender, PlaybackProgressEventArgs eventArgs)
         {
-            BaseItem? channel = LibraryManager.GetItemById(eventArgs.Item.ParentId);
-            BaseItem? collection = LibraryManager.GetItemById(channel!.ParentId);
-            if (collection?.Name.ToLower(CultureInfo.CurrentCulture) == Instance?.Configuration.CollectionTitle.ToLower(CultureInfo.CurrentCulture) && eventArgs.PlaybackPositionTicks != null)
+            if (Instance!.Configuration.JFTASync && eventArgs.Users.Any(u => Instance!.Configuration.GetJFUsernamesFromArray().Contains(u.Username)))
             {
-                long progress = (long)eventArgs.PlaybackPositionTicks / TimeSpan.TicksPerSecond;
-                var statusCode = await TubeArchivistApi.GetInstance().SetProgress(Utils.GetVideoNameFromPath(eventArgs.Item.Path), progress).ConfigureAwait(true);
-                if (statusCode != System.Net.HttpStatusCode.OK)
+                BaseItem? channel = LibraryManager.GetItemById(eventArgs.Item.ParentId);
+                BaseItem? collection = LibraryManager.GetItemById(channel!.ParentId);
+                if (collection?.Name.ToLower(CultureInfo.CurrentCulture) == Instance?.Configuration.CollectionTitle.ToLower(CultureInfo.CurrentCulture) && eventArgs.PlaybackPositionTicks != null)
                 {
-                    Logger.LogInformation("{Message}", $"POST /progress returned {statusCode} for video {eventArgs.Item.Name} with progress {progress} seconds");
+                    long progress = (long)eventArgs.PlaybackPositionTicks / TimeSpan.TicksPerSecond;
+                    var videoId = Utils.GetVideoNameFromPath(eventArgs.Item.Path);
+                    var statusCode = await TubeArchivistApi.GetInstance().SetProgress(videoId, progress).ConfigureAwait(true);
+                    if (statusCode != System.Net.HttpStatusCode.OK)
+                    {
+                        Logger.LogInformation("{Message}", $"POST /video/{videoId}/progress returned {statusCode} for video {eventArgs.Item.Name} with progress {progress} seconds");
+                    }
                 }
             }
         }

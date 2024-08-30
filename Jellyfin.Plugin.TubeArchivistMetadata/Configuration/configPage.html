@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Template</title>
+    <title>TubeArchivistMetadata</title>
 </head>
 
 <body>
@@ -12,25 +12,65 @@
         <div data-role="content">
             <div class="content-primary">
                 <form id="TemplateConfigForm">
+                    <div>
+                        <h1>TubeArchivistMetadata</h1>
+                    </div>
                     <div class="inputContainer">
                         <label class="inputLabel inputLabelUnfocused" for="CollectionTitle">Collection Title</label>
-                        <input id="CollectionTitle" name="CollectionTitle" type="text" is="emby-input" placeholder="eg. YouTube" />
+                        <input id="CollectionTitle" name="CollectionTitle" type="text" is="emby-input"
+                            placeholder="eg. YouTube" />
                         <div class="fieldDescription">TubeArchivist collection display name</div>
                     </div>
                     <div class="inputContainer">
                         <label class="inputLabel inputLabelUnfocused" for="TubeArchivistUrl">TubeArchivist URL</label>
-                        <input id="TubeArchivistUrl" name="TubeArchivistUrl" type="text" is="emby-input" placeholder="http://..." />
+                        <input id="TubeArchivistUrl" name="TubeArchivistUrl" type="text" is="emby-input"
+                            placeholder="http://..." />
                         <div class="fieldDescription">TubeArchivist URL</div>
                     </div>
                     <div class="inputContainer">
-                        <label class="inputLabel inputLabelUnfocused" for="TubeArchivistApiKey">TubeArchivist API key</label>
+                        <label class="inputLabel inputLabelUnfocused" for="TubeArchivistApiKey">TubeArchivist API
+                            key</label>
                         <input id="TubeArchivistApiKey" name="TubeArchivistApiKey" type="text" is="emby-input" />
                         <div class="fieldDescription">TubeArchivist API key</div>
                     </div>
                     <div class="inputContainer">
-                        <label class="inputLabel inputLabelUnfocused" for="MaxDescriptionLength">Maximum overviews length</label>
-                        <input id="MaxDescriptionLength" name="MaxDescriptionLength" type="number" is="emby-input" min="0" />
-                        <div class="fieldDescription">This is the maximum length of the descriptions showed in series and episodes</div>
+                        <label class="inputLabel inputLabelUnfocused" for="MaxDescriptionLength">Maximum overviews
+                            length</label>
+                        <input id="MaxDescriptionLength" name="MaxDescriptionLength" type="number" is="emby-input"
+                            min="0" />
+                        <div class="fieldDescription">This is the maximum length of the descriptions showed in series
+                            and episodes</div>
+                    </div>
+                    <div>
+                        <h2>Playback synchronization</h2>
+                    </div>
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label class="emby-checkbox-label" for="TAJFSync">
+                            <input id="TAJFSync" name="TAJFSync" type="checkbox" is="emby-checkbox" />
+                            <span>Synchronize TubeArchivist playback progress to Jellyfin</span>
+                        </label>
+                    </div>
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="JFUsernamesTo">Jellyfin usernames to sync
+                            playback status to</label>
+                        <input id="JFUsernamesTo" name="JFUsernamesTo" type="text" is="emby-input"
+                            placeholder="Username1, username2, ..." />
+                        <div class="fieldDescription">These are the (comma separated) Jellyfin usernames to synchronize
+                            data from TubeArchivist</div>
+                    </div>
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label class="emby-checkbox-label" for="JFTASync">
+                            <input id="JFTASync" name="JFTASync" type="checkbox" is="emby-checkbox" />
+                            <span>Synchronize Jellyfin playback progress to TubeArchivist</span>
+                        </label>
+                    </div>
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="JFUsernamesFrom">Jellyfin usernames to sync
+                            playback status from</label>
+                        <input id="JFUsernamesFrom" name="JFUsernamesFrom" type="text" is="emby-input"
+                            placeholder="Username1, username2, ..." />
+                        <div class="fieldDescription">These are the (comma separated) Jellyfin usernames to synchronize data from on
+                            TubeArchivist</div>
                     </div>
                     <div>
                         <button is="emby-button" type="submit" class="raised button-submit block emby-button">
@@ -53,6 +93,10 @@
                         document.querySelector('#TubeArchivistUrl').value = config.TubeArchivistUrl;
                         document.querySelector('#TubeArchivistApiKey').value = config.TubeArchivistApiKey;
                         document.querySelector('#MaxDescriptionLength').value = config.MaxDescriptionLength;
+                        document.querySelector('#JFTASync').checked = config.JFTASync;
+                        document.querySelector('#JFUsernamesTo').value = config.JFUsernamesTo;
+                        document.querySelector('#TAJFSync').checked = config.TAJFSync;
+                        document.querySelector('#JFUsernamesFrom').value = config.JFUsernamesFrom;
                         Dashboard.hideLoadingMsg();
                     });
                 });
@@ -65,6 +109,10 @@
                         config.TubeArchivistUrl = document.querySelector('#TubeArchivistUrl').value;
                         config.TubeArchivistApiKey = document.querySelector('#TubeArchivistApiKey').value;
                         config.MaxDescriptionLength = document.querySelector('#MaxDescriptionLength').value;
+                        config.JFTASync = document.querySelector('#JFTASync').checked;
+                        config.JFUsernamesTo = document.querySelector('#JFUsernamesTo').value;
+                        config.TAJFSync = document.querySelector('#TAJFSync').checked;
+                        config.JFUsernamesFrom = document.querySelector('#JFUsernamesFrom').value;
                         ApiClient.updatePluginConfiguration(TAMetadataConfig.pluginUniqueId, config).then(function (result) {
                             Dashboard.processPluginConfigurationUpdateResult(result);
                         });
