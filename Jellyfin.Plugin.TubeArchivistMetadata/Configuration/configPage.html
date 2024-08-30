@@ -45,20 +45,6 @@
                         <h2>Playback synchronization</h2>
                     </div>
                     <div class="checkboxContainer checkboxContainer-withDescription">
-                        <label class="emby-checkbox-label" for="TAJFSync">
-                            <input id="TAJFSync" name="TAJFSync" type="checkbox" is="emby-checkbox" />
-                            <span>Synchronize TubeArchivist playback progress to Jellyfin</span>
-                        </label>
-                    </div>
-                    <div class="inputContainer">
-                        <label class="inputLabel inputLabelUnfocused" for="JFUsernamesTo">Jellyfin usernames to sync
-                            playback status to</label>
-                        <input id="JFUsernamesTo" name="JFUsernamesTo" type="text" is="emby-input"
-                            placeholder="Username1, username2, ..." />
-                        <div class="fieldDescription">These are the (comma separated) Jellyfin usernames to synchronize
-                            data from TubeArchivist</div>
-                    </div>
-                    <div class="checkboxContainer checkboxContainer-withDescription">
                         <label class="emby-checkbox-label" for="JFTASync">
                             <input id="JFTASync" name="JFTASync" type="checkbox" is="emby-checkbox" />
                             <span>Synchronize Jellyfin playback progress to TubeArchivist</span>
@@ -71,6 +57,20 @@
                             placeholder="Username1, username2, ..." />
                         <div class="fieldDescription">These are the (comma separated) Jellyfin usernames to synchronize data from on
                             TubeArchivist</div>
+                    </div>
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label class="emby-checkbox-label" for="TAJFSync">
+                            <input id="TAJFSync" name="TAJFSync" type="checkbox" is="emby-checkbox" />
+                            <span>Synchronize TubeArchivist playback progress to Jellyfin</span>
+                        </label>
+                    </div>
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="JFUsernamesTo">Jellyfin usernames to sync
+                            playback status to</label>
+                        <input id="JFUsernamesTo" name="JFUsernamesTo" type="text" is="emby-input"
+                            placeholder="Username1, username2, ..." />
+                        <div class="fieldDescription">These are the (comma separated) Jellyfin usernames to synchronize
+                            data from TubeArchivist</div>
                     </div>
                     <div>
                         <button is="emby-button" type="submit" class="raised button-submit block emby-button">
