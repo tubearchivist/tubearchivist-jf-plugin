@@ -7,6 +7,7 @@ using Jellyfin.Data.Enums;
 using Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist;
 using Jellyfin.Plugin.TubeArchivistMetadata.Utilities;
 using MediaBrowser.Controller.Entities;
+using MediaBrowser.Controller.Entities.TV;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.Dto;
 using MediaBrowser.Model.Entities;
@@ -81,33 +82,31 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                     }
                     else
                     {
-                        var channels = _libraryManager.GetItemList(new InternalItemsQuery
+                        var collection = (CollectionFolder)collectionItem;
+                        var channels = collection.GetChildren(user, false, new InternalItemsQuery
                         {
-                            ParentId = collectionItem.Id,
                             IncludeItemTypes = new[] { BaseItemKind.Series }
                         });
                         _logger.LogInformation("Analyzing collection {Id} with name {Name}", collectionItem.Id, collectionItem.Name);
                         _logger.LogInformation("Found {Message} channels", channels.Count);
 
-                        foreach (var channel in channels)
+                        foreach (Series channel in channels)
                         {
-                            var years = _libraryManager.GetItemList(new InternalItemsQuery
+                            var years = channel.GetChildren(user, false, new InternalItemsQuery
                             {
-                                ParentId = channel.Id,
                                 IncludeItemTypes = new[] { BaseItemKind.Season }
                             });
-                            _logger.LogInformation("Found {Message} years", years.Count);
+                            _logger.LogInformation("Found {Years} years in channel {ChannelName}", years.Count, channel.Name);
 
-                            foreach (var year in years)
+                            foreach (Season year in years)
                             {
-                                var videos = _libraryManager.GetItemList(new InternalItemsQuery
+                                var videos = year.GetChildren(user, false, new InternalItemsQuery
                                 {
-                                    ParentId = year.Id,
                                     IncludeItemTypes = new[] { BaseItemKind.Episode }
                                 });
-                                _logger.LogInformation("Found {Message} videos", videos.Count);
+                                _logger.LogInformation("Found {Videos} videos in year {YearName} of the channel {ChannelName}", videos.Count, year.Name, channel.Name);
 
-                                foreach (var video in videos)
+                                foreach (Episode video in videos)
                                 {
                                     var playbackProgress = await taApi.GetProgress(Utils.GetVideoNameFromPath(video.Path)).ConfigureAwait(true);
                                     if (playbackProgress != null)
