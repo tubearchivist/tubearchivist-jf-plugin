@@ -17,7 +17,6 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Configuration
         private string _tubeArchivistUrl;
         private string _tubeArchivistApiKey;
         private HashSet<string> _jfUsernamesTo;
-        private HashSet<string> _jfUsernamesFrom;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PluginConfiguration"/> class.
@@ -37,10 +36,10 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Configuration
             _tubeArchivistUrl = string.Empty;
             _tubeArchivistApiKey = string.Empty;
             MaxDescriptionLength = 500;
+            JFTASync = false;
+            JFUsernameFrom = string.Empty;
             TAJFSync = false;
             _jfUsernamesTo = new HashSet<string>();
-            JFTASync = false;
-            _jfUsernamesFrom = new HashSet<string>();
         }
 
         /// <summary>
@@ -107,22 +106,9 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Configuration
         public bool JFTASync { get; set; }
 
         /// <summary>
-        /// Gets or sets the playback progress owner Jellyfin usernames to synchronize data to TubeArchivist.
+        /// Gets or sets the playback progress owner Jellyfin username to synchronize data to TubeArchivist.
         /// </summary>
-        public string JFUsernamesFrom
-        {
-            get
-            {
-                _logger.LogInformation("JFUsernamesFrom configured: {Message}", string.Join(", ", _jfUsernamesFrom));
-                return string.Join(", ", _jfUsernamesFrom);
-            }
-
-            set
-            {
-                value.Replace(" ", string.Empty, StringComparison.CurrentCulture).Split(',').ToList().ForEach(u => _jfUsernamesFrom.Add(u));
-                _logger.LogInformation("Set JFUsernamesFrom to: {Message}", value);
-            }
-        }
+        public string JFUsernameFrom { get; set; }
 
         /// <summary>
         /// Gets or sets the playback progress owners Jellyfin usernames to synchronize data from TubeArchivist.
@@ -140,15 +126,6 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Configuration
                 value.Replace(" ", string.Empty, StringComparison.CurrentCulture).Split(',').ToList().ForEach(u => _jfUsernamesTo.Add(u));
                 _logger.LogInformation("Set JFUsernamesTo to: {Message}", value);
             }
-        }
-
-        /// <summary>
-        /// Gets the playback progress owner Jellyfin usernames to synchronize data to TubeArchivist.
-        /// </summary>
-        /// <returns>An array of usernames.</returns>
-        public HashSet<string> GetJFUsernamesFromArray()
-        {
-            return _jfUsernamesFrom;
         }
 
         /// <summary>

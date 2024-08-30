@@ -51,11 +51,11 @@
                         </label>
                     </div>
                     <div class="inputContainer">
-                        <label class="inputLabel inputLabelUnfocused" for="JFUsernamesFrom">Jellyfin usernames to sync
+                        <label class="inputLabel inputLabelUnfocused" for="JFUsernameFrom">Jellyfin username to sync
                             playback status from</label>
-                        <input id="JFUsernamesFrom" name="JFUsernamesFrom" type="text" is="emby-input"
+                        <input id="JFUsernameFrom" name="JFUsernameFrom" type="text" is="emby-input"
                             placeholder="Username1, username2, ..." />
-                        <div class="fieldDescription">These are the (comma separated) Jellyfin usernames to synchronize data from on
+                        <div class="fieldDescription">This is the Jellyfin username to synchronize data from on
                             TubeArchivist</div>
                     </div>
                     <div class="checkboxContainer checkboxContainer-withDescription">
@@ -96,7 +96,7 @@
                         document.querySelector('#JFTASync').checked = config.JFTASync;
                         document.querySelector('#JFUsernamesTo').value = config.JFUsernamesTo;
                         document.querySelector('#TAJFSync').checked = config.TAJFSync;
-                        document.querySelector('#JFUsernamesFrom').value = config.JFUsernamesFrom;
+                        document.querySelector('#JFUsernameFrom').value = config.JFUsernameFrom;
                         Dashboard.hideLoadingMsg();
                     });
                 });
@@ -112,7 +112,7 @@
                         config.JFTASync = document.querySelector('#JFTASync').checked;
                         config.JFUsernamesTo = document.querySelector('#JFUsernamesTo').value;
                         config.TAJFSync = document.querySelector('#TAJFSync').checked;
-                        config.JFUsernamesFrom = document.querySelector('#JFUsernamesFrom').value;
+                        config.JFUsernameFrom = document.querySelector('#JFUsernameFrom').value;
                         ApiClient.updatePluginConfiguration(TAMetadataConfig.pluginUniqueId, config).then(function (result) {
                             Dashboard.processPluginConfigurationUpdateResult(result);
                         });

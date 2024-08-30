@@ -132,7 +132,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
 
         private async void OnPlaybackProgress(object? sender, PlaybackProgressEventArgs eventArgs)
         {
-            if (Instance!.Configuration.JFTASync && eventArgs.Users.Any(u => Instance!.Configuration.GetJFUsernamesFromArray().Contains(u.Username)))
+            if (Instance!.Configuration.JFTASync && eventArgs.Users.Any(u => Instance!.Configuration.JFUsernameFrom.Equals(u.Username, StringComparison.Ordinal)))
             {
                 BaseItem? channel = LibraryManager.GetItemById(eventArgs.Item.ParentId);
                 BaseItem? collection = LibraryManager.GetItemById(channel!.ParentId);
