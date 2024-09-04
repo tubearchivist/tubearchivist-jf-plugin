@@ -72,6 +72,12 @@
                         <div class="fieldDescription">These are the (comma separated) Jellyfin usernames to synchronize
                             data from TubeArchivist</div>
                     </div>
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="TAJFTaskInterval">Maximum overviews
+                            length</label>
+                        <input id="TAJFTaskInterval" name="TAJFTaskInterval" type="number" is="emby-input" min="1" />
+                        <div class="fieldDescription">This is the TubeArchivist to Jellyfin playback progress synchronization interval in seconds (Jellyfin restart required).</div>
+                    </div>
                     <div>
                         <button is="emby-button" type="submit" class="raised button-submit block emby-button">
                             <span>Save</span>
@@ -97,6 +103,7 @@
                         document.querySelector('#JFUsernamesTo').value = config.JFUsernamesTo;
                         document.querySelector('#TAJFSync').checked = config.TAJFSync;
                         document.querySelector('#JFUsernameFrom').value = config.JFUsernameFrom;
+                        document.querySelector('#TAJFTaskInterval').value = config.TAJFTaskInterval;
                         Dashboard.hideLoadingMsg();
                     });
                 });
@@ -113,6 +120,7 @@
                         config.JFUsernamesTo = document.querySelector('#JFUsernamesTo').value;
                         config.TAJFSync = document.querySelector('#TAJFSync').checked;
                         config.JFUsernameFrom = document.querySelector('#JFUsernameFrom').value;
+                        config.TAJFTaskInterval = document.querySelector('#TAJFTaskInterval').value;
                         ApiClient.updatePluginConfiguration(TAMetadataConfig.pluginUniqueId, config).then(function (result) {
                             Dashboard.processPluginConfigurationUpdateResult(result);
                         });

@@ -59,7 +59,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
             if (Plugin.Instance!.Configuration.TAJFSync)
             {
                 var start = DateTime.Now;
-                _logger.LogInformation("Starting TubeArchivist playback progresses synchronization.");
+                _logger.LogInformation("Starting TubeArchivist->Jellyfin playback progresses synchronization.");
                 var taApi = TubeArchivistApi.GetInstance();
                 foreach (var jfUsername in Plugin.Instance!.Configuration.GetJFUsernamesToArray())
                 {
@@ -139,6 +139,10 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
 
                 _logger.LogInformation("Time elapsed: {Time}", DateTime.Now - start);
             }
+            else
+            {
+                _logger.LogInformation("TubeArchivist->Jellyfin playback synchronization is currently disabled.");
+            }
         }
 
         /// <inheritdoc/>
@@ -149,7 +153,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                 new TaskTriggerInfo
                 {
                     Type = TaskTriggerInfo.TriggerInterval,
-                    IntervalTicks = TimeSpan.FromSeconds(1).Ticks
+                    IntervalTicks = TimeSpan.FromSeconds(Plugin.Instance!.Configuration.TAJFTaskInterval).Ticks
                 },
             ];
         }
