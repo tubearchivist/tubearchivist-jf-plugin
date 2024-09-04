@@ -57,9 +57,24 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
             SessionManager = sessionManager;
             sessionManager.PlaybackProgress += OnPlaybackProgress;
             LibraryManager = libraryManager;
-            taskManager.AddTasks([new TAToJellyfinProgressSyncTask(logger, libraryManager, userManager, userDataManager)]);
-            taskManager.Execute<TAToJellyfinProgressSyncTask>();
-            logger.LogInformation("Enabled tasks: {Tasks}", string.Join(", ", taskManager.ScheduledTasks.ToList().Select(t => t.Name)));
+
+            var taToJellyfinProgressSyncTask = new TAToJellyfinProgressSyncTask(logger, libraryManager, userManager, userDataManager);
+            var jfToTubearchivistProgressSyncTask = new JFToTubearchivistProgressSyncTask(logger, libraryManager, userManager, userDataManager);
+            var isTAJFTaskPresent = taskManager.ScheduledTasks.Any(t => t.Name.Equals(taToJellyfinProgressSyncTask.Name, StringComparison.Ordinal));
+            if (Instance!.Configuration.TAJFSync && !isTAJFTaskPresent)
+            {
+                logger.LogInformation("Queueing task {TaskName}.", taToJellyfinProgressSyncTask.Name);
+                taskManager.AddTasks([taToJellyfinProgressSyncTask]);
+                taskManager.Execute<TAToJellyfinProgressSyncTask>();
+            }
+
+            var isJFTATaskPresent = taskManager.ScheduledTasks.Any(t => t.Name.Equals(jfToTubearchivistProgressSyncTask.Name, StringComparison.Ordinal));
+            if (Instance!.Configuration.JFTASync && !isJFTATaskPresent)
+            {
+                logger.LogInformation("Queueing task {TaskName}.", jfToTubearchivistProgressSyncTask.Name);
+                taskManager.AddTasks([jfToTubearchivistProgressSyncTask]);
+                taskManager.Execute<JFToTubearchivistProgressSyncTask>();
+            }
 
             logger.LogInformation("{Message}", "Collection display name: " + Instance?.Configuration.CollectionTitle);
             logger.LogInformation("{Message}", "TubeArchivist API URL: " + Instance?.Configuration.TubeArchivistUrl);
