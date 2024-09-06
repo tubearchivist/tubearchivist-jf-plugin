@@ -19,7 +19,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
     /// <summary>
     /// Task to sync Jellyfin playback progresses to TubeArchivist.
     /// </summary>
-    public class JFToTubearchivistProgressSyncTask : IScheduledTask
+    public class JFToTubearchivistWatchedSyncTask : IScheduledTask
     {
         private readonly ILogger<Plugin> _logger;
         private readonly ILibraryManager _libraryManager;
@@ -27,13 +27,13 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
         private readonly IUserDataManager _userDataManager;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="JFToTubearchivistProgressSyncTask"/> class.
+        /// Initializes a new instance of the <see cref="JFToTubearchivistWatchedSyncTask"/> class.
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="libraryManager">Library manager.</param>
         /// <param name="userManager">User manager.</param>
         /// <param name="userDataManager">User data manager.</param>
-        public JFToTubearchivistProgressSyncTask(ILogger<Plugin> logger, ILibraryManager libraryManager, IUserManager userManager, IUserDataManager userDataManager)
+        public JFToTubearchivistWatchedSyncTask(ILogger<Plugin> logger, ILibraryManager libraryManager, IUserManager userManager, IUserDataManager userDataManager)
         {
             _logger = logger;
             _libraryManager = libraryManager;
@@ -42,16 +42,16 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
         }
 
         /// <inheritdoc/>
-        public string Name => "JFToTubearchivistProgressSyncTask";
+        public string Name => "JFToTubearchivistWatchedSyncTask";
 
         /// <inheritdoc/>
-        public string Description => "This tasks syncs TubeArchivist playback progresses to Jellyfin";
+        public string Description => "This tasks syncs TubeArchivist watched statuses to Jellyfin";
 
         /// <inheritdoc/>
         public string Category => "TubeArchivistMetadata";
 
         /// <inheritdoc/>
-        public string Key => "JFToTubearchivistProgressSyncTask";
+        public string Key => "JFToTubearchivistWatchedSyncTask";
 
         /// <inheritdoc/>
         public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
@@ -59,7 +59,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
             if (Plugin.Instance!.Configuration.JFTASync)
             {
                 var start = DateTime.Now;
-                _logger.LogInformation("Starting Jellyfin->TubeArchivist playback progresses synchronization.");
+                _logger.LogInformation("Starting Jellyfin->TubeArchivist watched statuses synchronization.");
                 var taApi = TubeArchivistApi.GetInstance();
                 foreach (var jfUsername in Plugin.Instance!.Configuration.GetJFUsernamesToArray())
                 {
@@ -113,17 +113,11 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                                 foreach (Episode video in videos)
                                 {
                                     var videoYTId = Utils.GetVideoNameFromPath(video.Path);
-                                    var playbackProgress = _userDataManager.GetUserData(user.Id, video).PlaybackPositionTicks / TimeSpan.TicksPerSecond;
-                                    var statusCode = await taApi.SetProgress(videoYTId, playbackProgress).ConfigureAwait(true);
-                                    if (statusCode != System.Net.HttpStatusCode.OK)
-                                    {
-                                        _logger.LogInformation("{Message}", $"POST /video/{videoYTId}/progress returned {statusCode} for video {video.Name} with progress {progress} seconds");
-                                    }
 
                                     if (!isChannelCheckedForWatched && channel.IsPlayed(user))
                                     {
                                         var isChannelPlayed = channel.IsPlayed(user);
-                                        statusCode = await taApi.SetWatchedStatus(channelYTId, isChannelPlayed).ConfigureAwait(true);
+                                        var statusCode = await taApi.SetWatchedStatus(channelYTId, isChannelPlayed).ConfigureAwait(true);
                                         if (statusCode != System.Net.HttpStatusCode.OK)
                                         {
                                             _logger.LogInformation("{Message}", $"POST /watched returned {statusCode} for channel {channel.Name} ({channelYTId}) with wacthed status {isChannelPlayed}");
@@ -139,7 +133,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                                     if (!isChannelWatched)
                                     {
                                         var isVideoPlayed = video.IsPlayed(user);
-                                        statusCode = await taApi.SetWatchedStatus(videoYTId, isVideoPlayed).ConfigureAwait(true);
+                                        var statusCode = await taApi.SetWatchedStatus(videoYTId, isVideoPlayed).ConfigureAwait(true);
                                         if (statusCode != System.Net.HttpStatusCode.OK)
                                         {
                                             _logger.LogInformation("{Message}", $"POST /watched returned {statusCode} for video {video.Name} ({videoYTId}) with wacthed status {isVideoPlayed}");
@@ -155,7 +149,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
             }
             else
             {
-                _logger.LogInformation("Jellyfin->TubeArchivist playback synchronization is currently disabled.");
+                _logger.LogInformation("Jellyfin->TubeArchivist watched status is currently disabled.");
             }
         }
 
@@ -166,7 +160,8 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
             [
                 new TaskTriggerInfo
                 {
-                    Type = TaskTriggerInfo.TriggerStartup,
+                    Type = TaskTriggerInfo.TriggerInterval,
+                    IntervalTicks = TimeSpan.FromSeconds(Plugin.Instance!.Configuration.JFTAWatchedTaskInterval).Ticks
                 },
             ];
         }

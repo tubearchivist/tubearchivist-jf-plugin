@@ -153,7 +153,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
         /// </summary>
         /// <param name="videoId">Video id.</param>
         /// <param name="progress">Progress in seconds.</param>
-        /// <returns>Nothing if successful.</returns>
+        /// <returns>The response <see cref="HttpStatusCode"/>.</returns>
         public async Task<HttpStatusCode> SetProgress(string videoId, long progress)
         {
             var progressEndpoint = $"/api/video/{videoId}/progress/";
@@ -186,6 +186,23 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
             }
 
             return progress;
+        }
+
+        /// <summary>
+        /// Set video/channel/playlist as watched on TubeArchivist.
+        /// </summary>
+        /// <param name="itemId">Video/channel/playlist id.</param>
+        /// <param name="isWatched">Whether the item has been watched or not.</param>
+        /// <returns>The response <see cref="HttpStatusCode"/>.</returns>
+        public async Task<HttpStatusCode> SetWatchedStatus(string itemId, bool isWatched)
+        {
+            var watchedEndpoint = $"/api/watched/";
+            var url = new Uri(Utils.SanitizeUrl(Plugin.Instance!.Configuration.TubeArchivistUrl + watchedEndpoint));
+            var body = JsonConvert.SerializeObject(new Watched(itemId, isWatched));
+
+            var response = await client.PostAsync(url, new StringContent(body, Encoding.UTF8, "application/json")).ConfigureAwait(true);
+
+            return response.StatusCode;
         }
     }
 }
