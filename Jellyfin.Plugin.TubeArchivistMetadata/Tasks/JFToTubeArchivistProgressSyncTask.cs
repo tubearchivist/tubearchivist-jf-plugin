@@ -42,7 +42,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
         }
 
         /// <inheritdoc/>
-        public string Name => "JFToTubearchivistProgressSyncTask";
+        public string Name => "JFToTubeArchivistProgressSyncTask";
 
         /// <inheritdoc/>
         public string Description => "This tasks syncs TubeArchivist playback progresses to Jellyfin";
@@ -51,7 +51,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
         public string Category => "TubeArchivistMetadata";
 
         /// <inheritdoc/>
-        public string Key => "JFToTubearchivistProgressSyncTask";
+        public string Key => "JFToTubeArchivistProgressSyncTask";
 
         /// <inheritdoc/>
         public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
