@@ -118,18 +118,22 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                                             PlaybackPositionTicks = playbackProgress.Position * TimeSpan.TicksPerSecond
                                         };
 
-                                        // TODO: Also last played datetime should be updated once TA will return it
-                                        if (userItemData.PlaybackPositionTicks >= video.RunTimeTicks)
+                                        var taVideoInfo = await taApi.GetVideo(Utils.GetVideoNameFromPath(video.Path)).ConfigureAwait(true);
+                                        if (taVideoInfo != null)
                                         {
-                                            userUpdateData.Played = true;
-                                        }
-                                        else
-                                        {
-                                            userUpdateData.Played = false;
+                                            if (taVideoInfo.Player.IsWatched)
+                                            {
+                                                userUpdateData.Played = true;
+                                            }
+                                            else
+                                            {
+                                                userUpdateData.Played = false;
+                                            }
                                         }
 
                                         _userDataManager.SaveUserData(user, video, userUpdateData, UserDataSaveReason.UpdateUserData);
                                         _logger.LogInformation("{Message}", $"Playback progress for video {video.Name} set to {userItemData.PlaybackPositionTicks / TimeSpan.TicksPerSecond} seconds for user {jfUsername}.");
+                                        _logger.LogInformation("{Message}", $"Watched status for video {video.Name} set to {userItemData.Played} seconds for user {jfUsername}.");
                                     }
                                 }
                             }
