@@ -136,7 +136,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                                         var statusCode = await taApi.SetWatchedStatus(videoYTId, isVideoPlayed).ConfigureAwait(true);
                                         if (statusCode != System.Net.HttpStatusCode.OK)
                                         {
-                                            _logger.LogInformation("{Message}", $"POST /watched returned {statusCode} for video {video.Name} ({videoYTId}) with wacthed status {isVideoPlayed}");
+                                            _logger.LogInformation("{Message}", $"POST /watched returned {statusCode} for video {video.Name} ({videoYTId}) with watched status {isVideoPlayed}");
                                         }
                                     }
                                 }
