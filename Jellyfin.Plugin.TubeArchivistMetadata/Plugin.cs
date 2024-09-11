@@ -62,10 +62,10 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
             sessionManager.PlaybackProgress += OnPlaybackProgress;
             LibraryManager = libraryManager;
             _userManager = userManager;
+            userDataManager.UserDataSaved += OnWatchedStatusChange;
 
             var taToJellyfinProgressSyncTask = new TAToJellyfinProgressSyncTask(logger, libraryManager, userManager, userDataManager);
             var jfToTubearchivistProgressSyncTask = new JFToTubearchivistProgressSyncTask(logger, libraryManager, userManager, userDataManager);
-            var jfToTubearchivistWatchedSyncTask = new JFToTubearchivistWatchedSyncTask(logger, libraryManager, userManager, userDataManager);
             var isTAJFTaskPresent = taskManager.ScheduledTasks.Any(t => t.Name.Equals(taToJellyfinProgressSyncTask.Name, StringComparison.Ordinal));
             if (Instance!.Configuration.TAJFSync && !isTAJFTaskPresent)
             {
@@ -78,10 +78,8 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
             if (Instance!.Configuration.JFTASync && !isJFTATaskPresent)
             {
                 logger.LogInformation("Queueing task {TaskName}.", jfToTubearchivistProgressSyncTask.Name);
-                logger.LogInformation("Queueing task {TaskName}.", jfToTubearchivistWatchedSyncTask.Name);
-                taskManager.AddTasks([jfToTubearchivistProgressSyncTask, jfToTubearchivistWatchedSyncTask]);
+                taskManager.AddTasks([jfToTubearchivistProgressSyncTask]);
                 taskManager.Execute<JFToTubearchivistProgressSyncTask>();
-                taskManager.Execute<JFToTubearchivistWatchedSyncTask>();
             }
 
             logger.LogInformation("{Message}", "Collection display name: " + Instance?.Configuration.CollectionTitle);
@@ -168,6 +166,35 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
                     {
                         Logger.LogInformation("{Message}", $"POST /video/{videoId}/progress returned {statusCode} for video {eventArgs.Item.Name} with progress {progress} seconds");
                     }
+                }
+            }
+        }
+
+        private async void OnWatchedStatusChange(object? sender, UserDataSaveEventArgs eventArgs)
+        {
+            var user = _userManager.GetUserById(eventArgs.UserId);
+            if (user != null && Configuration.GetJFUsernamesToArray().Contains(user!.Username))
+            {
+                var isPlayed = eventArgs.Item.IsPlayed(user);
+                Logger.LogInformation("User {UserId} changed watched status to {Status} for the item {ItemName}", eventArgs.UserId, isPlayed, eventArgs.Item.Name);
+                string itemYTId;
+                if (eventArgs.Item is Series)
+                {
+                    itemYTId = Utils.GetChannelNameFromPath(eventArgs.Item.Path);
+                }
+                else if (eventArgs.Item is Episode)
+                {
+                    itemYTId = Utils.GetVideoNameFromPath(eventArgs.Item.Path);
+                }
+                else
+                {
+                    return;
+                }
+
+                var statusCode = await TubeArchivistApi.GetInstance().SetWatchedStatus(itemYTId, isPlayed).ConfigureAwait(true);
+                if (statusCode != System.Net.HttpStatusCode.OK)
+                {
+                    Logger.LogInformation("POST /watched returned {StatusCode} for item {ItemName} ({VideoYTId}) with watched status {IsPlayed}", statusCode, eventArgs.Item.Name, itemYTId, isPlayed);
                 }
             }
         }

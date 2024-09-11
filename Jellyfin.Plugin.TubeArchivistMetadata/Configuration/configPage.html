@@ -58,13 +58,6 @@
                         <div class="fieldDescription">This is the Jellyfin username to synchronize data from on
                             TubeArchivist</div>
                     </div>
-                    <div class="inputContainer">
-                        <label class="inputLabel inputLabelUnfocused" for="JFTAWatchedTaskInterval">Jellyfin to TubeArchivist
-                            watched statuses synchronization interval</label>
-                        <input id="JFTAWatchedTaskInterval" name="JFTAWatchedTaskInterval" type="number" is="emby-input" min="1" />
-                        <div class="fieldDescription">This is the Jellyfin to TubeArchivist watched statuses
-                            synchronization interval in seconds (Jellyfin restart required).</div>
-                    </div>
                     <div class="checkboxContainer checkboxContainer-withDescription">
                         <label class="emby-checkbox-label" for="TAJFSync">
                             <input id="TAJFSync" name="TAJFSync" type="checkbox" is="emby-checkbox" />
@@ -112,7 +105,6 @@
                         document.querySelector('#TAJFSync').checked = config.TAJFSync;
                         document.querySelector('#JFUsernameFrom').value = config.JFUsernameFrom;
                         document.querySelector('#TAJFTaskInterval').value = config.TAJFTaskInterval;
-                        document.querySelector('#JFTAWatchedTaskInterval').value = config.JFTAWatchedTaskInterval;
                         Dashboard.hideLoadingMsg();
                     });
                 });
@@ -130,7 +122,6 @@
                         config.TAJFSync = document.querySelector('#TAJFSync').checked;
                         config.JFUsernameFrom = document.querySelector('#JFUsernameFrom').value;
                         config.TAJFTaskInterval = document.querySelector('#TAJFTaskInterval').value;
-                        config.JFTAWatchedTaskInterval = document.querySelector('#JFTAWatchedTaskInterval').value;
                         ApiClient.updatePluginConfiguration(TAMetadataConfig.pluginUniqueId, config).then(function (result) {
                             Dashboard.processPluginConfigurationUpdateResult(result);
                         });

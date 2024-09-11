@@ -41,7 +41,6 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Configuration
             TAJFSync = false;
             _jfUsernamesTo = new HashSet<string>();
             TAJFTaskInterval = 1;
-            JFTAWatchedTaskInterval = 1;
         }
 
         /// <summary>
@@ -135,12 +134,6 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Configuration
         /// It requires Jellyfin server restart to take effect.
         /// </summary>
         public int TAJFTaskInterval { get; set; }
-
-        /// <summary>
-        /// Gets or sets the interval in seconds at which the Jellyfin to TubeArchivist watched statuses synchronization task should run.
-        /// It requires Jellyfin server restart to take effect.
-        /// </summary>
-        public int JFTAWatchedTaskInterval { get; set; }
 
         /// <summary>
         /// Gets the playback progress owners Jellyfin usernames to synchronize data from TubeArchivist.
