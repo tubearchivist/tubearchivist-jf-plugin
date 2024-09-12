@@ -9,6 +9,14 @@
         "imageUrl": "https://raw.githubusercontent.com/tubearchivist/tubearchivist-jf-plugin/master/images/logo.png",
         "versions": [
             {
+                "version": "1.3.1.0",
+                "changelog": "Add support for Jellyfin 10.9.1\n",
+                "targetAbi": "10.9.1.0",
+                "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.3.1/tubearchivistmetadata_1.3.1.0.zip",
+                "checksum": "b0b526bbd1702970108e3b9a8c3709de",
+                "timestamp": "2024-09-12T13:36:12Z"
+            },
+            {
                 "version": "1.3.0.0",
                 "changelog": "Add support for Jellyfin 10.9.1\n",
                 "targetAbi": "10.9.1.0",
