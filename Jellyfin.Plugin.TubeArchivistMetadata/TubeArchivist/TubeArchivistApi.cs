@@ -2,6 +2,7 @@ using System;
 using System.Data;
 using System.Net;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.TubeArchivistMetadata.Utilities;
 using Microsoft.Extensions.Logging;
@@ -145,6 +146,63 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
             }
 
             return pong;
+        }
+
+        /// <summary>
+        /// Send video playback progress to TubeArchivist.
+        /// </summary>
+        /// <param name="videoId">Video id.</param>
+        /// <param name="progress">Progress in seconds.</param>
+        /// <returns>The response <see cref="HttpStatusCode"/>.</returns>
+        public async Task<HttpStatusCode> SetProgress(string videoId, long progress)
+        {
+            var progressEndpoint = $"/api/video/{videoId}/progress/";
+            var url = new Uri(Utils.SanitizeUrl(Plugin.Instance!.Configuration.TubeArchivistUrl + progressEndpoint));
+            var body = JsonConvert.SerializeObject(new Progress(progress));
+
+            var response = await client.PostAsync(url, new StringContent(body, Encoding.UTF8, "application/json")).ConfigureAwait(true);
+
+            return response.StatusCode;
+        }
+
+        /// <summary>
+        /// Send video playback progress to TubeArchivist.
+        /// </summary>
+        /// <param name="videoId">Video id.</param>
+        /// <returns>Video playback progress data.</returns>
+        public async Task<Progress?> GetProgress(string videoId)
+        {
+            Progress? progress = null;
+
+            var progressEndpoint = $"/api/video/{videoId}/progress/";
+            var url = new Uri(Utils.SanitizeUrl(Plugin.Instance!.Configuration.TubeArchivistUrl + progressEndpoint));
+
+            var response = await client.GetAsync(url).ConfigureAwait(true);
+
+            if (response.IsSuccessStatusCode)
+            {
+                string rawData = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
+                progress = JsonConvert.DeserializeObject<Progress>(rawData);
+            }
+
+            return progress;
+        }
+
+        /// <summary>
+        /// Set video/channel/playlist as watched on TubeArchivist.
+        /// </summary>
+        /// <param name="itemId">Video/channel/playlist id.</param>
+        /// <param name="isWatched">Whether the item has been watched or not.</param>
+        /// <returns>The response <see cref="HttpStatusCode"/>.</returns>
+        public async Task<HttpStatusCode> SetWatchedStatus(string itemId, bool isWatched)
+        {
+            var watchedEndpoint = $"/api/watched/";
+            var url = new Uri(Utils.SanitizeUrl(Plugin.Instance!.Configuration.TubeArchivistUrl + watchedEndpoint));
+            var body = JsonConvert.SerializeObject(new Watched(itemId, isWatched));
+
+            var response = await client.PostAsync(url, new StringContent(body, Encoding.UTF8, "application/json")).ConfigureAwait(true);
+
+            return response.StatusCode;
         }
     }
 }
