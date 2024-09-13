@@ -85,6 +85,12 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
                     Type = ImageType.Banner,
                     Url = channel.BannerUrl
                 });
+                list.Add(new RemoteImageInfo
+                {
+                    ProviderName = Name,
+                    Type = ImageType.Backdrop,
+                    Url = channel.TvartUrl
+                });
             }
 
             return list;
