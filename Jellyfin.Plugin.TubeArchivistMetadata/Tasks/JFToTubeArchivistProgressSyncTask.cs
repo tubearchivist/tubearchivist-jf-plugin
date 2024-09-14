@@ -56,11 +56,13 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
         /// <inheritdoc/>
         public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
         {
+            progress.Report(0);
             if (Plugin.Instance!.Configuration.JFTASync)
             {
                 var start = DateTime.Now;
                 _logger.LogInformation("Starting Jellyfin->TubeArchivist playback progresses synchronization.");
                 var taApi = TubeArchivistApi.GetInstance();
+                var videosCount = 0;
                 foreach (var jfUsername in Plugin.Instance!.Configuration.GetJFUsernamesToArray())
                 {
                     var user = _userManager.GetUserByName(jfUsername);
@@ -94,8 +96,6 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                         foreach (Series channel in channels)
                         {
                             var channelYTId = Utils.GetChannelNameFromPath(channel.Path);
-                            var isChannelWatched = false;
-                            var isChannelCheckedForWatched = false;
                             var years = channel.GetChildren(user, false, new InternalItemsQuery
                             {
                                 IncludeItemTypes = new[] { BaseItemKind.Season }
@@ -109,6 +109,60 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                                     IncludeItemTypes = new[] { BaseItemKind.Episode }
                                 });
                                 _logger.LogInformation("Found {Videos} videos in year {YearName} of the channel {ChannelName}", videos.Count, year.Name, channel.Name);
+                                videosCount += videos.Count;
+                            }
+                        }
+                    }
+                }
+
+                _logger.LogInformation("Found a total of {VideosCount} videos", videosCount);
+
+                var processedVideosCount = 0;
+                foreach (var jfUsername in Plugin.Instance!.Configuration.GetJFUsernamesToArray())
+                {
+                    var user = _userManager.GetUserByName(jfUsername);
+                    if (user == null)
+                    {
+                        _logger.LogInformation("{Message}", $"Jellyfin user with username {jfUsername} not found");
+                        continue;
+                    }
+
+                    var collectionItem = _libraryManager.GetItemList(new InternalItemsQuery
+                    {
+                        Name = Plugin.Instance?.Configuration.CollectionTitle,
+                        IncludeItemTypes = new[] { BaseItemKind.CollectionFolder }
+                    }).FirstOrDefault();
+
+                    if (collectionItem == null)
+                    {
+                        var message = $"Collection '{Plugin.Instance?.Configuration.CollectionTitle}' not found.";
+                        _logger.LogCritical("{Message}", message);
+                    }
+                    else
+                    {
+                        var collection = (CollectionFolder)collectionItem;
+                        var channels = collection.GetChildren(user, false, new InternalItemsQuery
+                        {
+                            IncludeItemTypes = new[] { BaseItemKind.Series }
+                        });
+
+                        foreach (Series channel in channels)
+                        {
+                            var channelYTId = Utils.GetChannelNameFromPath(channel.Path);
+                            var isChannelWatched = false;
+                            var isChannelCheckedForWatched = false;
+                            var years = channel.GetChildren(user, false, new InternalItemsQuery
+                            {
+                                IncludeItemTypes = new[] { BaseItemKind.Season }
+                            });
+
+                            foreach (Season year in years)
+                            {
+                                var videos = year.GetChildren(user, false, new InternalItemsQuery
+                                {
+                                    IncludeItemTypes = new[] { BaseItemKind.Episode }
+                                });
+                                videosCount += videos.Count;
 
                                 foreach (Episode video in videos)
                                 {
@@ -145,6 +199,9 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                                             _logger.LogInformation("{Message}", $"POST /watched returned {statusCode} for video {video.Name} ({videoYTId}) with wacthed status {isVideoPlayed}");
                                         }
                                     }
+
+                                    processedVideosCount++;
+                                    progress.Report(processedVideosCount * 100 / videosCount);
                                 }
                             }
                         }
@@ -157,6 +214,8 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
             {
                 _logger.LogInformation("Jellyfin->TubeArchivist playback synchronization is currently disabled.");
             }
+
+            progress.Report(100);
         }
 
         /// <inheritdoc/>

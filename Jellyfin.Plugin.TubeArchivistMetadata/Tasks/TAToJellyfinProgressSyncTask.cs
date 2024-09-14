@@ -56,11 +56,13 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
         /// <inheritdoc/>
         public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
         {
+            progress.Report(0);
             if (Plugin.Instance!.Configuration.TAJFSync)
             {
                 var start = DateTime.Now;
                 _logger.LogInformation("Starting TubeArchivist->Jellyfin playback progresses synchronization.");
                 var taApi = TubeArchivistApi.GetInstance();
+                var videosCount = 0;
                 foreach (var jfUsername in Plugin.Instance!.Configuration.GetJFUsernamesToArray())
                 {
                     var user = _userManager.GetUserByName(jfUsername);
@@ -107,6 +109,57 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                                 });
                                 _logger.LogInformation("Found {Videos} videos in year {YearName} of the channel {ChannelName}", videos.Count, year.Name, channel.Name);
 
+                                videosCount += videos.Count;
+                            }
+                        }
+                    }
+                }
+
+                _logger.LogInformation("Found a total of {VideosCount} videos", videosCount);
+
+                var processedVideosCount = 0;
+                foreach (var jfUsername in Plugin.Instance!.Configuration.GetJFUsernamesToArray())
+                {
+                    var user = _userManager.GetUserByName(jfUsername);
+                    if (user == null)
+                    {
+                        _logger.LogInformation("{Message}", $"Jellyfin user with username {jfUsername} not found");
+                        continue;
+                    }
+
+                    var collectionItem = _libraryManager.GetItemList(new InternalItemsQuery
+                    {
+                        Name = Plugin.Instance?.Configuration.CollectionTitle,
+                        IncludeItemTypes = new[] { BaseItemKind.CollectionFolder }
+                    }).FirstOrDefault();
+
+                    if (collectionItem == null)
+                    {
+                        var message = $"Collection '{Plugin.Instance?.Configuration.CollectionTitle}' not found.";
+                        _logger.LogCritical("{Message}", message);
+                    }
+                    else
+                    {
+                        var collection = (CollectionFolder)collectionItem;
+                        var channels = collection.GetChildren(user, false, new InternalItemsQuery
+                        {
+                            IncludeItemTypes = new[] { BaseItemKind.Series }
+                        });
+
+                        foreach (Series channel in channels)
+                        {
+                            var years = channel.GetChildren(user, false, new InternalItemsQuery
+                            {
+                                IncludeItemTypes = new[] { BaseItemKind.Season }
+                            });
+
+                            foreach (Season year in years)
+                            {
+                                var videos = year.GetChildren(user, false, new InternalItemsQuery
+                                {
+                                    IncludeItemTypes = new[] { BaseItemKind.Episode }
+                                });
+
                                 foreach (Episode video in videos)
                                 {
                                     var playbackProgress = await taApi.GetProgress(Utils.GetVideoNameFromPath(video.Path)).ConfigureAwait(true);
@@ -134,6 +187,9 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                                         _userDataManager.SaveUserData(user, video, userUpdateData, UserDataSaveReason.UpdateUserData);
                                         _logger.LogInformation("{Message}", $"Playback progress for video {video.Name} set to {userItemData.PlaybackPositionTicks / TimeSpan.TicksPerSecond} seconds for user {jfUsername}.");
                                         _logger.LogInformation("{Message}", $"Watched status for video {video.Name} set to {userItemData.Played} seconds for user {jfUsername}.");
+
+                                        processedVideosCount++;
+                                        progress.Report(processedVideosCount * 100 / videosCount);
                                     }
                                 }
                             }
@@ -147,6 +203,8 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
             {
                 _logger.LogInformation("TubeArchivist->Jellyfin playback synchronization is currently disabled.");
             }
+
+            progress.Report(100);
         }
 
         /// <inheritdoc/>
