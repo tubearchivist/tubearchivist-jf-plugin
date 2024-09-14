@@ -118,14 +118,14 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Configuration
         {
             get
             {
-                _logger.LogInformation("JFUsernamesTo configured: {Message}", string.Join(", ", _jfUsernamesTo));
+                _logger.LogDebug("JFUsernamesTo configured: {Message}", string.Join(", ", _jfUsernamesTo));
                 return string.Join(", ", _jfUsernamesTo);
             }
 
             set
             {
                 value.Replace(" ", string.Empty, StringComparison.CurrentCulture).Split(',').ToList().ForEach(u => _jfUsernamesTo.Add(u));
-                _logger.LogInformation("Set JFUsernamesTo to: {Message}", value);
+                _logger.LogDebug("Set JFUsernamesTo to: {Message}", value);
             }
         }
 

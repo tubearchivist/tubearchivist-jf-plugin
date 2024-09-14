@@ -164,7 +164,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
                     var statusCode = await TubeArchivistApi.GetInstance().SetProgress(videoId, progress).ConfigureAwait(true);
                     if (statusCode != System.Net.HttpStatusCode.OK)
                     {
-                        Logger.LogInformation("{Message}", $"POST /video/{videoId}/progress returned {statusCode} for video {eventArgs.Item.Name} with progress {progress} seconds");
+                        Logger.LogCritical("{Message}", $"POST /video/{videoId}/progress returned {statusCode} for video {eventArgs.Item.Name} with progress {progress} seconds");
                     }
                 }
             }
@@ -176,7 +176,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
             if (user != null && Configuration.GetJFUsernamesToArray().Contains(user!.Username))
             {
                 var isPlayed = eventArgs.Item.IsPlayed(user);
-                Logger.LogInformation("User {UserId} changed watched status to {Status} for the item {ItemName}", eventArgs.UserId, isPlayed, eventArgs.Item.Name);
+                Logger.LogDebug("User {UserId} changed watched status to {Status} for the item {ItemName}", eventArgs.UserId, isPlayed, eventArgs.Item.Name);
                 string itemYTId;
                 if (eventArgs.Item is Series)
                 {
@@ -194,7 +194,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
                 var statusCode = await TubeArchivistApi.GetInstance().SetWatchedStatus(itemYTId, isPlayed).ConfigureAwait(true);
                 if (statusCode != System.Net.HttpStatusCode.OK)
                 {
-                    Logger.LogInformation("POST /watched returned {StatusCode} for item {ItemName} ({VideoYTId}) with watched status {IsPlayed}", statusCode, eventArgs.Item.Name, itemYTId, isPlayed);
+                    Logger.LogCritical("POST /watched returned {StatusCode} for item {ItemName} ({VideoYTId}) with watched status {IsPlayed}", statusCode, eventArgs.Item.Name, itemYTId, isPlayed);
                 }
             }
         }

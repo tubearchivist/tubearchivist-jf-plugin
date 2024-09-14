@@ -91,7 +91,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                             IncludeItemTypes = new[] { BaseItemKind.Series }
                         });
                         _logger.LogInformation("Analyzing collection {Id} with name {Name}", collectionItem.Id, collectionItem.Name);
-                        _logger.LogInformation("Found {Message} channels", channels.Count);
+                        _logger.LogDebug("Found {Message} channels", channels.Count);
 
                         foreach (Series channel in channels)
                         {
@@ -99,7 +99,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                             {
                                 IncludeItemTypes = new[] { BaseItemKind.Season }
                             });
-                            _logger.LogInformation("Found {Years} years in channel {ChannelName}", years.Count, channel.Name);
+                            _logger.LogDebug("Found {Years} years in channel {ChannelName}", years.Count, channel.Name);
 
                             foreach (Season year in years)
                             {
@@ -107,7 +107,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                                 {
                                     IncludeItemTypes = new[] { BaseItemKind.Episode }
                                 });
-                                _logger.LogInformation("Found {Videos} videos in year {YearName} of the channel {ChannelName}", videos.Count, year.Name, channel.Name);
+                                _logger.LogDebug("Found {Videos} videos in year {YearName} of the channel {ChannelName}", videos.Count, year.Name, channel.Name);
 
                                 videosCount += videos.Count;
                             }

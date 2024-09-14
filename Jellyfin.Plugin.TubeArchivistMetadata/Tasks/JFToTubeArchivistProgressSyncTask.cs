@@ -91,7 +91,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                             IncludeItemTypes = new[] { BaseItemKind.Series }
                         });
                         _logger.LogInformation("Analyzing collection {Id} with name {Name}", collectionItem.Id, collectionItem.Name);
-                        _logger.LogInformation("Found {Message} channels", channels.Count);
+                        _logger.LogDebug("Found {Message} channels", channels.Count);
 
                         foreach (Series channel in channels)
                         {
@@ -100,7 +100,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                             {
                                 IncludeItemTypes = new[] { BaseItemKind.Season }
                             });
-                            _logger.LogInformation("Found {Years} years in channel {ChannelName}", years.Count, channel.Name);
+                            _logger.LogDebug("Found {Years} years in channel {ChannelName}", years.Count, channel.Name);
 
                             foreach (Season year in years)
                             {
@@ -108,7 +108,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                                 {
                                     IncludeItemTypes = new[] { BaseItemKind.Episode }
                                 });
-                                _logger.LogInformation("Found {Videos} videos in year {YearName} of the channel {ChannelName}", videos.Count, year.Name, channel.Name);
+                                _logger.LogDebug("Found {Videos} videos in year {YearName} of the channel {ChannelName}", videos.Count, year.Name, channel.Name);
                                 videosCount += videos.Count;
                             }
                         }
@@ -171,7 +171,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                                     var statusCode = await taApi.SetProgress(videoYTId, playbackProgress).ConfigureAwait(true);
                                     if (statusCode != System.Net.HttpStatusCode.OK)
                                     {
-                                        _logger.LogInformation("{Message}", $"POST /video/{videoYTId}/progress returned {statusCode} for video {video.Name} with progress {progress} seconds");
+                                        _logger.LogCritical("{Message}", $"POST /video/{videoYTId}/progress returned {statusCode} for video {video.Name} with progress {progress} seconds");
                                     }
 
                                     if (!isChannelCheckedForWatched && channel.IsPlayed(user))
@@ -180,7 +180,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                                         statusCode = await taApi.SetWatchedStatus(channelYTId, isChannelPlayed).ConfigureAwait(true);
                                         if (statusCode != System.Net.HttpStatusCode.OK)
                                         {
-                                            _logger.LogInformation("{Message}", $"POST /watched returned {statusCode} for channel {channel.Name} ({channelYTId}) with wacthed status {isChannelPlayed}");
+                                            _logger.LogCritical("{Message}", $"POST /watched returned {statusCode} for channel {channel.Name} ({channelYTId}) with wacthed status {isChannelPlayed}");
                                         }
                                         else
                                         {
@@ -196,7 +196,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                                         statusCode = await taApi.SetWatchedStatus(videoYTId, isVideoPlayed).ConfigureAwait(true);
                                         if (statusCode != System.Net.HttpStatusCode.OK)
                                         {
-                                            _logger.LogInformation("{Message}", $"POST /watched returned {statusCode} for video {video.Name} ({videoYTId}) with wacthed status {isVideoPlayed}");
+                                            _logger.LogCritical("{Message}", $"POST /watched returned {statusCode} for video {video.Name} ({videoYTId}) with wacthed status {isVideoPlayed}");
                                         }
                                     }
 
