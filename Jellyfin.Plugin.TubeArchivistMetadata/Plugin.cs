@@ -178,17 +178,25 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
                 var isPlayed = eventArgs.Item.IsPlayed(user);
                 Logger.LogDebug("User {UserId} changed watched status to {Status} for the item {ItemName}", eventArgs.UserId, isPlayed, eventArgs.Item.Name);
                 string itemYTId;
-                if (eventArgs.Item is Series)
+                try
                 {
-                    itemYTId = Utils.GetChannelNameFromPath(eventArgs.Item.Path);
+                    if (eventArgs.Item is Series)
+                    {
+                        itemYTId = Utils.GetChannelNameFromPath(eventArgs.Item.Path);
+                    }
+                    else if (eventArgs.Item is Episode)
+                    {
+                        itemYTId = Utils.GetVideoNameFromPath(eventArgs.Item.Path);  // Potentially problematic line for Series
+                    }
+                    else
+                    {
+                        return;
+                    }
                 }
-                else if (eventArgs.Item is Episode)
+                catch (Exception ex)
                 {
-                    itemYTId = Utils.GetVideoNameFromPath(eventArgs.Item.Path);
-                }
-                else
-                {
-                    return;
+                    Logger.LogError(ex, "Error while processing item path: {ItemPath}", eventArgs.Item.Path ?? "null");
+                    return; // Exit the method if there's an error
                 }
 
                 var statusCode = await TubeArchivistApi.GetInstance().SetWatchedStatus(itemYTId, isPlayed).ConfigureAwait(true);
