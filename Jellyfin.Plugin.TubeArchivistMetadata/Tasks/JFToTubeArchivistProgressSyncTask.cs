@@ -167,7 +167,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                                 foreach (Episode video in videos)
                                 {
                                     var videoYTId = Utils.GetVideoNameFromPath(video.Path);
-                                    var playbackProgress = _userDataManager.GetUserData(user.Id, video).PlaybackPositionTicks / TimeSpan.TicksPerSecond;
+                                    var playbackProgress = _userDataManager.GetUserData(user, video).PlaybackPositionTicks / TimeSpan.TicksPerSecond;
                                     var statusCode = await taApi.SetProgress(videoYTId, playbackProgress).ConfigureAwait(true);
                                     if (statusCode != System.Net.HttpStatusCode.OK)
                                     {

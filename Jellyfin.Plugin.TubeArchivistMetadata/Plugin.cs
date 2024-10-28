@@ -66,7 +66,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
 
             var taToJellyfinProgressSyncTask = new TAToJellyfinProgressSyncTask(logger, libraryManager, userManager, userDataManager);
             var jfToTubearchivistProgressSyncTask = new JFToTubearchivistProgressSyncTask(logger, libraryManager, userManager, userDataManager);
-            var isTAJFTaskPresent = taskManager.ScheduledTasks.Any(t => t.Name.Equals(taToJellyfinProgressSyncTask.Name, StringComparison.Ordinal));
+            var isTAJFTaskPresent = taskManager.ScheduledTasks.Any(t => t.ScheduledTask.Name.Equals(taToJellyfinProgressSyncTask.Name, StringComparison.Ordinal));
             if (Instance!.Configuration.TAJFSync && !isTAJFTaskPresent)
             {
                 logger.LogInformation("Queueing task {TaskName}.", taToJellyfinProgressSyncTask.Name);
@@ -74,7 +74,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
                 taskManager.Execute<TAToJellyfinProgressSyncTask>();
             }
 
-            var isJFTATaskPresent = taskManager.ScheduledTasks.Any(t => t.Name.Equals(jfToTubearchivistProgressSyncTask.Name, StringComparison.Ordinal));
+            var isJFTATaskPresent = taskManager.ScheduledTasks.Any(t => t.ScheduledTask.Name.Equals(jfToTubearchivistProgressSyncTask.Name, StringComparison.Ordinal));
             if (Instance!.Configuration.JFTASync && !isJFTATaskPresent)
             {
                 logger.LogInformation("Queueing task {TaskName}.", jfToTubearchivistProgressSyncTask.Name);
