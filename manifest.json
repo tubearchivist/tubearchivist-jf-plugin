@@ -46,7 +46,7 @@
                 "targetAbi": "10.8.0.0",
                 "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.2.4/tubearchivistmetadata_1.2.4.0.zip",
                 "checksum": "b418a46d458fe28354580d70748b1ced",
-                "timestamp": "2024-05-09 15:41:00"
+                "timestamp": "2024-05-09T15:41:00Z"
             },
             {
                 "version": "1.2.3.0",
@@ -54,7 +54,7 @@
                 "targetAbi": "10.8.0.0",
                 "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.2.3/tubearchivistmetadata_1.2.3.0.zip",
                 "checksum": "f5328a662444739eaa7c59855bfcb203",
-                "timestamp": "2024-04-18 21:45:00"
+                "timestamp": "2024-04-18T21:45:00Z"
             },
             {
                 "version": "1.2.2.0",
@@ -62,7 +62,7 @@
                 "targetAbi": "10.8.0.0",
                 "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.2.2/tubearchivistmetadata_1.2.2.0.zip",
                 "checksum": "82d04546916e1ba76d56de28e648447a",
-                "timestamp": "2024-03-15 10:12:00"
+                "timestamp": "2024-03-15T10:12:00Z"
             },
             {
                 "version": "1.2.1.0",
@@ -70,7 +70,7 @@
                 "targetAbi": "10.8.0.0",
                 "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.2.1/tubearchivistmetadata_1.2.1.0.zip",
                 "checksum": "cf68d169956f166a6ee68a06192651c2",
-                "timestamp": "2024-03-14 21:50:00"
+                "timestamp": "2024-03-14T21:50:00Z"
             },
             {
                 "version": "1.2.0.0",
@@ -78,7 +78,7 @@
                 "targetAbi": "10.8.0.0",
                 "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.2.0/tubearchivistmetadata_1.2.0.0.zip",
                 "checksum": "75812a4464bf68c43fb9dcdb74d924e3",
-                "timestamp": "2024-03-14 20:00:00"
+                "timestamp": "2024-03-14T20:00:00Z"
             },
             {
                 "version": "1.1.1.0",
@@ -86,7 +86,7 @@
                 "targetAbi": "10.8.0.0",
                 "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.1.1/tubearchivistmetadata_1.1.1.0.zip",
                 "checksum": "84ce752ce662e834690512c88ba48664",
-                "timestamp": "2024-03-14 16:35:00"
+                "timestamp": "2024-03-14T16:35:00Z"
             },
             {
                 "version": "1.1.0.0",
@@ -94,7 +94,7 @@
                 "targetAbi": "10.8.0.0",
                 "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.1.0/tubearchivistmetadata_1.1.0.0.zip",
                 "checksum": "de4b6562973b7f75b6afe3a441bb0e19",
-                "timestamp": "2024-03-13 15:02:00"
+                "timestamp": "2024-03-13T15:02:00Z"
             },
             {
                 "version": "1.0.0.0",
@@ -102,7 +102,7 @@
                 "targetAbi": "10.8.0.0",
                 "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.0.0/tubearchivistmetadata_1.0.0.0.zip",
                 "checksum": "444f8980671de494b1875ee7d1657bcf",
-                "timestamp": "2024-03-11 16:02:00"
+                "timestamp": "2024-03-11T16:02:00Z"
             }
         ]
     }
