@@ -186,7 +186,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
                     }
                     else if (eventArgs.Item is Episode)
                     {
-                        itemYTId = Utils.GetVideoNameFromPath(eventArgs.Item.Path);  // Potentially problematic line for Series
+                        itemYTId = Utils.GetVideoNameFromPath(eventArgs.Item.Path);
                     }
                     else
                     {
@@ -196,7 +196,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
                 catch (Exception ex)
                 {
                     Logger.LogError(ex, "Error while processing item path: {ItemPath}", eventArgs.Item.Path ?? "null");
-                    return; // Exit the method if there's an error
+                    return;
                 }
 
                 var statusCode = await TubeArchivistApi.GetInstance().SetWatchedStatus(itemYTId, isPlayed).ConfigureAwait(true);
