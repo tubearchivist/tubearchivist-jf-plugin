@@ -126,7 +126,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
                         Type = ImageType.Primary
                     }
                 },
-                Tags = this.Tags.ToArray<string>()
+                Tags = this.Tags != null ? this.Tags.ToArray<string>() : []
             };
         }
     }
