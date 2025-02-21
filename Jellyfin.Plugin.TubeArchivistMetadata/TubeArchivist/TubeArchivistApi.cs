@@ -65,7 +65,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
         /// <returns>A task.</returns>
         public async Task<Channel?> GetChannel(string channelId)
         {
-            ResponseContainer<Channel>? channel = null;
+            Channel? channel = null;
 
             var channelsEndpoint = "/api/channel/";
             var url = new Uri(Utils.SanitizeUrl(Plugin.Instance?.Configuration.TubeArchivistUrl + channelsEndpoint + channelId));
@@ -82,10 +82,10 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
             if (response.IsSuccessStatusCode)
             {
                 string rawData = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
-                channel = JsonConvert.DeserializeObject<ResponseContainer<Channel>>(rawData);
+                channel = JsonConvert.DeserializeObject<Channel>(rawData);
             }
 
-            return channel?.Data;
+            return channel;
         }
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
         /// <returns>A task.</returns>
         public async Task<Video?> GetVideo(string videoId)
         {
-            ResponseContainer<Video>? video = null;
+            Video? video = null;
 
             var videosEndpoint = "/api/video/";
             var url = new Uri(Utils.SanitizeUrl(Plugin.Instance?.Configuration.TubeArchivistUrl + videosEndpoint + videoId));
@@ -112,10 +112,11 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
             if (response.IsSuccessStatusCode)
             {
                 string rawData = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
-                video = JsonConvert.DeserializeObject<ResponseContainer<Video>>(rawData);
+                _logger.LogInformation("{Message}", rawData);
+                video = JsonConvert.DeserializeObject<Video>(rawData);
             }
 
-            return video?.Data;
+            return video;
         }
 
         /// <summary>
@@ -174,15 +175,11 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
         {
             Progress? progress = null;
 
-            var progressEndpoint = $"/api/video/{videoId}/progress/";
-            var url = new Uri(Utils.SanitizeUrl(Plugin.Instance!.Configuration.TubeArchivistUrl + progressEndpoint));
-
-            var response = await client.GetAsync(url).ConfigureAwait(true);
-
-            if (response.IsSuccessStatusCode)
+            var video = await GetVideo(videoId).ConfigureAwait(true);
+            if (video != null)
             {
-                string rawData = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
-                progress = JsonConvert.DeserializeObject<Progress>(rawData);
+                progress = new Progress((long)video.Player.Position);
+                _logger.LogInformation("{Message}", $"Retrieved progress {video.Player.Position}");
             }
 
             return progress;
