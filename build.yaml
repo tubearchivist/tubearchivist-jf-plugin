@@ -2,7 +2,7 @@
 name: "TubeArchivistMetadata"
 guid: "dc97d0c6-28b0-4242-afb4-5833ae1b3715"
 imageUrl: https://raw.githubusercontent.com/tubearchivist/tubearchivist-jf-plugin/master/images/logo.png
-version: "1.3.4.0"
+version: "1.3.5.0"
 targetAbi: "10.10.0.0"
 framework: "net8.0"
 overview: "Metadata for your TubeArchivist library on Jellyfin"
@@ -14,4 +14,4 @@ owner: "DarkFighterLuke"
 artifacts:
 - "Jellyfin.Plugin.TubeArchivistMetadata.dll"
 changelog: >
-  Merge workaround for JF crashing when scanning Series pull request by wolffshots
+  Adapt to the new TA API changes
