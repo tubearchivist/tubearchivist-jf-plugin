@@ -87,7 +87,8 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Configuration
             set
             {
                 _tubeArchivistApiKey = value;
-                Plugin.Instance?.LogTAApiConnectionStatus();
+                Plugin.Instance?.LogTAApiConnectionStatus();            
+                Plugin.Instance?.UpdateAuthorizationHeader();
             }
         }
 
