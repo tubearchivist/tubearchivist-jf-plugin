@@ -192,7 +192,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
         private async void OnWatchedStatusChange(object? sender, UserDataSaveEventArgs eventArgs)
         {
             var user = _userManager.GetUserById(eventArgs.UserId);
-            if (user != null && Configuration.GetJFUsernamesToArray().Contains(user!.Username))
+            if (Configuration.JFTASync && user != null && Configuration.GetJFUsernamesToArray().Contains(user!.Username))
             {
                 var isPlayed = eventArgs.Item.IsPlayed(user);
                 Logger.LogDebug("User {UserId} changed watched status to {Status} for the item {ItemName}", eventArgs.UserId, isPlayed, eventArgs.Item.Name);
@@ -218,10 +218,17 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
                     return;
                 }
 
-                var statusCode = await TubeArchivistApi.GetInstance().SetWatchedStatus(itemYTId, isPlayed).ConfigureAwait(true);
-                if (statusCode != System.Net.HttpStatusCode.OK)
+                try
                 {
-                    Logger.LogCritical("POST /watched returned {StatusCode} for item {ItemName} ({VideoYTId}) with watched status {IsPlayed}", statusCode, eventArgs.Item.Name, itemYTId, isPlayed);
+                    var statusCode = await TubeArchivistApi.GetInstance().SetWatchedStatus(itemYTId, isPlayed).ConfigureAwait(true);
+                    if (statusCode != System.Net.HttpStatusCode.OK)
+                    {
+                        Logger.LogCritical("POST /watched returned {StatusCode} for item {ItemName} ({VideoYTId}) with watched status {IsPlayed}", statusCode, eventArgs.Item.Name, itemYTId, isPlayed);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogCritical("An exception occurred while calling POST /watched for item {ItemName} ({VideoYTId}) with watched status {IsPlayed}: {ExceptionMessage}", eventArgs.Item.Name, itemYTId, isPlayed, ex.Message);
                 }
             }
         }
