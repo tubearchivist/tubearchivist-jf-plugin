@@ -57,9 +57,8 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
             handler.AllowAutoRedirect = false;
             handler.CheckCertificateRevocationList = true;
             HttpClient = new HttpClient(handler);
-            
-            UpdateAuthorizationHeader();
-            
+            UpdateAuthorizationHeader(Configuration.TubeArchivistApiKey);
+
             SessionManager = sessionManager;
             sessionManager.PlaybackProgress += OnPlaybackProgress;
             LibraryManager = libraryManager;
@@ -133,12 +132,12 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
         /// <summary>
         /// Updates the HTTP client's Authorization header with the current API key.
         /// </summary>
-        public void UpdateAuthorizationHeader()
+        /// <param name="apiKey">TubeArchivist API key.</param>
+        public void UpdateAuthorizationHeader(string apiKey)
         {
-            if (!string.IsNullOrEmpty(Configuration.TubeArchivistApiKey))
+            if (!string.IsNullOrEmpty(apiKey))
             {
-                HttpClient.DefaultRequestHeaders.Authorization = 
-                    new System.Net.Http.Headers.AuthenticationHeaderValue("Token", Configuration.TubeArchivistApiKey);
+                HttpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Token", apiKey);
                 Logger.LogInformation("{Message}", "Updated Authorization header with API key");
             }
             else
