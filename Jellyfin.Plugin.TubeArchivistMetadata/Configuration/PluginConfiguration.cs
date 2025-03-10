@@ -88,6 +88,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Configuration
             {
                 _tubeArchivistApiKey = value;
                 Plugin.Instance?.LogTAApiConnectionStatus();
+                Plugin.Instance?.UpdateAuthorizationHeader(value);
             }
         }
 
@@ -124,8 +125,20 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Configuration
 
             set
             {
-                value.Replace(" ", string.Empty, StringComparison.CurrentCulture).Split(',').ToList().ForEach(u => _jfUsernamesTo.Add(u));
-                _logger.LogDebug("Set JFUsernamesTo to: {Message}", value);
+                // Clear existing usernames
+                _jfUsernamesTo.Clear();
+
+                // Split by comma, then trim each part to remove leading/trailing spaces
+                foreach (var username in value.Split(','))
+                {
+                    var trimmedUsername = username.Trim();
+                    if (!string.IsNullOrEmpty(trimmedUsername))
+                    {
+                        _jfUsernamesTo.Add(trimmedUsername);
+                    }
+                }
+
+                _logger.LogDebug("Set JFUsernamesTo to: {Message}", string.Join(", ", _jfUsernamesTo));
             }
         }
 
