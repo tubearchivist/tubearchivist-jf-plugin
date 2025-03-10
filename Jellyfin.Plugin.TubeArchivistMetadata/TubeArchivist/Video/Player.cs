@@ -1,4 +1,3 @@
-using System;
 using Newtonsoft.Json;
 
 namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
@@ -13,12 +12,12 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
         /// </summary>
         /// <param name="duration">Duration of the video.</param>
         /// <param name="isWatched">Whether the video is marked as watched.</param>
-        /// <param name="watchedUnixTime">Unix time of when the video has been marked watched.</param>
-        public Player(long duration, bool isWatched, long watchedUnixTime)
+        /// <param name="position">Video watched seconds.</param>
+        public Player(long duration, bool isWatched, double position)
         {
             Duration = duration;
             IsWatched = isWatched;
-            WatchedUnixTime = watchedUnixTime;
+            Position = position;
         }
 
         /// <summary>
@@ -34,18 +33,9 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
         public bool IsWatched { get; }
 
         /// <summary>
-        /// Gets the Unix date and time when the video has been marked as watched.
+        /// Gets the video watched seconds.
         /// </summary>
-        [JsonProperty(PropertyName = "watched_date")]
-        public long WatchedUnixTime { get; }
-
-        /// <summary>
-        /// Gets the date and time when the video has been marked as watched.
-        /// </summary>
-        [JsonIgnore]
-        public DateTime WatchedTime
-        {
-            get => DateTimeOffset.FromUnixTimeSeconds(WatchedUnixTime).DateTime;
-        }
+        [JsonProperty(PropertyName = "position")]
+        public double Position { get; }
     }
 }

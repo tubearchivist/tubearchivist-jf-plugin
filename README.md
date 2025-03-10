@@ -7,6 +7,7 @@
 
 > [!IMPORTANT]
 > Jellyfin release cycle has changed in the past few months and now it is shorter than before. The plugin supports only the latest Jellyfin release, in order to continue using this plugin with all the latest features you will need to upgrade your Jellyfin installation.
+> The same rule applies to TubeArchivist: the plugin is only guaranteed to work with the latest TubeArchivist version.
 
 ## About
 
