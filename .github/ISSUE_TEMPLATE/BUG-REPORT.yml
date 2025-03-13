@@ -17,6 +17,8 @@ body:
           required: true
         - label: I have read the [how to open an issue](https://github.com/tubearchivist/tubearchivist/blob/master/CONTRIBUTING.md#how-to-open-an-issue) guide, particularly the [bug report](https://github.com/tubearchivist/tubearchivist/blob/master/CONTRIBUTING.md#bug-report) section.
           required: true
+        - label: I have searched for both closed and open already existing issues about the problem I am reporting.
+          required: true
 
   - type: input
     id: os
