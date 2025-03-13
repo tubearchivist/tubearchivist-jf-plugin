@@ -9,6 +9,10 @@
 > Jellyfin release cycle has changed in the past few months and now it is shorter than before. The plugin supports only the latest Jellyfin release, in order to continue using this plugin with all the latest features you will need to upgrade your Jellyfin installation.
 > The same rule applies to TubeArchivist: the plugin is only guaranteed to work with the latest TubeArchivist version.
 
+> [!WARNING]
+> Jellyfin 10.10 introduced a bug that prevents the plugin to correctly create Season folders by year. The bug has been finally solved on the Jellyfin codebase, but, until the next minor release, a manual build of the Jellyfin branch release-10.10.z is required in order to get the fix running.<br>
+> This is not a plugin bug, any issue opened about this bug will be immediately closed!
+
 ## About
 
 <p>This plugin adds the metadata provider for <a href="https://www.tubearchivist.com/">TubeArchivist</a>, offering improved flexibility and native integration with Jellyfin compared to previous solutions.</p>
