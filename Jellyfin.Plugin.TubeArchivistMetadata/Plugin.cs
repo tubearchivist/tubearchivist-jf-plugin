@@ -177,6 +177,11 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
             {
                 BaseItem? season = LibraryManager.GetItemById(eventArgs.Item.ParentId);
                 BaseItem? channel = LibraryManager.GetItemById(season!.ParentId);
+                var topParent = eventArgs.Item.GetTopParent();
+
+                if ((topParent?.Name ?? string.Empty) == (Instance?.Configuration.CollectionTitle ?? string.Empty) && topParent?.Name is not null)
+                {
+                BaseItem? channel = LibraryManager.GetItemById(eventArgs.Item.ParentId);
                 BaseItem? collection = LibraryManager.GetItemById(channel!.ParentId);
                 if (collection?.Name.ToLower(CultureInfo.CurrentCulture) == Instance?.Configuration.CollectionTitle.ToLower(CultureInfo.CurrentCulture) && eventArgs.PlaybackPositionTicks != null)
                 {
@@ -188,6 +193,11 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
                         Logger.LogCritical("{Message}", $"POST /video/{videoId}/progress returned {statusCode} for video {eventArgs.Item.Name} with progress {progress} seconds");
                     }
                 }
+                }
+                else
+                {
+                    Logger.LogDebug("Parent name ({ParentName}) is not collection title({CollectionTitle})", topParent?.Name ?? string.Empty, Instance?.Configuration.CollectionTitle);
+                }
             }
         }
 
@@ -196,6 +206,10 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
             var user = _userManager.GetUserById(eventArgs.UserId);
             if (Configuration.JFTASync && user != null && Configuration.GetJFUsernamesToArray().Contains(user!.Username))
             {
+                var topParent = eventArgs.Item.GetTopParent();
+
+                if ((topParent?.Name ?? string.Empty) == (Instance?.Configuration.CollectionTitle ?? string.Empty) && topParent?.Name is not null)
+                {
                 var isPlayed = eventArgs.Item.IsPlayed(user);
                 Logger.LogDebug("User {UserId} changed watched status to {Status} for the item {ItemName}", eventArgs.UserId, isPlayed, eventArgs.Item.Name);
                 string itemYTId;
@@ -242,6 +256,11 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
                 catch (Exception ex)
                 {
                     Logger.LogCritical("An exception occurred while calling POST /watched for item {ItemName} ({VideoYTId}) with watched status {IsPlayed}: {ExceptionMessage}", eventArgs.Item.Name, itemYTId, isPlayed, ex.Message);
+                }
+                }
+                else
+                {
+                    Logger.LogDebug("Parent name ({ParentName}) is not collection title({CollectionTitle})", topParent?.Name ?? string.Empty, Instance?.Configuration.CollectionTitle);
                 }
             }
         }
