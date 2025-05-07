@@ -82,6 +82,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
             if (response.IsSuccessStatusCode)
             {
                 string rawData = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
+                _logger.LogInformation("{Message}", url + ": " + rawData);
                 channel = JsonConvert.DeserializeObject<Channel>(rawData);
             }
 

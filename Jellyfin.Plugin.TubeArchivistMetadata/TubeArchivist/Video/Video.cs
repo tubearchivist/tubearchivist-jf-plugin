@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using Jellyfin.Plugin.TubeArchivistMetadata.Utilities;
 using MediaBrowser.Controller.Entities;
@@ -124,8 +125,9 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
             {
                 Name = Title,
                 Overview = Utils.FormatDescription(Description),
-                SeasonName = Published.Year.ToString(CultureInfo.CurrentCulture),
+                // SeasonName = Published.Year.ToString(CultureInfo.CurrentCulture),
                 ParentIndexNumber = Published.Year,
+                IndexNumber = (Published.Year * 10000) + (Published.Month * 100) + Published.Day,
                 SeriesName = Channel.Name,
                 ProductionYear = Published.Year,
                 PremiereDate = Published,
