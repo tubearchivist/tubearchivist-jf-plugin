@@ -28,6 +28,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
     public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     {
         private readonly IUserManager _userManager;
+        private readonly IUserDataManager _userDataManager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Plugin"/> class.
@@ -63,6 +64,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
             sessionManager.PlaybackProgress += OnPlaybackProgress;
             LibraryManager = libraryManager;
             _userManager = userManager;
+            _userDataManager = userDataManager;
             userDataManager.UserDataSaved += OnWatchedStatusChange;
 
             var taToJellyfinProgressSyncTask = new TAToJellyfinProgressSyncTask(logger, libraryManager, userManager, userDataManager);
@@ -173,7 +175,8 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
         {
             if (Instance!.Configuration.JFTASync && eventArgs.Users.Any(u => Instance!.Configuration.JFUsernameFrom.Equals(u.Username, StringComparison.Ordinal)))
             {
-                BaseItem? channel = LibraryManager.GetItemById(eventArgs.Item.ParentId);
+                BaseItem? season = LibraryManager.GetItemById(eventArgs.Item.ParentId);
+                BaseItem? channel = LibraryManager.GetItemById(season!.ParentId);
                 BaseItem? collection = LibraryManager.GetItemById(channel!.ParentId);
                 if (collection?.Name.ToLower(CultureInfo.CurrentCulture) == Instance?.Configuration.CollectionTitle.ToLower(CultureInfo.CurrentCulture) && eventArgs.PlaybackPositionTicks != null)
                 {
@@ -223,6 +226,17 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
                     if (statusCode != System.Net.HttpStatusCode.OK)
                     {
                         Logger.LogCritical("POST /watched returned {StatusCode} for item {ItemName} ({VideoYTId}) with watched status {IsPlayed}", statusCode, eventArgs.Item.Name, itemYTId, isPlayed);
+                    }
+
+                    if (eventArgs.Item is Episode)
+                    {
+                        var progress = _userDataManager.GetUserData(user, eventArgs.Item).PlaybackPositionTicks / TimeSpan.TicksPerSecond;
+                        var videoId = Utils.GetVideoNameFromPath(eventArgs.Item.Path);
+                        statusCode = await TubeArchivistApi.GetInstance().SetProgress(videoId, progress).ConfigureAwait(true);
+                        if (statusCode != System.Net.HttpStatusCode.OK)
+                        {
+                            Logger.LogCritical("{Message}", $"POST /video/{videoId}/progress returned {statusCode} for video {eventArgs.Item.Name} with progress {progress} seconds");
+                        }
                     }
                 }
                 catch (Exception ex)
