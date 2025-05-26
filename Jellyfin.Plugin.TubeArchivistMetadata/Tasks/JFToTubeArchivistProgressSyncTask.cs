@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Data.Enums;
@@ -45,7 +46,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
         public string Name => "JFToTubeArchivistProgressSyncTask";
 
         /// <inheritdoc/>
-        public string Description => "This tasks syncs TubeArchivist playback progresses to Jellyfin";
+        public string Description => "This tasks syncs Jellyfin playback progresses to TubeArchivist";
 
         /// <inheritdoc/>
         public string Category => "TubeArchivistMetadata";
@@ -63,54 +64,52 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                 _logger.LogInformation("Starting Jellyfin->TubeArchivist playback progresses synchronization.");
                 var taApi = TubeArchivistApi.GetInstance();
                 var videosCount = 0;
-                foreach (var jfUsername in Plugin.Instance!.Configuration.GetJFUsernamesToArray())
+                var jfUsername = Plugin.Instance!.Configuration.JFUsernameFrom;
+                var user = _userManager.GetUserByName(jfUsername);
+                if (user == null)
                 {
-                    var user = _userManager.GetUserByName(jfUsername);
-                    if (user == null)
-                    {
-                        _logger.LogInformation("{Message}", $"Jellyfin user with username {jfUsername} not found");
-                        continue;
-                    }
+                    _logger.LogInformation("{Message}", $"Jellyfin user with username {jfUsername} not found");
+                    return;
+                }
 
-                    var collectionItem = _libraryManager.GetItemList(new InternalItemsQuery
-                    {
-                        Name = Plugin.Instance?.Configuration.CollectionTitle,
-                        IncludeItemTypes = new[] { BaseItemKind.CollectionFolder }
-                    }).FirstOrDefault();
+                var collectionItem = _libraryManager.GetItemList(new InternalItemsQuery
+                {
+                    Name = Plugin.Instance?.Configuration.CollectionTitle,
+                    IncludeItemTypes = new[] { BaseItemKind.CollectionFolder }
+                }).FirstOrDefault();
 
-                    if (collectionItem == null)
+                if (collectionItem == null)
+                {
+                    var message = $"Collection '{Plugin.Instance?.Configuration.CollectionTitle}' not found.";
+                    _logger.LogCritical("{Message}", message);
+                }
+                else
+                {
+                    var collection = (CollectionFolder)collectionItem;
+                    var channels = collection.GetChildren(user, false, new InternalItemsQuery
                     {
-                        var message = $"Collection '{Plugin.Instance?.Configuration.CollectionTitle}' not found.";
-                        _logger.LogCritical("{Message}", message);
-                    }
-                    else
+                        IncludeItemTypes = new[] { BaseItemKind.Series }
+                    });
+                    _logger.LogInformation("Analyzing collection {Id} with name {Name}", collectionItem.Id, collectionItem.Name);
+                    _logger.LogDebug("Found {Message} channels", channels.Count);
+
+                    foreach (Series channel in channels)
                     {
-                        var collection = (CollectionFolder)collectionItem;
-                        var channels = collection.GetChildren(user, false, new InternalItemsQuery
+                        var channelYTId = Utils.GetChannelNameFromPath(channel.Path);
+                        var years = channel.GetChildren(user, false, new InternalItemsQuery
                         {
-                            IncludeItemTypes = new[] { BaseItemKind.Series }
+                            IncludeItemTypes = new[] { BaseItemKind.Season }
                         });
-                        _logger.LogInformation("Analyzing collection {Id} with name {Name}", collectionItem.Id, collectionItem.Name);
-                        _logger.LogDebug("Found {Message} channels", channels.Count);
+                        _logger.LogDebug("Found {Years} years in channel {ChannelName}", years.Count, channel.Name);
 
-                        foreach (Series channel in channels)
+                        foreach (Season year in years)
                         {
-                            var channelYTId = Utils.GetChannelNameFromPath(channel.Path);
-                            var years = channel.GetChildren(user, false, new InternalItemsQuery
+                            var videos = year.GetChildren(user, false, new InternalItemsQuery
                             {
-                                IncludeItemTypes = new[] { BaseItemKind.Season }
+                                IncludeItemTypes = new[] { BaseItemKind.Episode }
                             });
-                            _logger.LogDebug("Found {Years} years in channel {ChannelName}", years.Count, channel.Name);
-
-                            foreach (Season year in years)
-                            {
-                                var videos = year.GetChildren(user, false, new InternalItemsQuery
-                                {
-                                    IncludeItemTypes = new[] { BaseItemKind.Episode }
-                                });
-                                _logger.LogDebug("Found {Videos} videos in year {YearName} of the channel {ChannelName}", videos.Count, year.Name, channel.Name);
-                                videosCount += videos.Count;
-                            }
+                            _logger.LogDebug("Found {Videos} videos in year {YearName} of the channel {ChannelName}", videos.Count, year.Name, channel.Name);
+                            videosCount += videos.Count;
                         }
                     }
                 }
@@ -118,91 +117,82 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                 _logger.LogInformation("Found a total of {VideosCount} videos", videosCount);
 
                 var processedVideosCount = 0;
-                foreach (var jfUsername in Plugin.Instance!.Configuration.GetJFUsernamesToArray())
+                if (collectionItem == null)
                 {
-                    var user = _userManager.GetUserByName(jfUsername);
-                    if (user == null)
+                    var message = $"Collection '{Plugin.Instance?.Configuration.CollectionTitle}' not found.";
+                    _logger.LogCritical("{Message}", message);
+                }
+                else
+                {
+                    var collection = (CollectionFolder)collectionItem;
+                    var channels = collection.GetChildren(user, false, new InternalItemsQuery
                     {
-                        _logger.LogInformation("{Message}", $"Jellyfin user with username {jfUsername} not found");
-                        continue;
-                    }
+                        IncludeItemTypes = new[] { BaseItemKind.Series }
+                    });
 
-                    var collectionItem = _libraryManager.GetItemList(new InternalItemsQuery
+                    foreach (Series channel in channels)
                     {
-                        Name = Plugin.Instance?.Configuration.CollectionTitle,
-                        IncludeItemTypes = new[] { BaseItemKind.CollectionFolder }
-                    }).FirstOrDefault();
-
-                    if (collectionItem == null)
-                    {
-                        var message = $"Collection '{Plugin.Instance?.Configuration.CollectionTitle}' not found.";
-                        _logger.LogCritical("{Message}", message);
-                    }
-                    else
-                    {
-                        var collection = (CollectionFolder)collectionItem;
-                        var channels = collection.GetChildren(user, false, new InternalItemsQuery
+                        var channelYTId = Utils.GetChannelNameFromPath(channel.Path);
+                        var isChannelWatched = false;
+                        var isChannelCheckedForWatched = false;
+                        var years = channel.GetChildren(user, false, new InternalItemsQuery
                         {
-                            IncludeItemTypes = new[] { BaseItemKind.Series }
+                            IncludeItemTypes = new[] { BaseItemKind.Season }
                         });
 
-                        foreach (Series channel in channels)
+                        foreach (Season year in years)
                         {
-                            var channelYTId = Utils.GetChannelNameFromPath(channel.Path);
-                            var isChannelWatched = false;
-                            var isChannelCheckedForWatched = false;
-                            var years = channel.GetChildren(user, false, new InternalItemsQuery
+                            var videos = year.GetChildren(user, false, new InternalItemsQuery
                             {
-                                IncludeItemTypes = new[] { BaseItemKind.Season }
+                                IncludeItemTypes = new[] { BaseItemKind.Episode }
                             });
+                            videosCount += videos.Count;
 
-                            foreach (Season year in years)
+                            foreach (Episode video in videos)
                             {
-                                var videos = year.GetChildren(user, false, new InternalItemsQuery
-                                {
-                                    IncludeItemTypes = new[] { BaseItemKind.Episode }
-                                });
-                                videosCount += videos.Count;
+                                var videoYTId = Utils.GetVideoNameFromPath(video.Path);
+                                _logger.LogInformation("{VideoYtId}", videoYTId);
+                                HttpStatusCode statusCode;
 
-                                foreach (Episode video in videos)
+                                if (!isChannelCheckedForWatched && channel.IsPlayed(user))
                                 {
-                                    var videoYTId = Utils.GetVideoNameFromPath(video.Path);
-                                    var playbackProgress = _userDataManager.GetUserData(user, video).PlaybackPositionTicks / TimeSpan.TicksPerSecond;
-                                    var statusCode = await taApi.SetProgress(videoYTId, playbackProgress).ConfigureAwait(true);
+                                    var isChannelPlayed = channel.IsPlayed(user);
+                                    statusCode = await taApi.SetWatchedStatus(channelYTId, isChannelPlayed).ConfigureAwait(true);
                                     if (statusCode != System.Net.HttpStatusCode.OK)
                                     {
-                                        _logger.LogCritical("{Message}", $"POST /video/{videoYTId}/progress returned {statusCode} for video {video.Name} with progress {progress} seconds");
+                                        _logger.LogCritical("{Message}", $"POST /watched returned {statusCode} for channel {channel.Name} ({channelYTId}) with wacthed status {isChannelPlayed}");
                                     }
-
-                                    if (!isChannelCheckedForWatched && channel.IsPlayed(user))
+                                    else
                                     {
-                                        var isChannelPlayed = channel.IsPlayed(user);
-                                        statusCode = await taApi.SetWatchedStatus(channelYTId, isChannelPlayed).ConfigureAwait(true);
-                                        if (statusCode != System.Net.HttpStatusCode.OK)
-                                        {
-                                            _logger.LogCritical("{Message}", $"POST /watched returned {statusCode} for channel {channel.Name} ({channelYTId}) with wacthed status {isChannelPlayed}");
-                                        }
-                                        else
-                                        {
-                                            isChannelWatched = true;
-                                        }
-
-                                        isChannelCheckedForWatched = true;
+                                        isChannelWatched = true;
                                     }
 
-                                    if (!isChannelWatched)
-                                    {
-                                        var isVideoPlayed = video.IsPlayed(user);
-                                        statusCode = await taApi.SetWatchedStatus(videoYTId, isVideoPlayed).ConfigureAwait(true);
-                                        if (statusCode != System.Net.HttpStatusCode.OK)
-                                        {
-                                            _logger.LogCritical("{Message}", $"POST /watched returned {statusCode} for video {video.Name} ({videoYTId}) with wacthed status {isVideoPlayed}");
-                                        }
-                                    }
-
-                                    processedVideosCount++;
-                                    progress.Report(processedVideosCount * 100 / videosCount);
+                                    isChannelCheckedForWatched = true;
                                 }
+
+                                if (!isChannelWatched)
+                                {
+                                    var isVideoPlayed = video.IsPlayed(user);
+                                    statusCode = await taApi.SetWatchedStatus(videoYTId, isVideoPlayed).ConfigureAwait(true);
+                                    if (statusCode != System.Net.HttpStatusCode.OK)
+                                    {
+                                        _logger.LogCritical("{Message}", $"POST /watched returned {statusCode} for video {video.Name} ({videoYTId}) with wacthed status {isVideoPlayed}");
+                                    }
+
+                                    _logger.LogInformation("{Message}", isVideoPlayed);
+                                    if (!isVideoPlayed)
+                                    {
+                                        var playbackProgress = _userDataManager.GetUserData(user, video).PlaybackPositionTicks / TimeSpan.TicksPerSecond;
+                                        statusCode = await taApi.SetProgress(videoYTId, playbackProgress).ConfigureAwait(true);
+                                        if (statusCode != System.Net.HttpStatusCode.OK)
+                                        {
+                                            _logger.LogCritical("{Message}", $"POST /video/{videoYTId}/progress returned {statusCode} for video {video.Name} with progress {progress} seconds");
+                                        }
+                                    }
+                                }
+
+                                processedVideosCount++;
+                                progress.Report(processedVideosCount * 100 / videosCount);
                             }
                         }
                     }
