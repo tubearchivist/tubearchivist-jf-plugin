@@ -10,11 +10,11 @@
         "versions": [
             {
                 "version": "1.3.7.0",
-                "changelog": "Fix TA auth header\n",
+                "changelog": "Fix JF->TA Sync\n",
                 "targetAbi": "10.10.0.0",
                 "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.3.7/tubearchivistmetadata_1.3.7.0.zip",
-                "checksum": "a0e4ee866f298df223a0b9b5cece16b0",
-                "timestamp": "2025-05-26T21:43:54Z"
+                "checksum": "60d8e9f134912f907dccd30b531da4f6",
+                "timestamp": "2025-05-27T18:36:55Z"
             },
             {
                 "version": "1.3.6.0",
