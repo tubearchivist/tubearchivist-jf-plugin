@@ -175,13 +175,12 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
         {
             if (Instance!.Configuration.JFTASync && eventArgs.Users.Any(u => Instance!.Configuration.JFUsernameFrom.Equals(u.Username, StringComparison.Ordinal)))
             {
-                BaseItem? season = LibraryManager.GetItemById(eventArgs.Item.ParentId);
-                BaseItem? channel = LibraryManager.GetItemById(season!.ParentId);
                 var topParent = eventArgs.Item.GetTopParent();
 
                 if ((topParent?.Name ?? string.Empty) == (Instance?.Configuration.CollectionTitle ?? string.Empty) && topParent?.Name is not null)
                 {
-                BaseItem? channel = LibraryManager.GetItemById(eventArgs.Item.ParentId);
+                BaseItem? season = LibraryManager.GetItemById(eventArgs.Item.ParentId);
+                BaseItem? channel = LibraryManager.GetItemById(season!.ParentId);
                 BaseItem? collection = LibraryManager.GetItemById(channel!.ParentId);
                 if (collection?.Name.ToLower(CultureInfo.CurrentCulture) == Instance?.Configuration.CollectionTitle.ToLower(CultureInfo.CurrentCulture) && eventArgs.PlaybackPositionTicks != null)
                 {
