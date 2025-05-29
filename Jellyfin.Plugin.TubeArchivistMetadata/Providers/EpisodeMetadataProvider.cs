@@ -70,7 +70,6 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
                 result.Item.Path = info.Path;
                 result.Provider = Name;
                 result.People = peopleInfo;
-                _logger.LogInformation("{Message}", "Result of video to episode: \n" + JsonConvert.SerializeObject(result));
             }
 
             return result;
