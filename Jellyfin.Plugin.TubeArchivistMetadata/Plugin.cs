@@ -173,93 +173,81 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
 
         private async void OnPlaybackProgress(object? sender, PlaybackProgressEventArgs eventArgs)
         {
-            if (Instance!.Configuration.JFTASync && eventArgs.Users.Any(u => Instance!.Configuration.JFUsernameFrom.Equals(u.Username, StringComparison.Ordinal)))
+            var topParent = eventArgs.Item.GetTopParent();
+            if (
+                Instance!.Configuration.JFTASync &&
+                eventArgs.Users.Any(u => Instance!.Configuration.JFUsernameFrom.Equals(u.Username, StringComparison.Ordinal)) &&
+                eventArgs.PlaybackPositionTicks.HasValue &&
+                string.Equals(topParent?.Name, Instance?.Configuration.CollectionTitle, StringComparison.OrdinalIgnoreCase)
+            )
             {
-                var topParent = eventArgs.Item.GetTopParent();
-
-                if ((topParent?.Name ?? string.Empty) == (Instance?.Configuration.CollectionTitle ?? string.Empty) && topParent?.Name is not null)
+                long progress = (long)eventArgs.PlaybackPositionTicks / TimeSpan.TicksPerSecond;
+                var videoId = Utils.GetVideoNameFromPath(eventArgs.Item.Path);
+                var statusCode = await TubeArchivistApi.GetInstance().SetProgress(videoId, progress).ConfigureAwait(true);
+                if (statusCode != System.Net.HttpStatusCode.OK)
                 {
-                    BaseItem? season = LibraryManager.GetItemById(eventArgs.Item.ParentId);
-                    BaseItem? channel = LibraryManager.GetItemById(season!.ParentId);
-                    BaseItem? collection = LibraryManager.GetItemById(channel!.ParentId);
-                    if (collection?.Name.ToLower(CultureInfo.CurrentCulture) == Instance?.Configuration.CollectionTitle.ToLower(CultureInfo.CurrentCulture) && eventArgs.PlaybackPositionTicks != null)
-                    {
-                        long progress = (long)eventArgs.PlaybackPositionTicks / TimeSpan.TicksPerSecond;
-                        var videoId = Utils.GetVideoNameFromPath(eventArgs.Item.Path);
-                        var statusCode = await TubeArchivistApi.GetInstance().SetProgress(videoId, progress).ConfigureAwait(true);
-                        if (statusCode != System.Net.HttpStatusCode.OK)
-                        {
-                            Logger.LogCritical("{Message}", $"POST /video/{videoId}/progress returned {statusCode} for video {eventArgs.Item.Name} with progress {progress} seconds");
-                        }
-                    }
-                }
-                else
-                {
-                    Logger.LogDebug("Parent name ({ParentName}) is not collection title({CollectionTitle})", topParent?.Name ?? string.Empty, Instance?.Configuration.CollectionTitle);
+                    Logger.LogCritical("{Message}", $"POST /video/{videoId}/progress returned {statusCode} for video {eventArgs.Item.Name} with progress {progress} seconds");
                 }
             }
         }
 
         private async void OnWatchedStatusChange(object? sender, UserDataSaveEventArgs eventArgs)
         {
+            var topParent = eventArgs.Item.GetTopParent();
             var user = _userManager.GetUserById(eventArgs.UserId);
-            if (Configuration.JFTASync && user != null && Configuration.GetJFUsernamesToArray().Contains(user!.Username))
+            if (
+                Configuration.JFTASync &&
+                user != null &&
+                Configuration.GetJFUsernamesToArray().Contains(user!.Username) &&
+                string.Equals(topParent?.Name, Instance?.Configuration.CollectionTitle, StringComparison.OrdinalIgnoreCase)
+            )
             {
-                var topParent = eventArgs.Item.GetTopParent();
-
-                if ((topParent?.Name ?? string.Empty) == (Instance?.Configuration.CollectionTitle ?? string.Empty) && topParent?.Name is not null)
+                var isPlayed = eventArgs.Item.IsPlayed(user);
+                Logger.LogDebug("User {UserId} changed watched status to {Status} for the item {ItemName}", eventArgs.UserId, isPlayed, eventArgs.Item.Name);
+                string itemYTId;
+                try
                 {
-                    var isPlayed = eventArgs.Item.IsPlayed(user);
-                    Logger.LogDebug("User {UserId} changed watched status to {Status} for the item {ItemName}", eventArgs.UserId, isPlayed, eventArgs.Item.Name);
-                    string itemYTId;
-                    try
+                    if (eventArgs.Item is Series)
                     {
-                        if (eventArgs.Item is Series)
-                        {
-                            itemYTId = Utils.GetChannelNameFromPath(eventArgs.Item.Path);
-                        }
-                        else if (eventArgs.Item is Episode)
-                        {
-                            itemYTId = Utils.GetVideoNameFromPath(eventArgs.Item.Path);
-                        }
-                        else
-                        {
-                            return;
-                        }
+                        itemYTId = Utils.GetChannelNameFromPath(eventArgs.Item.Path);
                     }
-                    catch (Exception ex)
+                    else if (eventArgs.Item is Episode)
                     {
-                        Logger.LogError(ex, "Error while processing item path: {ItemPath}", eventArgs.Item.Path ?? "null");
+                        itemYTId = Utils.GetVideoNameFromPath(eventArgs.Item.Path);
+                    }
+                    else
+                    {
                         return;
                     }
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError(ex, "Error while processing item path: {ItemPath}", eventArgs.Item.Path ?? "null");
+                    return;
+                }
 
-                    try
+                try
+                {
+                    var statusCode = await TubeArchivistApi.GetInstance().SetWatchedStatus(itemYTId, isPlayed).ConfigureAwait(true);
+                    if (statusCode != System.Net.HttpStatusCode.OK)
                     {
-                        var statusCode = await TubeArchivistApi.GetInstance().SetWatchedStatus(itemYTId, isPlayed).ConfigureAwait(true);
+                        Logger.LogCritical("POST /watched returned {StatusCode} for item {ItemName} ({VideoYTId}) with watched status {IsPlayed}", statusCode, eventArgs.Item.Name, itemYTId, isPlayed);
+                    }
+
+                    if (eventArgs.Item is Episode)
+                    {
+                        var progress = _userDataManager.GetUserData(user, eventArgs.Item).PlaybackPositionTicks / TimeSpan.TicksPerSecond;
+                        var videoId = Utils.GetVideoNameFromPath(eventArgs.Item.Path);
+                        statusCode = await TubeArchivistApi.GetInstance().SetProgress(videoId, progress).ConfigureAwait(true);
                         if (statusCode != System.Net.HttpStatusCode.OK)
                         {
-                            Logger.LogCritical("POST /watched returned {StatusCode} for item {ItemName} ({VideoYTId}) with watched status {IsPlayed}", statusCode, eventArgs.Item.Name, itemYTId, isPlayed);
+                            Logger.LogCritical("{Message}", $"POST /video/{videoId}/progress returned {statusCode} for video {eventArgs.Item.Name} with progress {progress} seconds");
                         }
-
-                        if (eventArgs.Item is Episode)
-                        {
-                            var progress = _userDataManager.GetUserData(user, eventArgs.Item).PlaybackPositionTicks / TimeSpan.TicksPerSecond;
-                            var videoId = Utils.GetVideoNameFromPath(eventArgs.Item.Path);
-                            statusCode = await TubeArchivistApi.GetInstance().SetProgress(videoId, progress).ConfigureAwait(true);
-                            if (statusCode != System.Net.HttpStatusCode.OK)
-                            {
-                                Logger.LogCritical("{Message}", $"POST /video/{videoId}/progress returned {statusCode} for video {eventArgs.Item.Name} with progress {progress} seconds");
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.LogCritical("An exception occurred while calling POST /watched for item {ItemName} ({VideoYTId}) with watched status {IsPlayed}: {ExceptionMessage}", eventArgs.Item.Name, itemYTId, isPlayed, ex.Message);
                     }
                 }
-                else
+                catch (Exception ex)
                 {
-                    Logger.LogDebug("Parent name ({ParentName}) is not collection title({CollectionTitle})", topParent?.Name ?? string.Empty, Instance?.Configuration.CollectionTitle);
+                    Logger.LogCritical("An exception occurred while calling POST /watched for item {ItemName} ({VideoYTId}) with watched status {IsPlayed}: {ExceptionMessage}", eventArgs.Item.Name, itemYTId, isPlayed, ex.Message);
                 }
             }
         }
