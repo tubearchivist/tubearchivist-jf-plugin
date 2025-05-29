@@ -173,28 +173,34 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
 
         private async void OnPlaybackProgress(object? sender, PlaybackProgressEventArgs eventArgs)
         {
-            if (Instance!.Configuration.JFTASync && eventArgs.Users.Any(u => Instance!.Configuration.JFUsernameFrom.Equals(u.Username, StringComparison.Ordinal)))
+            var topParent = eventArgs.Item.GetTopParent();
+            if (
+                Instance!.Configuration.JFTASync &&
+                eventArgs.Users.Any(u => Instance!.Configuration.JFUsernameFrom.Equals(u.Username, StringComparison.Ordinal)) &&
+                eventArgs.PlaybackPositionTicks.HasValue &&
+                string.Equals(topParent?.Name, Instance?.Configuration.CollectionTitle, StringComparison.OrdinalIgnoreCase)
+            )
             {
-                BaseItem? season = LibraryManager.GetItemById(eventArgs.Item.ParentId);
-                BaseItem? channel = LibraryManager.GetItemById(season!.ParentId);
-                BaseItem? collection = LibraryManager.GetItemById(channel!.ParentId);
-                if (collection?.Name.ToLower(CultureInfo.CurrentCulture) == Instance?.Configuration.CollectionTitle.ToLower(CultureInfo.CurrentCulture) && eventArgs.PlaybackPositionTicks != null)
+                long progress = (long)eventArgs.PlaybackPositionTicks / TimeSpan.TicksPerSecond;
+                var videoId = Utils.GetVideoNameFromPath(eventArgs.Item.Path);
+                var statusCode = await TubeArchivistApi.GetInstance().SetProgress(videoId, progress).ConfigureAwait(true);
+                if (statusCode != System.Net.HttpStatusCode.OK)
                 {
-                    long progress = (long)eventArgs.PlaybackPositionTicks / TimeSpan.TicksPerSecond;
-                    var videoId = Utils.GetVideoNameFromPath(eventArgs.Item.Path);
-                    var statusCode = await TubeArchivistApi.GetInstance().SetProgress(videoId, progress).ConfigureAwait(true);
-                    if (statusCode != System.Net.HttpStatusCode.OK)
-                    {
-                        Logger.LogCritical("{Message}", $"POST /video/{videoId}/progress returned {statusCode} for video {eventArgs.Item.Name} with progress {progress} seconds");
-                    }
+                    Logger.LogCritical("{Message}", $"POST /video/{videoId}/progress returned {statusCode} for video {eventArgs.Item.Name} with progress {progress} seconds");
                 }
             }
         }
 
         private async void OnWatchedStatusChange(object? sender, UserDataSaveEventArgs eventArgs)
         {
+            var topParent = eventArgs.Item.GetTopParent();
             var user = _userManager.GetUserById(eventArgs.UserId);
-            if (Configuration.JFTASync && user != null && Configuration.GetJFUsernamesToArray().Contains(user!.Username))
+            if (
+                Configuration.JFTASync &&
+                user != null &&
+                Configuration.GetJFUsernamesToArray().Contains(user!.Username) &&
+                string.Equals(topParent?.Name, Instance?.Configuration.CollectionTitle, StringComparison.OrdinalIgnoreCase)
+            )
             {
                 var isPlayed = eventArgs.Item.IsPlayed(user);
                 Logger.LogDebug("User {UserId} changed watched status to {Status} for the item {ItemName}", eventArgs.UserId, isPlayed, eventArgs.Item.Name);

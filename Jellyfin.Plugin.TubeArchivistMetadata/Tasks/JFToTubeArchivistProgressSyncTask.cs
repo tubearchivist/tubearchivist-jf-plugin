@@ -151,7 +151,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                             foreach (Episode video in videos)
                             {
                                 var videoYTId = Utils.GetVideoNameFromPath(video.Path);
-                                _logger.LogInformation("{VideoYtId}", videoYTId);
+                                _logger.LogDebug("{VideoYtId}", videoYTId);
                                 HttpStatusCode statusCode;
 
                                 if (!isChannelCheckedForWatched && channel.IsPlayed(user))
@@ -179,7 +179,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                                         _logger.LogCritical("{Message}", $"POST /watched returned {statusCode} for video {video.Name} ({videoYTId}) with wacthed status {isVideoPlayed}");
                                     }
 
-                                    _logger.LogInformation("{Message}", isVideoPlayed);
+                                    _logger.LogDebug("{Message}", isVideoPlayed);
                                     if (!isVideoPlayed)
                                     {
                                         var playbackProgress = _userDataManager.GetUserData(user, video).PlaybackPositionTicks / TimeSpan.TicksPerSecond;

@@ -67,6 +67,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
                 });
                 result.HasMetadata = true;
                 result.Item = video.ToEpisode();
+                result.Item.Path = info.Path;
                 result.Provider = Name;
                 result.People = peopleInfo;
             }
