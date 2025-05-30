@@ -14,6 +14,7 @@ using MediaBrowser.Common.Plugins;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.TV;
 using MediaBrowser.Controller.Library;
+using MediaBrowser.Controller.Playlists;
 using MediaBrowser.Controller.Session;
 using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Serialization;
@@ -41,6 +42,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
         /// <param name="taskManager">Instance of the <see cref="ITaskManager"/> interface.</param>
         /// <param name="userManager">Instance of the <see cref="IUserManager"/> interface.</param>
         /// <param name="userDataManager">Instance of the <see cref="IUserDataManager"/> interface.</param>
+        /// <param name="playlistManager">Instance of the <see cref="IPlaylistManager"/> interface.</param>
         public Plugin(
             IApplicationPaths applicationPaths,
             IXmlSerializer xmlSerializer,
@@ -49,7 +51,8 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
             ILibraryManager libraryManager,
             ITaskManager taskManager,
             IUserManager userManager,
-            IUserDataManager userDataManager)
+            IUserDataManager userDataManager,
+            IPlaylistManager playlistManager)
             : base(applicationPaths, xmlSerializer)
         {
             Instance = this;
@@ -68,11 +71,16 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
             userDataManager.UserDataSaved += OnWatchedStatusChange;
 
             var taToJellyfinProgressSyncTask = new TAToJellyfinProgressSyncTask(logger, libraryManager, userManager, userDataManager);
+            var taToJellyfinPlaylistsSyncTask = new TAToJellyfinPlaylistsSyncTask(logger, libraryManager, userManager, playlistManager);
             var jfToTubearchivistProgressSyncTask = new JFToTubearchivistProgressSyncTask(logger, libraryManager, userManager, userDataManager);
             var isTAJFTaskPresent = taskManager.ScheduledTasks.Any(t => t.Name.Equals(taToJellyfinProgressSyncTask.Name, StringComparison.Ordinal));
             if (Instance!.Configuration.TAJFSync && !isTAJFTaskPresent)
             {
                 logger.LogInformation("Queueing task {TaskName}.", taToJellyfinProgressSyncTask.Name);
+                taskManager.AddTasks([taToJellyfinProgressSyncTask]);
+                taskManager.Execute<TAToJellyfinProgressSyncTask>();
+
+                logger.LogInformation("Queueing task {TaskName}.", taToJellyfinPlaylistsSyncTask.Name);
                 taskManager.AddTasks([taToJellyfinProgressSyncTask]);
                 taskManager.Execute<TAToJellyfinProgressSyncTask>();
             }
