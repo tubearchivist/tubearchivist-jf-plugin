@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Net;
 using System.Net.Http;
@@ -200,6 +201,35 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
             var response = await client.PostAsync(url, new StringContent(body, Encoding.UTF8, "application/json")).ConfigureAwait(true);
 
             return response.StatusCode;
+        }
+
+        /// <summary>
+        /// Retrieves the playlists from TubeArchivist.
+        /// </summary>
+        /// <returns>A task.</returns>
+        public async Task<ISet<Playlist>?> GetPlaylists()
+        {
+            ResponseContainer<ISet<Playlist>?>? playlists = null;
+
+            var playlistsEndpoint = "/api/playlist/";
+            var url = new Uri(Utils.SanitizeUrl(Plugin.Instance?.Configuration.TubeArchivistUrl + playlistsEndpoint));
+            var response = await client.GetAsync(url).ConfigureAwait(true);
+            while (response.StatusCode == HttpStatusCode.Moved)
+            {
+                url = response.Headers.Location;
+                _logger.LogInformation("{Message}", "Received redirect to: " + url);
+                response = await client.GetAsync(url).ConfigureAwait(true);
+            }
+
+            _logger.LogInformation("{Message}", url + ": " + response.StatusCode);
+
+            if (response.IsSuccessStatusCode)
+            {
+                string rawData = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
+                playlists = JsonConvert.DeserializeObject<ResponseContainer<ISet<Playlist>?>>(rawData);
+            }
+
+            return playlists?.Data;
         }
     }
 }
