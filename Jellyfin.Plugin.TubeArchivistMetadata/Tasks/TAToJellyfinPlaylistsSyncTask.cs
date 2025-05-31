@@ -19,7 +19,7 @@ using Microsoft.Extensions.Logging;
 namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
 {
     /// <summary>
-    /// Task to sync TubeArchivist playback progresses to Jellyfin.
+    /// Task to sync TubeArchivist playlists to Jellyfin.
     /// </summary>
     public class TAToJellyfinPlaylistsSyncTask : IScheduledTask
     {
@@ -167,7 +167,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
             }
             else
             {
-                _logger.LogInformation("TubeArchivist->Jellyfin playback synchronization is currently disabled.");
+                _logger.LogInformation("TubeArchivist->Jellyfin playlists synchronization is currently disabled.");
             }
 
             progress.Report(100);
