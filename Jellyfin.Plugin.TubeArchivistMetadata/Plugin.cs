@@ -72,7 +72,8 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
 
             var taToJellyfinProgressSyncTask = new TAToJellyfinProgressSyncTask(logger, libraryManager, userManager, userDataManager);
             var taToJellyfinPlaylistsSyncTask = new TAToJellyfinPlaylistsSyncTask(logger, libraryManager, userManager, playlistManager);
-            var jfToTubearchivistProgressSyncTask = new JFToTubearchivistProgressSyncTask(logger, libraryManager, userManager, userDataManager);
+            var jfToTubeArchivistProgressSyncTask = new JFToTubeArchivistProgressSyncTask(logger, libraryManager, userManager, userDataManager);
+            var jfToTubeArchivistPlaylistsSyncTask = new JFToTubeArchivistPlaylistsSyncTask(logger, libraryManager, userManager, playlistManager);
             var isTAJFTaskPresent = taskManager.ScheduledTasks.Any(t => t.Name.Equals(taToJellyfinProgressSyncTask.Name, StringComparison.Ordinal));
             if (Instance!.Configuration.TAJFSync && !isTAJFTaskPresent)
             {
@@ -81,16 +82,20 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
                 taskManager.Execute<TAToJellyfinProgressSyncTask>();
 
                 logger.LogInformation("Queueing task {TaskName}.", taToJellyfinPlaylistsSyncTask.Name);
-                taskManager.AddTasks([taToJellyfinProgressSyncTask]);
-                taskManager.Execute<TAToJellyfinProgressSyncTask>();
+                taskManager.AddTasks([taToJellyfinPlaylistsSyncTask]);
+                taskManager.Execute<TAToJellyfinPlaylistsSyncTask>();
             }
 
-            var isJFTATaskPresent = taskManager.ScheduledTasks.Any(t => t.Name.Equals(jfToTubearchivistProgressSyncTask.Name, StringComparison.Ordinal));
+            var isJFTATaskPresent = taskManager.ScheduledTasks.Any(t => t.Name.Equals(jfToTubeArchivistProgressSyncTask.Name, StringComparison.Ordinal));
             if (Instance!.Configuration.JFTASync && !isJFTATaskPresent)
             {
-                logger.LogInformation("Queueing task {TaskName}.", jfToTubearchivistProgressSyncTask.Name);
-                taskManager.AddTasks([jfToTubearchivistProgressSyncTask]);
-                taskManager.Execute<JFToTubearchivistProgressSyncTask>();
+                logger.LogInformation("Queueing task {TaskName}.", jfToTubeArchivistProgressSyncTask.Name);
+                taskManager.AddTasks([jfToTubeArchivistProgressSyncTask]);
+                taskManager.Execute<JFToTubeArchivistProgressSyncTask>();
+
+                logger.LogInformation("Queueing task {TaskName}.", jfToTubeArchivistPlaylistsSyncTask.Name);
+                taskManager.AddTasks([jfToTubeArchivistPlaylistsSyncTask]);
+                taskManager.Execute<JFToTubeArchivistPlaylistsSyncTask>();
             }
 
             logger.LogInformation("{Message}", "Collection display name: " + Instance?.Configuration.CollectionTitle);
