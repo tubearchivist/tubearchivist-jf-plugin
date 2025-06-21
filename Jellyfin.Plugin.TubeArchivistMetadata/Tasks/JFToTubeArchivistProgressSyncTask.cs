@@ -72,11 +72,13 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                     return;
                 }
 
-                var collectionItem = _libraryManager.GetItemList(new InternalItemsQuery
+                var items = _libraryManager.GetItemList(new InternalItemsQuery
                 {
                     Name = Plugin.Instance?.Configuration.CollectionTitle,
                     IncludeItemTypes = new[] { BaseItemKind.CollectionFolder }
-                }).FirstOrDefault();
+                });
+
+                var collectionItem = items.Count > 0 ? items[0] : null;
 
                 if (collectionItem == null)
                 {
@@ -182,11 +184,14 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                                     _logger.LogInformation("{Message}", isVideoPlayed);
                                     if (!isVideoPlayed)
                                     {
-                                        var playbackProgress = _userDataManager.GetUserData(user, video).PlaybackPositionTicks / TimeSpan.TicksPerSecond;
-                                        statusCode = await taApi.SetProgress(videoYTId, playbackProgress).ConfigureAwait(true);
-                                        if (statusCode != System.Net.HttpStatusCode.OK)
+                                        var playbackProgress = _userDataManager.GetUserData(user, video)?.PlaybackPositionTicks / TimeSpan.TicksPerSecond;
+                                        if (playbackProgress != null)
                                         {
-                                            _logger.LogCritical("{Message}", $"POST /video/{videoYTId}/progress returned {statusCode} for video {video.Name} with progress {progress} seconds");
+                                            statusCode = await taApi.SetProgress(videoYTId, playbackProgress.Value).ConfigureAwait(true);
+                                            if (statusCode != System.Net.HttpStatusCode.OK)
+                                            {
+                                                _logger.LogCritical("{Message}", $"POST /video/{videoYTId}/progress returned {statusCode} for video {video.Name} with progress {progress} seconds");
+                                            }
                                         }
                                     }
                                 }
@@ -215,7 +220,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
             [
                 new TaskTriggerInfo
                 {
-                    Type = TaskTriggerInfo.TriggerStartup,
+                    Type = TaskTriggerInfoType.StartupTrigger,
                 },
             ];
         }
