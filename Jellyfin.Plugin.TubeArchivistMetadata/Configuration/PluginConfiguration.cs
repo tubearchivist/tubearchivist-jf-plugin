@@ -119,7 +119,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Configuration
         {
             get
             {
-                _logger.LogDebug("JFUsernamesTo configured: {Message}", string.Join(", ", _jfUsernamesTo));
+                _logger.LogInformation("JFUsernamesTo configured: {Message}", string.Join(", ", _jfUsernamesTo));
                 return string.Join(", ", _jfUsernamesTo);
             }
 
@@ -138,7 +138,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Configuration
                     }
                 }
 
-                _logger.LogDebug("Set JFUsernamesTo to: {Message}", string.Join(", ", _jfUsernamesTo));
+                _logger.LogInformation("Set JFUsernamesTo to: {Message}", string.Join(", ", _jfUsernamesTo));
             }
         }
 
