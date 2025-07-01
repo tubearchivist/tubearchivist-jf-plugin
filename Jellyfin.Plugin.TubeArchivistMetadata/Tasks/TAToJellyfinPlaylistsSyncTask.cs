@@ -91,7 +91,18 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                             continue;
                         }
 
-                        var userPlaylists = _playlistManager.GetPlaylists(user.Id);
+                        var userPlaylists = _playlistManager.GetPlaylists(user.Id).ToList();
+
+                        // TODO: Implement playlist deletion based on a configuration switch
+                        if (true)
+                        {
+                            var jfPlaylistsToDelete = userPlaylists.Where(up => !taPlaylists.Select(tp => tp.Id).Contains(Utils.GetTAPlaylistIdFromName(up.Name)));
+                            foreach (var jfPlaylistToDelete in jfPlaylistsToDelete)
+                            {
+                                _logger.LogInformation("Deleting Jellyfin playlist {PlaylistName}", jfPlaylistToDelete.Name);
+                                _libraryManager.DeleteItem(jfPlaylistToDelete, new DeleteOptions());
+                            }
+                        }
 
                         foreach (var taPlaylist in taPlaylists)
                         {
@@ -110,7 +121,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                                     continue;
                                 }
 
-                                var jfEntry = _libraryManager.GetItemList(new InternalItemsQuery
+                                var entries = _libraryManager.GetItemList(new InternalItemsQuery
                                 {
                                     HasAnyProviderId = new Dictionary<string, string>()
                                         {
@@ -118,7 +129,9 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                                                 Constants.ProviderName, taEntry.YoutubeId
                                             }
                                         }
-                                }).FirstOrDefault();
+                                });
+
+                                var jfEntry = entries.Count > 0 ? entries[0] : null;
 
                                 if (jfEntry != null)
                                 {
@@ -180,7 +193,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
             [
                 new TaskTriggerInfo
                 {
-                    Type = TaskTriggerInfo.TriggerInterval,
+                    Type = TaskTriggerInfoType.IntervalTrigger,
                     IntervalTicks = TimeSpan.FromSeconds(Plugin.Instance!.Configuration.TAJFTaskInterval).Ticks
                 },
             ];

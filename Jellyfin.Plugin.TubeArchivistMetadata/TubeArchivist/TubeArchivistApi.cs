@@ -276,5 +276,20 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
 
             return response.StatusCode;
         }
+
+        /// <summary>
+        /// Deletes a playlist.
+        /// </summary>
+        /// <param name="playlistId">Playlist id.</param>
+        /// <returns>Whether the playlist has been deleted successfully or not.</returns>
+        public async Task<bool> DeletePlaylist(string playlistId)
+        {
+            var deletePlaylistEndpoint = $"/api/playlist/";
+            var url = new Uri(Utils.SanitizeUrl(Plugin.Instance!.Configuration.TubeArchivistUrl + deletePlaylistEndpoint + playlistId));
+            var response = await client.DeleteAsync(url).ConfigureAwait(true);
+            _logger.LogDebug("Response code: {Message}", response.StatusCode);
+
+            return response.StatusCode == HttpStatusCode.NoContent;
+        }
     }
 }

@@ -7,8 +7,8 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using J2N.Collections.Generic.Extensions;
-using Jellyfin.Data.Entities;
 using Jellyfin.Data.Enums;
+using Jellyfin.Database.Implementations.Entities;
 using Jellyfin.Extensions;
 using Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist;
 using Jellyfin.Plugin.TubeArchivistMetadata.Utilities;
@@ -29,9 +29,6 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
     /// </summary>
     public class JFToTubeArchivistPlaylistsSyncTask : IScheduledTask
     {
-        private const string TAPlaylistIdRegex = @"^(.*)\((.*)\)$";
-        private const string YTTAPlaylistNameFormatRegex = @"^(.*)\s\-\s(.*)\s\((.*)\)$";
-        private const string TAPlaylistNameFormatRegex = @"^(.*)\s\((.*)\)$";
         private readonly ILogger<Plugin> _logger;
         private readonly ILibraryManager _libraryManager;
         private readonly IUserManager _userManager;
@@ -69,7 +66,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
             var items = new Dictionary<Guid, List<BaseItem>>();
             foreach (var playlist in playlists)
             {
-                items[playlist.Id] = playlist.GetChildren(user, true, new InternalItemsQuery());
+                items[playlist.Id] = new List<BaseItem>(playlist.GetChildren(user, true, new InternalItemsQuery()));
             }
 
             return items;
@@ -84,26 +81,6 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
             }
 
             return totalVideosCount;
-        }
-
-        private string? GetTAPlaylistIdFromName(string playlistName)
-        {
-            var regex = new Regex(TAPlaylistIdRegex);
-            return regex.Match(playlistName).Groups[2].ToString();
-        }
-
-        private string? GetTAPlaylistNameFromName(string playlistName)
-        {
-            var ytRegex = new Regex(YTTAPlaylistNameFormatRegex);
-            var regex = new Regex(TAPlaylistNameFormatRegex);
-
-            var name = ytRegex.Match(playlistName).Groups[1].ToString();
-            if (string.IsNullOrEmpty(name))
-            {
-                name = regex.Match(playlistName).Groups[1].ToString();
-            }
-
-            return name;
         }
 
         private string GetPlaylistUpdatedName(string playlistName, string newId)
@@ -153,10 +130,21 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                 var processedVideosCount = 0;
 
                 _logger.LogInformation("Found a total of {PlaylistsCount} playlists to analyze with a total of {VideosCount} videos", userPlaylists.Count, totalVideosCount);
+                // TODO: Implement playlist deletion based on a configuration switch
+                if (taPlaylists != null && true)
+                {
+                    var taPlaylistsToDelete = taPlaylists.Where(tp => !userPlaylists.Select(up => Utils.GetTAPlaylistIdFromName(up.Name)).Contains(tp.Id));
+                    foreach (var taPlaylistToDelete in taPlaylistsToDelete)
+                    {
+                        _logger.LogInformation("Deleting TubeArchivist playlist {PlaylistName} ({PlaylistId})", taPlaylistToDelete.Name, taPlaylistToDelete.Id);
+                        await taApi.DeletePlaylist(taPlaylistToDelete.Id).ConfigureAwait(true);
+                    }
+                }
+
                 foreach (var jfPlaylist in userPlaylists)
                 {
                     _logger.LogInformation("Analyzing playlist {PlaylistName}...", jfPlaylist.Name);
-                    var taPlaylistId = GetTAPlaylistIdFromName(jfPlaylist.Name);
+                    var taPlaylistId = Utils.GetTAPlaylistIdFromName(jfPlaylist.Name);
                     if (taPlaylistId == null)
                     {
                         _logger.LogDebug("The playlist {PlaylistName} was not a TA playlist: could not find TA playlist id at the end", jfPlaylist.Name);
@@ -193,6 +181,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                                     _logger.LogDebug("Video {VideoName} from playlist {PlaylistName} not found in TA playlist", jfItems[i].Name, jfPlaylist.Name);
                                     var positionsToMove = i - position;
                                     action = new PlaylistItemAction(i, jfItems[i].ProviderIds[Constants.ProviderName], CustomPlaylistAction.Create, positionsToMove, jfItems[i].Name);
+                                    taPlaylist.Entries.Insert(i, new PlaylistEntry(jfItems[i].ProviderIds[Constants.ProviderName], jfItems[i].Name, jfItems[i].Studios[0], i, true));
                                 }
                                 else
                                 {
@@ -210,17 +199,28 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                                         var positionsToMove = i - position;
                                         action = new PlaylistItemAction(i, jfItems[i].ProviderIds[Constants.ProviderName], positionsToMove > 0 ? CustomPlaylistAction.Up : CustomPlaylistAction.Down, Math.Abs(positionsToMove), jfItems[i].Name);
                                     }
+
+                                    var temp = taPlaylist.Entries[position];
+                                    taPlaylist.Entries.RemoveAt(position);
+                                    taPlaylist.Entries.Insert(i, temp);
                                 }
 
                                 itemsToProcess.Add(action);
                             }
 
                             // Add videos to delete from the TA playlist
-                            itemsToProcess.AddRange(taPlaylist.Entries
+                            var itemsToDelete = taPlaylist.Entries
                             .Where(e => !itemsToProcess
                                 .Select(i => i.YoutubeId)
                                 .Contains(e.YoutubeId))
-                            .Select(e => new PlaylistItemAction(e.YoutubeId, e.Title)));
+                                .ToList();
+                            foreach (var item in itemsToDelete)
+                            {
+                                _logger.LogDebug("Video {VideoName} not found in JF playlist, marking for deletion", item.Title);
+                                var ret = taPlaylist.Entries.Remove(item);
+                            }
+
+                            itemsToProcess.AddRange(itemsToDelete.Select(e => new PlaylistItemAction(e.YoutubeId, e.Title)));
 
                             foreach (var item in itemsToProcess)
                             {
@@ -268,7 +268,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                         // If it doesn't, create a new custom playlist and add videos
                         _logger.LogInformation("Playlist {PlaylistName} was not found on TubeArchivist. Creating a new playlist...", jfPlaylist.Name);
 
-                        var playlistName = GetTAPlaylistNameFromName(jfPlaylist.Name);
+                        var playlistName = Utils.GetTAPlaylistNameFromName(jfPlaylist.Name);
                         if (string.IsNullOrEmpty(playlistName))
                         {
                             playlistName = jfPlaylist.Name;
@@ -379,7 +379,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
             [
                 new TaskTriggerInfo
                 {
-                    Type = TaskTriggerInfo.TriggerInterval,
+                    Type = TaskTriggerInfoType.IntervalTrigger,
                     IntervalTicks = TimeSpan.FromSeconds(Plugin.Instance!.Configuration.TAJFTaskInterval).Ticks
                 },
             ];
