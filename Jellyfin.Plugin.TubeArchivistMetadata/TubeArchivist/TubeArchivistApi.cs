@@ -73,11 +73,11 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
             while (response.StatusCode == HttpStatusCode.Moved)
             {
                 url = response.Headers.Location;
-                _logger.LogInformation("{Message}", "Received redirect to: " + url);
+                _logger.LogDebug("{Message}", "Received redirect to: " + url);
                 response = await client.GetAsync(url).ConfigureAwait(true);
             }
 
-            _logger.LogInformation("{Message}", url + ": " + response.StatusCode);
+            _logger.LogDebug("{Message}", url + ": " + response.StatusCode);
 
             if (response.IsSuccessStatusCode)
             {
@@ -103,16 +103,16 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
             while (response.StatusCode == HttpStatusCode.Moved)
             {
                 url = response.Headers.Location;
-                _logger.LogInformation("{Message}", "Received redirect to: " + url);
+                _logger.LogDebug("{Message}", "Received redirect to: " + url);
                 response = await client.GetAsync(url).ConfigureAwait(true);
             }
 
-            _logger.LogInformation("{Message}", url + ": " + response.StatusCode);
+            _logger.LogDebug("{Message}", url + ": " + response.StatusCode);
 
             if (response.IsSuccessStatusCode)
             {
                 string rawData = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
-                _logger.LogInformation("{Message}", rawData);
+                _logger.LogDebug("{Message}", rawData);
                 video = JsonConvert.DeserializeObject<Video>(rawData);
             }
 
@@ -134,11 +134,11 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
             while (response.StatusCode == HttpStatusCode.Moved)
             {
                 url = response.Headers.Location;
-                _logger.LogInformation("{Message}", "Received redirect to: " + url);
+                _logger.LogDebug("{Message}", "Received redirect to: " + url);
                 response = await client.GetAsync(url).ConfigureAwait(true);
             }
 
-            _logger.LogInformation("{Message}", url + ": " + response.StatusCode);
+            _logger.LogDebug("{Message}", url + ": " + response.StatusCode);
 
             if (response.IsSuccessStatusCode)
             {
@@ -179,7 +179,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
             if (video != null)
             {
                 progress = new Progress((long)video.Player.Position);
-                _logger.LogInformation("{Message}", $"Retrieved progress {video.Player.Position}");
+                _logger.LogDebug("{Message}", $"Retrieved progress {video.Player.Position}");
             }
 
             return progress;
