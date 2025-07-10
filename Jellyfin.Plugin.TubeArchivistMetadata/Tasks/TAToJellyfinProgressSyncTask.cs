@@ -57,7 +57,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
         public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
         {
             progress.Report(0);
-            if (Plugin.Instance!.Configuration.TAJFSync)
+            if (Plugin.Instance!.Configuration.TAJFProgressSync)
             {
                 var start = DateTime.Now;
                 _logger.LogInformation("Starting TubeArchivist->Jellyfin playback progresses synchronization.");
@@ -219,7 +219,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                 new TaskTriggerInfo
                 {
                     Type = TaskTriggerInfoType.IntervalTrigger,
-                    IntervalTicks = TimeSpan.FromSeconds(Plugin.Instance!.Configuration.TAJFTaskInterval).Ticks
+                    IntervalTicks = TimeSpan.FromSeconds(Plugin.Instance!.Configuration.TAJFProgressTaskInterval).Ticks
                 },
             ];
         }

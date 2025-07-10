@@ -36,11 +36,17 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Configuration
             _tubeArchivistUrl = string.Empty;
             _tubeArchivistApiKey = string.Empty;
             MaxDescriptionLength = 500;
-            JFTASync = false;
+            JFTAProgressSync = false;
             JFUsernameFrom = string.Empty;
-            TAJFSync = false;
+            TAJFProgressSync = false;
+            JFTAPlaylistsSync = false;
+            JFTAPlaylistsDelete = false;
+            TAJFPlaylistsSync = false;
+            TAJFPlaylistsDelete = false;
             _jfUsernamesTo = new HashSet<string>();
-            TAJFTaskInterval = 1;
+            TAJFProgressTaskInterval = 60;
+            JFTAPlaylistsSyncTaskInterval = 60;
+            TAJFPlaylistsSyncTaskInterval = 60;
         }
 
         /// <summary>
@@ -100,12 +106,32 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Configuration
         /// <summary>
         /// Gets or sets a value indicating whether to enable TA->JF playback progress synchronization.
         /// </summary>
-        public bool TAJFSync { get; set; }
+        public bool TAJFProgressSync { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether to enable JF->TA playback progress synchronization.
         /// </summary>
-        public bool JFTASync { get; set; }
+        public bool JFTAProgressSync { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to enable JF->TA playlists synchronization.
+        /// </summary>
+        public bool JFTAPlaylistsSync { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to delete playlists from TA when not found on JF.
+        /// </summary>
+        public bool JFTAPlaylistsDelete { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to enable TA->JF playlists synchronization.
+        /// </summary>
+        public bool TAJFPlaylistsSync { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to delete playlists from JF when not found on TA.
+        /// </summary>
+        public bool TAJFPlaylistsDelete { get; set; }
 
         /// <summary>
         /// Gets or sets the playback progress owner Jellyfin username to synchronize data to TubeArchivist.
@@ -146,7 +172,19 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Configuration
         /// Gets or sets the interval in seconds at which the TubeArchivist to Jellyfin playback progress synchronization task should run.
         /// It requires Jellyfin server restart to take effect.
         /// </summary>
-        public int TAJFTaskInterval { get; set; }
+        public int TAJFProgressTaskInterval { get; set; }
+
+        /// <summary>
+        /// Gets or sets the interval in seconds at which the Jellyfin to TubeArchivist playlists synchronization task should run.
+        /// It requires Jellyfin server restart to take effect.
+        /// </summary>
+        public int JFTAPlaylistsSyncTaskInterval { get; set; }
+
+        /// <summary>
+        /// Gets or sets the interval in seconds at which the TubeArchivist to Jellyfin playlists synchronization task should run.
+        /// It requires Jellyfin server restart to take effect.
+        /// </summary>
+        public int TAJFPlaylistsSyncTaskInterval { get; set; }
 
         /// <summary>
         /// Gets the playback progress owners Jellyfin usernames to synchronize data from TubeArchivist.

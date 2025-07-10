@@ -58,7 +58,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
         public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
         {
             progress.Report(0);
-            if (Plugin.Instance!.Configuration.JFTASync)
+            if (Plugin.Instance!.Configuration.JFTAProgressSync)
             {
                 var start = DateTime.Now;
                 _logger.LogInformation("Starting Jellyfin->TubeArchivist playback progresses synchronization.");

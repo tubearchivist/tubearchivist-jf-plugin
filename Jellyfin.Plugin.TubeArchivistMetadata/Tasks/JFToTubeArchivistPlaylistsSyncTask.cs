@@ -108,7 +108,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
         public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
         {
             progress.Report(0);
-            if (Plugin.Instance!.Configuration.JFTASync)
+            if (Plugin.Instance!.Configuration.JFTAPlaylistsSync)
             {
                 var start = DateTime.Now;
                 _logger.LogInformation("Starting Jellyfin->TubeArchivist playlists synchronization.");
@@ -130,8 +130,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                 var processedVideosCount = 0;
 
                 _logger.LogInformation("Found a total of {PlaylistsCount} playlists to analyze with a total of {VideosCount} videos", userPlaylists.Count, totalVideosCount);
-                // TODO: Implement playlist deletion based on a configuration switch
-                if (taPlaylists != null && true)
+                if (taPlaylists != null && Plugin.Instance!.Configuration.JFTAPlaylistsDelete)
                 {
                     var taPlaylistsToDelete = taPlaylists.Where(tp => !userPlaylists.Select(up => Utils.GetTAPlaylistIdFromName(up.Name)).Contains(tp.Id));
                     foreach (var taPlaylistToDelete in taPlaylistsToDelete)
@@ -380,7 +379,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                 new TaskTriggerInfo
                 {
                     Type = TaskTriggerInfoType.IntervalTrigger,
-                    IntervalTicks = TimeSpan.FromSeconds(Plugin.Instance!.Configuration.TAJFTaskInterval).Ticks
+                    IntervalTicks = TimeSpan.FromSeconds(Plugin.Instance!.Configuration.TAJFProgressTaskInterval).Ticks
                 },
             ];
         }
