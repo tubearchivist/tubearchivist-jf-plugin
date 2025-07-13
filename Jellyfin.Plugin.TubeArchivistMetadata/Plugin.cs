@@ -173,11 +173,12 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
 
         private async void OnPlaybackProgress(object? sender, PlaybackProgressEventArgs eventArgs)
         {
-            if (eventArgs == null || eventArgs.ItemId == Guid.Empty)
+            if (eventArgs == null || eventArgs.Item.Id == Guid.Empty)
             {
                 Logger.LogDebug("Skipping progress synchronization: PlaybackProgress event triggered with null or empty Guid.");
                 return;
             }
+
             if (Instance!.Configuration.JFTASync && eventArgs.Users.Any(u => Instance!.Configuration.JFUsernameFrom.Equals(u.Username, StringComparison.Ordinal)))
             {
                 BaseItem? season = LibraryManager.GetItemById(eventArgs.Item.ParentId);
