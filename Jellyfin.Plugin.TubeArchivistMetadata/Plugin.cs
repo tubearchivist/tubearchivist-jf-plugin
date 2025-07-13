@@ -199,6 +199,12 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
 
         private async void OnWatchedStatusChange(object? sender, UserDataSaveEventArgs eventArgs)
         {
+            if (eventArgs == null || eventArgs.Item.Id == Guid.Empty)
+            {
+                Logger.LogDebug("Skipping watched status synchronization: WatchedStatusChange event triggered with null or empty Guid.");
+                return;
+            }
+
             var user = _userManager.GetUserById(eventArgs.UserId);
             if (Configuration.JFTASync && user != null && Configuration.GetJFUsernamesToArray().Contains(user!.Username))
             {
