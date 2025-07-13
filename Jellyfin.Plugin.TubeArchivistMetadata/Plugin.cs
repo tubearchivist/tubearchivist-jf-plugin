@@ -175,7 +175,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
         {
             if (eventArgs == null || eventArgs.ItemId == Guid.Empty)
             {
-                Logger.LogWarning("PlaybackProgress called with null or empty Guid.");
+                Logger.LogDebug("Skipping progress synchronization: PlaybackProgress event triggered with null or empty Guid.");
                 return;
             }
             if (Instance!.Configuration.JFTASync && eventArgs.Users.Any(u => Instance!.Configuration.JFUsernameFrom.Equals(u.Username, StringComparison.Ordinal)))
