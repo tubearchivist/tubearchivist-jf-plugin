@@ -173,7 +173,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
 
         private async void OnPlaybackProgress(object? sender, PlaybackProgressEventArgs eventArgs)
         {
-            if (eventArgs == null || eventArgs.ItemId == Guid.Empty)
+            if (eventArgs == null || eventArgs.Item.Id == Guid.Empty)
             {
                 Logger.LogDebug("Skipping progress synchronization: PlaybackProgress event triggered with null or empty Guid.");
                 return;
