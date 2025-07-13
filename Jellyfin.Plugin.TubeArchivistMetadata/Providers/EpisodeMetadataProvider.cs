@@ -53,8 +53,8 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
             var taApi = TubeArchivistApi.GetInstance();
             var videoTAId = Utils.GetVideoNameFromPath(info.Path);
             var video = await taApi.GetVideo(videoTAId).ConfigureAwait(true);
-            _logger.LogInformation("{Message}", string.Format(CultureInfo.CurrentCulture, "Getting metadata for video: {0} ({1})", video?.Title, videoTAId));
-            _logger.LogInformation("{Message}", "Received metadata: \n" + JsonConvert.SerializeObject(video));
+            _logger.LogDebug("{Message}", string.Format(CultureInfo.CurrentCulture, "Getting metadata for video: {0} ({1})", video?.Title, videoTAId));
+            _logger.LogDebug("{Message}", "Received metadata: \n" + JsonConvert.SerializeObject(video));
 
             if (video != null)
             {

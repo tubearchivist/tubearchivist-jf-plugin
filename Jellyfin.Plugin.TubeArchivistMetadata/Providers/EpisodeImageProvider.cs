@@ -62,8 +62,8 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
             var taApi = TubeArchivistApi.GetInstance();
             var videoTAId = Utils.GetVideoNameFromPath(item.Path);
             var video = await taApi.GetVideo(videoTAId).ConfigureAwait(true);
-            _logger.LogInformation("{Message}", string.Format(CultureInfo.CurrentCulture, "Getting images for video: {0} ({1})", video?.Title, videoTAId));
-            _logger.LogInformation("{Message}", "Thumb URI: " + video?.VidThumbUrl);
+            _logger.LogDebug("{Message}", string.Format(CultureInfo.CurrentCulture, "Getting images for video: {0} ({1})", video?.Title, videoTAId));
+            _logger.LogDebug("{Message}", "Thumb URI: " + video?.VidThumbUrl);
 
             if (video != null)
             {

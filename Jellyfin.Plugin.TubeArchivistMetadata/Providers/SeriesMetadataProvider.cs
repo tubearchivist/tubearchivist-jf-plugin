@@ -52,8 +52,8 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
             var taApi = TubeArchivistApi.GetInstance();
             var channelTAId = Utils.GetChannelNameFromPath(info.Path);
             var channel = await taApi.GetChannel(channelTAId).ConfigureAwait(true);
-            _logger.LogInformation("{Message}", string.Format(CultureInfo.CurrentCulture, "Getting metadata for channel: {0} ({1})", channel?.Name, channelTAId));
-            _logger.LogInformation("{Message}", "Received metadata: \n" + JsonConvert.SerializeObject(channel));
+            _logger.LogDebug("{Message}", string.Format(CultureInfo.CurrentCulture, "Getting metadata for channel: {0} ({1})", channel?.Name, channelTAId));
+            _logger.LogDebug("{Message}", "Received metadata: \n" + JsonConvert.SerializeObject(channel));
 
             if (channel != null)
             {

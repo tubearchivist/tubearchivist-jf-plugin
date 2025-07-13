@@ -90,7 +90,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                         {
                             IncludeItemTypes = new[] { BaseItemKind.Series }
                         });
-                        _logger.LogInformation("Analyzing collection {Id} with name {Name}", collectionItem.Id, collectionItem.Name);
+                        _logger.LogDebug("Analyzing collection {Id} with name {Name}", collectionItem.Id, collectionItem.Name);
                         _logger.LogDebug("Found {Message} channels", channels.Count);
 
                         foreach (Series channel in channels)
@@ -115,7 +115,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                     }
                 }
 
-                _logger.LogInformation("Found a total of {VideosCount} videos", videosCount);
+                _logger.LogDebug("Found a total of {VideosCount} videos", videosCount);
 
                 var processedVideosCount = 0;
                 foreach (var jfUsername in Plugin.Instance!.Configuration.GetJFUsernamesToArray())
@@ -123,7 +123,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                     var user = _userManager.GetUserByName(jfUsername);
                     if (user == null)
                     {
-                        _logger.LogInformation("{Message}", $"Jellyfin user with username {jfUsername} not found");
+                        _logger.LogDebug("{Message}", $"Jellyfin user with username {jfUsername} not found");
                         continue;
                     }
 
@@ -185,8 +185,8 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                                         }
 
                                         _userDataManager.SaveUserData(user, video, userUpdateData, UserDataSaveReason.UpdateUserData);
-                                        _logger.LogInformation("{Message}", $"Playback progress for video {video.Name} set to {userItemData.PlaybackPositionTicks / TimeSpan.TicksPerSecond} seconds for user {jfUsername}.");
-                                        _logger.LogInformation("{Message}", $"Watched status for video {video.Name} set to {userItemData.Played} seconds for user {jfUsername}.");
+                                        _logger.LogDebug("{Message}", $"Playback progress for video {video.Name} set to {userItemData.PlaybackPositionTicks / TimeSpan.TicksPerSecond} seconds for user {jfUsername}.");
+                                        _logger.LogDebug("{Message}", $"Watched status for video {video.Name} set to {userItemData.Played} seconds for user {jfUsername}.");
 
                                         processedVideosCount++;
                                         progress.Report(processedVideosCount * 100 / videosCount);
