@@ -27,6 +27,11 @@ The plugin interacts with TubeArchivist APIs to fetch videos and channels metada
 - Add images for videos (episodes), ie. thumb images
 - Add images for channels (shows), ie. thumb, tvart and banner images
 - Organize videos (episodes) by year (seasons)
+- Bidirectional playback progress synchronization
+- Bidirectional playlists synchronization
+
+> [!WARNING]
+> Enabling synchronization in both directions you can run in race conditions and unexpected results.
 
 ## Installation
 ### From official repository (recommended)
