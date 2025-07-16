@@ -126,6 +126,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
                 Overview = Utils.FormatDescription(Description),
                 SeasonName = Published.Year.ToString(CultureInfo.CurrentCulture),
                 ParentIndexNumber = Published.Year,
+                IndexNumber = (Published.Year * 10000) + (Published.Month * 100) + Published.Day,
                 SeriesName = Channel.Name,
                 ProductionYear = Published.Year,
                 PremiereDate = Published,
