@@ -90,6 +90,16 @@ _NOTE: If you are using Docker containers, it is important to mount the TubeArch
 <p>In the first text field you can specify one or more Jellyfin usernames to update data for.<br>
 In the second field you can specify the interval in seconds the task should run at, so that you can choose according to your system requirements. The lower is the interval the higher will be the resources consuption on your system.</p>
 
+## Episode numbering
+
+<p>There are different ways to number the episodes as they are configured in Jellyfin.<br>
+This changes the number after E in S--E-- (for example S2024E100 for episode number 100 of season 2024).</p>
+
+![Episode numbering scheme options](https://github.com/user-attachments/assets/6d36bc2c-ca9d-4a5c-8021-e15d399316fc)
+
+The options correlate with:
+- Default - leave the numbering to what Jellyfin does by default (this is what the plugin has always done)
+- YYYYMMDD - numbers the episode by the year, month, day (e.g. 20250804 for a video published on the 4th of August 2025)
 
 ## Build
 
