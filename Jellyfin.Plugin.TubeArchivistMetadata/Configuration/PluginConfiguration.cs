@@ -149,6 +149,11 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Configuration
         public int TAJFTaskInterval { get; set; }
 
         /// <summary>
+        /// Gets or sets the preferred numbering scheme for episodes (index number) in Jellyfin.
+        /// </summary>
+        public NumberingScheme EpisodeNumberingScheme { get; set; } = NumberingScheme.Default;
+
+        /// <summary>
         /// Gets the playback progress owners Jellyfin usernames to synchronize data from TubeArchivist.
         /// </summary>
         /// <returns>An array of usernames.</returns>
