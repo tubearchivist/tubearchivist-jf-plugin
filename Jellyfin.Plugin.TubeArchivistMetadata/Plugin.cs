@@ -161,6 +161,12 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
 
             if (Instance!.Configuration.JFTASync && eventArgs.Users.Any(u => Instance!.Configuration.JFUsernameFrom.Equals(u.Username, StringComparison.Ordinal)))
             {
+                // Only process Episodes (YouTube videos), not Movies or other media types
+                if (eventArgs.Item is not Episode)
+                {
+                    return;
+                }
+
                 BaseItem? season = LibraryManager.GetItemById(eventArgs.Item.ParentId);
                 BaseItem? channel = LibraryManager.GetItemById(season!.ParentId);
                 BaseItem? collection = LibraryManager.GetItemById(channel!.ParentId);
