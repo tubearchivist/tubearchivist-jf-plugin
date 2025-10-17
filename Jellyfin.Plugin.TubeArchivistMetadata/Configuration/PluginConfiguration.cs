@@ -16,6 +16,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Configuration
         private ILogger _logger;
         private string _tubeArchivistUrl;
         private string _tubeArchivistApiKey;
+        private string _collectionTitle;
         private HashSet<string> _jfUsernamesTo;
 
         /// <summary>
@@ -32,7 +33,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Configuration
                 _logger = Plugin.Instance.Logger;
             }
 
-            CollectionTitle = string.Empty;
+            _collectionTitle = string.Empty;
             _tubeArchivistUrl = string.Empty;
             _tubeArchivistApiKey = string.Empty;
             MaxDescriptionLength = 500;
@@ -46,7 +47,34 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Configuration
         /// <summary>
         /// Gets or sets TubeArchivist collection display name.
         /// </summary>
-        public string CollectionTitle { get; set; }
+        public string CollectionTitle
+        {
+            get
+            {
+                return _collectionTitle;
+            }
+
+            set
+            {
+                // Only refresh if value actually changed AND plugin is initialized
+                if (_collectionTitle != value && !string.IsNullOrEmpty(_collectionTitle))
+                {
+                    _collectionTitle = value;
+                    _logger?.LogInformation("Collection title changed to: {CollectionTitle}", value);
+
+                    // Only refresh if plugin is fully initialized
+                    if (Plugin.Instance?.LibraryManager != null)
+                    {
+                        Plugin.Instance?.RefreshTubeArchivistCollectionId();
+                    }
+                }
+                else
+                {
+                    // Initial set, no refresh needed
+                    _collectionTitle = value;
+                }
+            }
+        }
 
         /// <summary>
         /// Gets or sets TubeArchivist URL.
