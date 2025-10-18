@@ -56,22 +56,14 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Configuration
 
             set
             {
-                // Only refresh if value actually changed AND plugin is initialized
-                if (_collectionTitle != value && !string.IsNullOrEmpty(_collectionTitle))
-                {
-                    _collectionTitle = value;
-                    _logger?.LogInformation("Collection title changed to: {CollectionTitle}", value);
+                _collectionTitle = value;
 
-                    // Only refresh if plugin is fully initialized
-                    if (Plugin.Instance?.LibraryManager != null)
-                    {
-                        Plugin.Instance?.RefreshTubeArchivistCollectionId();
-                    }
-                }
-                else
+                // Refresh cache if plugin is initialized and value is not empty
+                if (!string.IsNullOrEmpty(value) && Plugin.Instance?.LibraryManager != null)
                 {
-                    // Initial set, no refresh needed
-                    _collectionTitle = value;
+                    _logger?.LogInformation("Collection title set to: {CollectionTitle}, refreshing cache", value);
+                    // Pass the new value directly instead of reading from Configuration
+                    Plugin.Instance?.RefreshTubeArchivistCollectionId(value);
                 }
             }
         }

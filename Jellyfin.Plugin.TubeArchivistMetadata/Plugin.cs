@@ -175,15 +175,13 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
                 TaskScheduler.Default);
         }
 
-        /// <summary>
-        /// Caches the TubeArchivist collection ID for efficient lookups.
-        /// This is called once during initialization to avoid repeated searches.
-        /// </summary>
-        private void CacheTubeArchivistCollectionId()
+        private void CacheTubeArchivistCollectionId(string? collectionTitle = null)
         {
             try
             {
-                if (string.IsNullOrEmpty(Configuration.CollectionTitle))
+                string titleToSearch = collectionTitle ?? Configuration.CollectionTitle;
+
+                if (string.IsNullOrEmpty(titleToSearch))
                 {
                     Logger.LogWarning("TubeArchivist collection title not configured");
                     _tubeArchivistCollectionId = null;
@@ -198,7 +196,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
                 });
 
                 var tubeArchivistCollection = collections.FirstOrDefault(c =>
-                    c.Name.Equals(Configuration.CollectionTitle, StringComparison.OrdinalIgnoreCase));
+                    c.Name.Equals(titleToSearch, StringComparison.OrdinalIgnoreCase));
 
                 if (tubeArchivistCollection != null)
                 {
@@ -207,7 +205,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
                 }
                 else
                 {
-                    Logger.LogWarning("Could not find TubeArchivist collection with name: {CollectionName}", Configuration.CollectionTitle);
+                    Logger.LogWarning("Could not find TubeArchivist collection with name: {CollectionName}", titleToSearch);
                     _tubeArchivistCollectionId = null;
                 }
             }
@@ -222,10 +220,11 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
         /// Refreshes the cached TubeArchivist collection ID.
         /// Called when the collection title changes in configuration.
         /// </summary>
-        public void RefreshTubeArchivistCollectionId()
+        /// <param name="collectionTitle">Optional collection title to use. If null, reads from Configuration.</param>
+        public void RefreshTubeArchivistCollectionId(string? collectionTitle = null)
         {
             Logger.LogInformation("Refreshing TubeArchivist collection cache due to configuration change");
-            CacheTubeArchivistCollectionId();
+            CacheTubeArchivistCollectionId(collectionTitle ?? Configuration.CollectionTitle);
         }
 
         /// <summary>
