@@ -27,9 +27,9 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
     /// </summary>
     public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages, IDisposable
     {
-        private bool _disposed = false;
         private readonly IUserManager _userManager;
         private readonly IUserDataManager _userDataManager;
+        private bool _disposed = false;
         private Guid? _tubeArchivistCollectionId;
 
         /// <summary>
@@ -442,6 +442,11 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
                 Logger.LogCritical("An exception occurred while calling POST /watched for item {ItemName} ({VideoYTId}) with watched status {IsPlayed}: {ExceptionMessage}", eventArgs.Item.Name, itemYTId, isPlayed, ex.Message);
             }
         }
+
+        /// <summary>
+        /// Releases the unmanaged resources and disposes of the managed resources used.
+        /// </summary>
+        /// <param name="disposing">Whether to dispose managed resources.</param>
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposed)
@@ -449,22 +454,20 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
                 if (disposing)
                 {
                     // Unsubscribe from events to prevent memory leaks
-                    if (SessionManager != null)
-                    {
-                        SessionManager.PlaybackProgress -= OnPlaybackProgress;
-                    }
-                    if (_userDataManager != null)
-                    {
-                        _userDataManager.UserDataSaved -= OnWatchedStatusChange;
-                    }
+                    SessionManager.PlaybackProgress -= OnPlaybackProgress;
+                    _userDataManager.UserDataSaved -= OnWatchedStatusChange;
 
                     // Dispose managed resources
                     HttpClient?.Dispose();
                 }
+
                 _disposed = true;
             }
         }
 
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
         public void Dispose()
         {
             Dispose(true);
