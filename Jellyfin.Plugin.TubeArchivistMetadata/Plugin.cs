@@ -189,12 +189,16 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
                     return;
                 }
 
+                Logger.LogDebug("Searching for collection with title: {TitleToSearch}", titleToSearch);
+
                 // Find the collection by name
                 var collections = LibraryManager.GetItemList(new InternalItemsQuery
                 {
-                    IncludeItemTypes = new[] { Jellyfin.Data.Enums.BaseItemKind.CollectionFolder, Jellyfin.Data.Enums.BaseItemKind.Folder },
+                    IncludeItemTypes = new[] { Jellyfin.Data.Enums.BaseItemKind.Folder },  // CHANGED: Only Folder, not CollectionFolder
                     Recursive = false
                 });
+
+                Logger.LogDebug("Found {Count} total folders", collections.Count);
 
                 var tubeArchivistCollection = collections.FirstOrDefault(c =>
                     c.Name.Equals(titleToSearch, StringComparison.OrdinalIgnoreCase));
@@ -202,7 +206,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
                 if (tubeArchivistCollection != null)
                 {
                     _tubeArchivistCollectionId = tubeArchivistCollection.Id;
-                    Logger.LogInformation("Found TubeArchivist collection with ID: {CollectionId}", _tubeArchivistCollectionId);
+                    Logger.LogDebug("Found TubeArchivist collection with ID: {CollectionId}", _tubeArchivistCollectionId);
                 }
                 else
                 {
@@ -224,7 +228,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
         /// <param name="collectionTitle">Optional collection title to use. If null, reads from Configuration.</param>
         public void RefreshTubeArchivistCollectionId(string? collectionTitle = null)
         {
-            Logger.LogInformation("Refreshing TubeArchivist collection cache due to configuration change");
+            Logger.LogDebug("Refreshing TubeArchivist collection cache due to configuration change");
             CacheTubeArchivistCollectionId(collectionTitle ?? Configuration.CollectionTitle);
         }
 
@@ -239,46 +243,67 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
             // Type check first (cheapest operation)
             if (item is not Episode)
             {
+                Logger.LogDebug("Type check failed - item is not an Episode, it's a {ItemType}", item.GetType().Name);
                 return false;
             }
+
+            Logger.LogDebug("Checking collection membership for Episode: {EpisodeId}, Name: {EpisodeName}", item.Id, item.Name);
+            Logger.LogDebug("Cached TubeArchivist Collection ID: {CollectionId}", _tubeArchivistCollectionId?.ToString() ?? "null");
 
             // If we couldn't cache the collection ID, fall back to name-based check
             if (_tubeArchivistCollectionId == null)
             {
-                // Fallback: traverse hierarchy to find collection
+                Logger.LogDebug("Collection ID not cached, using fallback method");
                 return IsItemInTubeArchivistCollectionByHierarchy(item);
             }
 
             // Efficient check: Walk up the parent chain looking for our cached collection ID
-            // This is much faster than multiple GetItemById calls
             var currentItem = item;
-            for (int depth = 0; depth < 10; depth++) // Limit depth to prevent infinite loops
+            for (int depth = 0; depth < 10; depth++)
             {
+                Logger.LogDebug(
+                    "Depth {Depth}: Current item ID: {ItemId}, Name: {ItemName}, ParentId: {ParentId}",
+                    depth,
+                    currentItem.Id,
+                    currentItem.Name,
+                    currentItem.ParentId);
+
                 if (currentItem.Id == _tubeArchivistCollectionId)
                 {
+                    Logger.LogDebug("Found match at depth {Depth} - current item IS the collection", depth);
                     return true;
                 }
 
                 if (currentItem.ParentId == Guid.Empty)
                 {
+                    Logger.LogDebug("Reached root (empty ParentId) at depth {Depth}", depth);
                     break;
                 }
 
                 var parent = LibraryManager.GetItemById(currentItem.ParentId);
                 if (parent == null)
                 {
+                    Logger.LogDebug("Parent not found at depth {Depth}", depth);
                     break;
                 }
+
+                Logger.LogDebug(
+                    "Parent found: ID: {ParentId}, Name: {ParentName}, Type: {ParentType}",
+                    parent.Id,
+                    parent.Name,
+                    parent.GetType().Name);
 
                 // Check if this parent is our target collection
                 if (parent.Id == _tubeArchivistCollectionId)
                 {
+                    Logger.LogInformation("Found match! Parent matches TubeArchivist collection ID");
                     return true;
                 }
 
                 currentItem = parent;
             }
 
+            Logger.LogDebug("No match found after traversing parent chain");
             return false;
         }
 
@@ -314,42 +339,78 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
 
         private async void OnPlaybackProgress(object? sender, PlaybackProgressEventArgs eventArgs)
         {
+            try
+            {
+                await OnPlaybackProgressAsync(eventArgs).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Error in OnPlaybackProgress for item {ItemName}", eventArgs.Item?.Name ?? "unknown");
+            }
+        }
+
+        private async Task OnPlaybackProgressAsync(PlaybackProgressEventArgs eventArgs)
+        {
+            Logger.LogDebug("OnPlaybackProgress triggered for item: {ItemName}", eventArgs.Item?.Name ?? "unknown");
+
             // Early exit checks - ordered from cheapest to most expensive
             // 1. Configuration check (memory access)
             if (!Instance!.Configuration.JFTASync)
             {
+                Logger.LogDebug("JFTASync is disabled");
                 return;
             }
 
             // 2. User check (list iteration)
+            var userNames = string.Join(", ", eventArgs.Users.Select(u => u.Username));
+            Logger.LogDebug("Playback users: {Users}, Looking for: {TargetUser}", userNames, Instance!.Configuration.JFUsernameFrom);
+
             if (!eventArgs.Users.Any(u => Instance!.Configuration.JFUsernameFrom.Equals(u.Username, StringComparison.Ordinal)))
             {
+                Logger.LogDebug("User check failed - no matching user");
                 return;
             }
 
             // 3. Playback position check (null check)
             if (eventArgs.PlaybackPositionTicks == null)
             {
+                Logger.LogDebug("Playback position is null");
                 return;
             }
 
-            // 4. Type and collection check (type check + cached ID lookup)
-            // This is now much more efficient - single type check + ID comparison vs 3 database calls
-            if (!IsItemInTubeArchivistCollection(eventArgs.Item))
+            // 4. Item null check (add this!)
+            if (eventArgs.Item == null)
             {
+                Logger.LogDebug("Item is null");
                 return;
             }
+
+            // 5. Type and collection check (type check + cached ID lookup)
+            if (!IsItemInTubeArchivistCollection(eventArgs.Item))
+            {
+                Logger.LogDebug("Item is not in TubeArchivist collection");
+                return;
+            }
+
+            Logger.LogDebug("Syncing progress for {ItemName}", eventArgs.Item.Name);
 
             // At this point, we know it's a valid TubeArchivist Episode - safe to proceed
             try
             {
                 long progress = (long)eventArgs.PlaybackPositionTicks / TimeSpan.TicksPerSecond;
                 var videoId = Utils.GetVideoNameFromPath(eventArgs.Item.Path);
-                var statusCode = await TubeArchivistApi.GetInstance().SetProgress(videoId, progress).ConfigureAwait(true);
+
+                Logger.LogDebug("Sending progress update: videoId={VideoId}, progress={Progress}s", videoId, progress);
+
+                var statusCode = await TubeArchivistApi.GetInstance().SetProgress(videoId, progress).ConfigureAwait(false);
 
                 if (statusCode != System.Net.HttpStatusCode.OK)
                 {
                     Logger.LogCritical("{Message}", $"POST /video/{videoId}/progress returned {statusCode} for video {eventArgs.Item.Name} with progress {progress} seconds");
+                }
+                else
+                {
+                    Logger.LogInformation("Progress synced successfully");
                 }
             }
             catch (Exception ex)
@@ -360,6 +421,18 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
 
         private async void OnWatchedStatusChange(object? sender, UserDataSaveEventArgs eventArgs)
         {
+            try
+            {
+                await OnWatchedStatusChangeAsync(eventArgs).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Error in OnWatchedStatusChange for item {ItemName}", eventArgs.Item?.Name ?? "unknown");
+            }
+        }
+
+        private async Task OnWatchedStatusChangeAsync(UserDataSaveEventArgs eventArgs)
+        {
             // Early exit checks
             var user = _userManager.GetUserById(eventArgs.UserId);
             if (!Configuration.JFTASync || user == null || !Configuration.GetJFUsernamesToArray().Contains(user.Username))
@@ -368,7 +441,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
             }
 
             var isPlayed = eventArgs.Item.IsPlayed(user);
-            Logger.LogDebug("User {UserId} changed watched status to {Status} for the item {ItemName}", eventArgs.UserId, isPlayed, eventArgs.Item.Name);
+            Logger.LogInformation("User {UserId} changed watched status to {Status} for the item {ItemName}", eventArgs.UserId, isPlayed, eventArgs.Item.Name);
 
             string itemYTId;
             try
@@ -419,7 +492,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
 
             try
             {
-                var statusCode = await TubeArchivistApi.GetInstance().SetWatchedStatus(itemYTId, isPlayed).ConfigureAwait(true);
+                var statusCode = await TubeArchivistApi.GetInstance().SetWatchedStatus(itemYTId, isPlayed).ConfigureAwait(false);
                 if (statusCode != System.Net.HttpStatusCode.OK)
                 {
                     Logger.LogCritical("POST /watched returned {StatusCode} for item {ItemName} ({VideoYTId}) with watched status {IsPlayed}", statusCode, eventArgs.Item.Name, itemYTId, isPlayed);
@@ -430,7 +503,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
                 {
                     var progress = _userDataManager.GetUserData(user, eventArgs.Item).PlaybackPositionTicks / TimeSpan.TicksPerSecond;
                     var videoId = Utils.GetVideoNameFromPath(eventArgs.Item.Path);
-                    statusCode = await TubeArchivistApi.GetInstance().SetProgress(videoId, progress).ConfigureAwait(true);
+                    statusCode = await TubeArchivistApi.GetInstance().SetProgress(videoId, progress).ConfigureAwait(false);
                     if (statusCode != System.Net.HttpStatusCode.OK)
                     {
                         Logger.LogCritical("{Message}", $"POST /video/{videoId}/progress returned {statusCode} for video {eventArgs.Item.Name} with progress {progress} seconds");
