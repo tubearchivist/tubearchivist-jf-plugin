@@ -145,7 +145,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
             if (!string.IsNullOrEmpty(apiKey))
             {
                 HttpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Token", apiKey);
-                Logger.LogInformation("{Message}", "Updated Authorization header with API key");
+                Logger.LogDebug("{Message}", "Updated Authorization header with API key");
             }
             else
             {
@@ -176,6 +176,13 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
                 TaskScheduler.Default);
         }
 
+        /// <summary>
+        /// Caches the TubeArchivist collection ID for efficient O(1) lookups.
+        /// Uses Folder type only (not CollectionFolder) to avoid matching ghost library entries
+        /// that remain in the database after deletion. This is a known Jellyfin quirk where
+        /// deleted libraries can leave CollectionFolder entries in the database.
+        /// </summary>
+        /// <param name="collectionTitle">Optional collection title to search for. If null, uses Configuration.CollectionTitle.</param>
         private void CacheTubeArchivistCollectionId(string? collectionTitle = null)
         {
             try
@@ -233,8 +240,14 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
         }
 
         /// <summary>
-        /// Validates if an item belongs to the TubeArchivist collection.
-        /// Uses cached collection ID for efficient lookups without traversing hierarchy.
+        /// Validates if an item belongs to the TubeArchivist collection using a cached collection ID.
+        /// This method implements an efficient validation strategy:
+        /// 1. Type check - reject non-Episode items immediately (O(1))
+        /// 2. Cached ID lookup - walk parent chain looking for cached collection ID (O(depth))
+        /// 3. Fallback to name-based hierarchy check if cache unavailable (O(depth))
+        /// 
+        /// The caching strategy converts what would be repeated O(n) hierarchy traversals
+        /// into O(1) cached ID comparisons, significantly improving performance during playback.
         /// </summary>
         /// <param name="item">The item to validate.</param>
         /// <returns>True if the item is a valid Episode in the TubeArchivist collection; otherwise, false.</returns>
@@ -296,7 +309,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
                 // Check if this parent is our target collection
                 if (parent.Id == _tubeArchivistCollectionId)
                 {
-                    Logger.LogInformation("Found match! Parent matches TubeArchivist collection ID");
+                    Logger.LogDebug("Found match! Parent matches TubeArchivist collection ID");
                     return true;
                 }
 
@@ -309,7 +322,11 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
 
         /// <summary>
         /// Fallback method for validating collection membership when collection ID is not cached.
+        /// Traverses the expected hierarchy: Episode -> Season -> Series -> Collection.
+        /// This is slower than the cached ID method but provides a safety net when caching fails.
         /// </summary>
+        /// <param name="item">The item to validate.</param>
+        /// <returns>True if the item's collection matches the configured TubeArchivist collection name; otherwise, false.</returns>
         private bool IsItemInTubeArchivistCollectionByHierarchy(BaseItem item)
         {
             // Early exit if parent ID is empty or null
