@@ -56,14 +56,17 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Configuration
 
             set
             {
-                _collectionTitle = value;
-
-                // Refresh cache if plugin is initialized and value is not empty
-                if (!string.IsNullOrEmpty(value) && Plugin.Instance?.LibraryManager != null)
+                // Only refresh if the value actually changed
+                if (_collectionTitle != value)
                 {
-                    _logger?.LogInformation("Collection title set to: {CollectionTitle}, refreshing cache", value);
-                    // Pass the new value directly instead of reading from Configuration
-                    Plugin.Instance?.RefreshTubeArchivistCollectionId(value);
+                    _collectionTitle = value;
+
+                    // Refresh cache if plugin is initialized and value is not empty
+                    if (!string.IsNullOrEmpty(value) && Plugin.Instance?.LibraryManager != null)
+                    {
+                        _logger?.LogInformation("Collection title changed to: {CollectionTitle}", value);
+                        Plugin.Instance?.RefreshTubeArchivistCollectionId(value);
+                    }
                 }
             }
         }
@@ -80,17 +83,23 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Configuration
 
             set
             {
+                string sanitizedUrl;
                 if (value.StartsWith("http://", StringComparison.CurrentCulture) || value.StartsWith("https://", StringComparison.CurrentCulture))
                 {
-                    _tubeArchivistUrl = Utils.SanitizeUrl(value);
+                    sanitizedUrl = Utils.SanitizeUrl(value);
                 }
                 else
                 {
                     _logger.LogInformation("{Message}", "Given TubeArchivist URL contains no schema. Adding http://...");
-                    _tubeArchivistUrl = Utils.SanitizeUrl("http://" + value);
+                    sanitizedUrl = Utils.SanitizeUrl("http://" + value);
                 }
 
-                Plugin.Instance?.LogTAApiConnectionStatus();
+                // Only update if changed
+                if (_tubeArchivistUrl != sanitizedUrl)
+                {
+                    _tubeArchivistUrl = sanitizedUrl;
+                    Plugin.Instance?.LogTAApiConnectionStatus();
+                }
             }
         }
 
@@ -106,9 +115,13 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Configuration
 
             set
             {
-                _tubeArchivistApiKey = value;
-                Plugin.Instance?.LogTAApiConnectionStatus();
-                Plugin.Instance?.UpdateAuthorizationHeader(value);
+                // Only update if changed
+                if (_tubeArchivistApiKey != value)
+                {
+                    _tubeArchivistApiKey = value;
+                    Plugin.Instance?.LogTAApiConnectionStatus();
+                    Plugin.Instance?.UpdateAuthorizationHeader(value);
+                }
             }
         }
 
