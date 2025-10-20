@@ -38,7 +38,6 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
         /// <param name="logger">Instance of the <see cref="ILogger"/> interface.</param>
         /// <param name="sessionManager">Instance of the <see cref="ISessionManager"/> interface.</param>
         /// <param name="libraryManager">Instance of the <see cref="ILibraryManager"/> interface.</param>
-        /// <param name="taskManager">Instance of the <see cref="ITaskManager"/> interface.</param>
         /// <param name="userManager">Instance of the <see cref="IUserManager"/> interface.</param>
         /// <param name="userDataManager">Instance of the <see cref="IUserDataManager"/> interface.</param>
         public Plugin(
@@ -47,7 +46,6 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
             ILogger<Plugin> logger,
             ISessionManager sessionManager,
             ILibraryManager libraryManager,
-            ITaskManager taskManager,
             IUserManager userManager,
             IUserDataManager userDataManager)
             : base(applicationPaths, xmlSerializer)
@@ -66,24 +64,6 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
             _userManager = userManager;
             _userDataManager = userDataManager;
             userDataManager.UserDataSaved += OnWatchedStatusChange;
-
-            var taToJellyfinProgressSyncTask = new TAToJellyfinProgressSyncTask(logger, libraryManager, userManager, userDataManager);
-            var jfToTubearchivistProgressSyncTask = new JFToTubearchivistProgressSyncTask(logger, libraryManager, userManager, userDataManager);
-            var isTAJFTaskPresent = taskManager.ScheduledTasks.Any(t => t.Name.Equals(taToJellyfinProgressSyncTask.Name, StringComparison.Ordinal));
-            if (Instance!.Configuration.TAJFSync && !isTAJFTaskPresent)
-            {
-                logger.LogInformation("Queueing task {TaskName}.", taToJellyfinProgressSyncTask.Name);
-                taskManager.AddTasks([taToJellyfinProgressSyncTask]);
-                taskManager.Execute<TAToJellyfinProgressSyncTask>();
-            }
-
-            var isJFTATaskPresent = taskManager.ScheduledTasks.Any(t => t.Name.Equals(jfToTubearchivistProgressSyncTask.Name, StringComparison.Ordinal));
-            if (Instance!.Configuration.JFTASync && !isJFTATaskPresent)
-            {
-                logger.LogInformation("Queueing task {TaskName}.", jfToTubearchivistProgressSyncTask.Name);
-                taskManager.AddTasks([jfToTubearchivistProgressSyncTask]);
-                taskManager.Execute<JFToTubearchivistProgressSyncTask>();
-            }
 
             logger.LogInformation("{Message}", "Collection display name: " + Instance?.Configuration.CollectionTitle);
             logger.LogInformation("{Message}", "TubeArchivist API URL: " + Instance?.Configuration.TubeArchivistUrl);
@@ -173,6 +153,12 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
 
         private async void OnPlaybackProgress(object? sender, PlaybackProgressEventArgs eventArgs)
         {
+            if (eventArgs == null || eventArgs.Item.Id == Guid.Empty)
+            {
+                Logger.LogDebug("Skipping progress synchronization: PlaybackProgress event triggered with null or empty Guid.");
+                return;
+            }
+
             if (Instance!.Configuration.JFTASync && eventArgs.Users.Any(u => Instance!.Configuration.JFUsernameFrom.Equals(u.Username, StringComparison.Ordinal)))
             {
                 BaseItem? season = LibraryManager.GetItemById(eventArgs.Item.ParentId);
@@ -193,6 +179,12 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
 
         private async void OnWatchedStatusChange(object? sender, UserDataSaveEventArgs eventArgs)
         {
+            if (eventArgs == null || eventArgs.Item.Id == Guid.Empty)
+            {
+                Logger.LogDebug("Skipping watched status synchronization: WatchedStatusChange event triggered with null or empty Guid.");
+                return;
+            }
+
             var user = _userManager.GetUserById(eventArgs.UserId);
             if (Configuration.JFTASync && user != null && Configuration.GetJFUsernamesToArray().Contains(user!.Username))
             {
