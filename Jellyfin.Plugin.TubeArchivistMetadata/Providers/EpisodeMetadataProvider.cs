@@ -59,12 +59,6 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
             if (video != null)
             {
                 var peopleInfo = new List<PersonInfo>();
-                PeopleHelper.AddPerson(peopleInfo, new PersonInfo
-                {
-                    Name = video.Channel.Name,
-                    ImageUrl = video.Channel.ThumbUrl,
-                    Type = Data.Enums.PersonKind.Actor,
-                });
                 result.HasMetadata = true;
                 result.Item = video.ToEpisode();
                 result.Provider = Name;

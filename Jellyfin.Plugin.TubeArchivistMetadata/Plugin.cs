@@ -188,7 +188,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
             var user = _userManager.GetUserById(eventArgs.UserId);
             if (Configuration.JFTASync && user != null && Configuration.GetJFUsernamesToArray().Contains(user!.Username))
             {
-                var isPlayed = eventArgs.Item.IsPlayed(user);
+                var isPlayed = eventArgs.Item.IsPlayed(user, null);
                 Logger.LogDebug("User {UserId} changed watched status to {Status} for the item {ItemName}", eventArgs.UserId, isPlayed, eventArgs.Item.Name);
                 string itemYTId;
                 try
@@ -222,12 +222,15 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
 
                     if (eventArgs.Item is Episode)
                     {
-                        var progress = _userDataManager.GetUserData(user, eventArgs.Item).PlaybackPositionTicks / TimeSpan.TicksPerSecond;
-                        var videoId = Utils.GetVideoNameFromPath(eventArgs.Item.Path);
-                        statusCode = await TubeArchivistApi.GetInstance().SetProgress(videoId, progress).ConfigureAwait(true);
-                        if (statusCode != System.Net.HttpStatusCode.OK)
+                        var progress = _userDataManager.GetUserData(user, eventArgs.Item)?.PlaybackPositionTicks / TimeSpan.TicksPerSecond;
+                        if (progress != null)
                         {
-                            Logger.LogCritical("{Message}", $"POST /video/{videoId}/progress returned {statusCode} for video {eventArgs.Item.Name} with progress {progress} seconds");
+                            var videoId = Utils.GetVideoNameFromPath(eventArgs.Item.Path);
+                            statusCode = await TubeArchivistApi.GetInstance().SetProgress(videoId, progress.Value).ConfigureAwait(true);
+                            if (statusCode != System.Net.HttpStatusCode.OK)
+                            {
+                                Logger.LogCritical("{Message}", $"POST /video/{videoId}/progress returned {statusCode} for video {eventArgs.Item.Name} with progress {progress} seconds");
+                            }
                         }
                     }
                 }

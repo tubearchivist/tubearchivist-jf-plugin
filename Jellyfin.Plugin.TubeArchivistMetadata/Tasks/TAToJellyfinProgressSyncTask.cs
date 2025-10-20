@@ -72,11 +72,13 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                         continue;
                     }
 
-                    var collectionItem = _libraryManager.GetItemList(new InternalItemsQuery
+                    var items = _libraryManager.GetItemList(new InternalItemsQuery
                     {
                         Name = Plugin.Instance?.Configuration.CollectionTitle,
                         IncludeItemTypes = new[] { BaseItemKind.CollectionFolder }
-                    }).FirstOrDefault();
+                    });
+
+                    var collectionItem = items.Count > 0 ? items[0] : null;
 
                     if (collectionItem == null)
                     {
@@ -127,11 +129,12 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                         continue;
                     }
 
-                    var collectionItem = _libraryManager.GetItemList(new InternalItemsQuery
+                    var items = _libraryManager.GetItemList(new InternalItemsQuery
                     {
                         Name = Plugin.Instance?.Configuration.CollectionTitle,
                         IncludeItemTypes = new[] { BaseItemKind.CollectionFolder }
-                    }).FirstOrDefault();
+                    });
+                    var collectionItem = items.Count > 0 ? items[0] : null;
 
                     if (collectionItem == null)
                     {
@@ -185,8 +188,8 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                                         }
 
                                         _userDataManager.SaveUserData(user, video, userUpdateData, UserDataSaveReason.UpdateUserData);
-                                        _logger.LogDebug("{Message}", $"Playback progress for video {video.Name} set to {userItemData.PlaybackPositionTicks / TimeSpan.TicksPerSecond} seconds for user {jfUsername}.");
-                                        _logger.LogDebug("{Message}", $"Watched status for video {video.Name} set to {userItemData.Played} seconds for user {jfUsername}.");
+                                        _logger.LogDebug("{Message}", $"Playback progress for video {video.Name} set to {userItemData?.PlaybackPositionTicks / TimeSpan.TicksPerSecond} seconds for user {jfUsername}.");
+                                        _logger.LogDebug("{Message}", $"Watched status for video {video.Name} set to {userItemData?.Played} seconds for user {jfUsername}.");
 
                                         processedVideosCount++;
                                         progress.Report(processedVideosCount * 100 / videosCount);
@@ -214,7 +217,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
             [
                 new TaskTriggerInfo
                 {
-                    Type = TaskTriggerInfo.TriggerInterval,
+                    Type = TaskTriggerInfoType.IntervalTrigger,
                     IntervalTicks = TimeSpan.FromSeconds(Plugin.Instance!.Configuration.TAJFTaskInterval).Ticks
                 },
             ];
