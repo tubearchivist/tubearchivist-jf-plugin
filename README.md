@@ -30,15 +30,15 @@ The plugin interacts with TubeArchivist APIs to fetch videos and channels metada
 
 ## Installation
 ### From official repository (recommended)
-1. Go to `Dashboard -> Plugins` and select the `Repositories` tab
+1. Go to `Dashboard -> Plugins` and click on the `Manage Repositories` button
 2. Add a new repository with the following details:
 - Repository name: `TubeArchivistMetadata`
 - Repository URL: `https://github.com/tubearchivist/tubearchivist-jf-plugin/raw/master/manifest.json`
-  ![Add repository](https://github.com/tubearchivist/tubearchivist-jf-plugin/assets/31162436/b0216b21-79c4-445b-8cf1-fbf6b138dee0)
+  ![Add repository](https://github.com/user-attachments/assets/337ba921-bc97-47ea-815c-c664cf7661a2)
 
-3. Go to the `Catalog` tab
-4. Find `TubeArchivistMetadata` in the `Metadata` section and install it
-![Find plugin](https://github.com/tubearchivist/tubearchivist-jf-plugin/assets/31162436/a30a14c2-33cd-44c1-b96a-406662726e5e)
+3. Go back to the catalog
+4. Find `TubeArchivistMetadata` and install it
+![Find plugin](https://github.com/user-attachments/assets/41f7315b-27c6-47dd-958f-21a232c30013)
 5. Restart Jellyfin to apply the changes
 
 ### From ZIP in GitHub releases
@@ -93,7 +93,7 @@ In the second field you can specify the interval in seconds the task should run 
 
 ## Build
 
-1. To build this plugin you will need [.Net 8.x](https://dotnet.microsoft.com/download/dotnet/8.0).
+1. To build this plugin you will need [.Net 9.x](https://dotnet.microsoft.com/download/dotnet/9.0).
 
 2. Build plugin with following command
   ```
