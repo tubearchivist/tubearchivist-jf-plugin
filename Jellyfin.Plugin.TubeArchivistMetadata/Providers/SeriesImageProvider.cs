@@ -60,10 +60,10 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
             var taApi = TubeArchivistApi.GetInstance();
             var channelTAId = Utils.GetChannelNameFromPath(item.Path);
             var channel = await taApi.GetChannel(channelTAId).ConfigureAwait(true);
-            _logger.LogInformation("{Message}", string.Format(CultureInfo.CurrentCulture, "Getting images for channel: {0} ({1})", channel?.Name, channelTAId));
-            _logger.LogInformation("{Message}", "Thumb URI: " + channel?.ThumbUrl);
-            _logger.LogInformation("{Message}", "TVArt URI: " + channel?.TvartUrl);
-            _logger.LogInformation("{Message}", "Banner URI: " + channel?.BannerUrl);
+            _logger.LogDebug("{Message}", string.Format(CultureInfo.CurrentCulture, "Getting images for channel: {0} ({1})", channel?.Name, channelTAId));
+            _logger.LogDebug("{Message}", "Thumb URI: " + channel?.ThumbUrl);
+            _logger.LogDebug("{Message}", "TVArt URI: " + channel?.TvartUrl);
+            _logger.LogDebug("{Message}", "Banner URI: " + channel?.BannerUrl);
 
             if (channel != null)
             {

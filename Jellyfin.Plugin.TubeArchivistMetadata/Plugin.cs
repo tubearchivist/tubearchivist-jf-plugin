@@ -39,7 +39,6 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
         /// <param name="logger">Instance of the <see cref="ILogger"/> interface.</param>
         /// <param name="sessionManager">Instance of the <see cref="ISessionManager"/> interface.</param>
         /// <param name="libraryManager">Instance of the <see cref="ILibraryManager"/> interface.</param>
-        /// <param name="taskManager">Instance of the <see cref="ITaskManager"/> interface.</param>
         /// <param name="userManager">Instance of the <see cref="IUserManager"/> interface.</param>
         /// <param name="userDataManager">Instance of the <see cref="IUserDataManager"/> interface.</param>
         /// <param name="playlistManager">Instance of the <see cref="IPlaylistManager"/> interface.</param>
@@ -49,7 +48,6 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
             ILogger<Plugin> logger,
             ISessionManager sessionManager,
             ILibraryManager libraryManager,
-            ITaskManager taskManager,
             IUserManager userManager,
             IUserDataManager userDataManager,
             IPlaylistManager playlistManager)
@@ -69,34 +67,6 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
             _userManager = userManager;
             _userDataManager = userDataManager;
             userDataManager.UserDataSaved += OnWatchedStatusChange;
-
-            var taToJellyfinProgressSyncTask = new TAToJellyfinProgressSyncTask(logger, libraryManager, userManager, userDataManager);
-            var taToJellyfinPlaylistsSyncTask = new TAToJellyfinPlaylistsSyncTask(logger, libraryManager, userManager, playlistManager);
-            var jfToTubeArchivistProgressSyncTask = new JFToTubeArchivistProgressSyncTask(logger, libraryManager, userManager, userDataManager);
-            var jfToTubeArchivistPlaylistsSyncTask = new JFToTubeArchivistPlaylistsSyncTask(logger, libraryManager, userManager, playlistManager);
-            var isTAJFTaskPresent = taskManager.ScheduledTasks.Any(t => t.Name.Equals(taToJellyfinProgressSyncTask.Name, StringComparison.Ordinal));
-            if (Instance!.Configuration.TAJFProgressSync && !isTAJFTaskPresent)
-            {
-                logger.LogInformation("Queueing task {TaskName}.", taToJellyfinProgressSyncTask.Name);
-                taskManager.AddTasks([taToJellyfinProgressSyncTask]);
-                taskManager.Execute<TAToJellyfinProgressSyncTask>();
-
-                logger.LogInformation("Queueing task {TaskName}.", taToJellyfinPlaylistsSyncTask.Name);
-                taskManager.AddTasks([taToJellyfinPlaylistsSyncTask]);
-                taskManager.Execute<TAToJellyfinPlaylistsSyncTask>();
-            }
-
-            var isJFTATaskPresent = taskManager.ScheduledTasks.Any(t => t.Name.Equals(jfToTubeArchivistProgressSyncTask.Name, StringComparison.Ordinal));
-            if (Instance!.Configuration.JFTAProgressSync && !isJFTATaskPresent)
-            {
-                logger.LogInformation("Queueing task {TaskName}.", jfToTubeArchivistProgressSyncTask.Name);
-                taskManager.AddTasks([jfToTubeArchivistProgressSyncTask]);
-                taskManager.Execute<JFToTubeArchivistProgressSyncTask>();
-
-                logger.LogInformation("Queueing task {TaskName}.", jfToTubeArchivistPlaylistsSyncTask.Name);
-                taskManager.AddTasks([jfToTubeArchivistPlaylistsSyncTask]);
-                taskManager.Execute<JFToTubeArchivistPlaylistsSyncTask>();
-            }
 
             logger.LogInformation("{Message}", "Collection display name: " + Instance?.Configuration.CollectionTitle);
             logger.LogInformation("{Message}", "TubeArchivist API URL: " + Instance?.Configuration.TubeArchivistUrl);
@@ -186,6 +156,12 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
 
         private async void OnPlaybackProgress(object? sender, PlaybackProgressEventArgs eventArgs)
         {
+            if (eventArgs == null || eventArgs.Item.Id == Guid.Empty)
+            {
+                Logger.LogDebug("Skipping progress synchronization: PlaybackProgress event triggered with null or empty Guid.");
+                return;
+            }
+
             if (Instance!.Configuration.JFTAProgressSync && eventArgs.Users.Any(u => Instance!.Configuration.JFUsernameFrom.Equals(u.Username, StringComparison.Ordinal)))
             {
                 BaseItem? season = LibraryManager.GetItemById(eventArgs.Item.ParentId);
@@ -206,10 +182,23 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
 
         private async void OnWatchedStatusChange(object? sender, UserDataSaveEventArgs eventArgs)
         {
+            if (eventArgs == null || eventArgs.Item.Id == Guid.Empty)
+            {
+                Logger.LogDebug("Skipping watched status synchronization: WatchedStatusChange event triggered with null or empty Guid.");
+                return;
+            }
+
             var user = _userManager.GetUserById(eventArgs.UserId);
+            if (user == null)
+            {
+                Logger.LogError("OnWatchedStatusChange callback called without user id for item {ItemName}", eventArgs.Item.Name);
+                return;
+            }
+
+            var userItemData = _userDataManager.GetUserData(user, eventArgs.Item);
             if (Configuration.JFTAProgressSync && user != null && Configuration.GetJFUsernamesToArray().Contains(user!.Username))
             {
-                var isPlayed = eventArgs.Item.IsPlayed(user);
+                var isPlayed = eventArgs.Item.IsPlayed(user, userItemData);
                 Logger.LogDebug("User {UserId} changed watched status to {Status} for the item {ItemName}", eventArgs.UserId, isPlayed, eventArgs.Item.Name);
                 string itemYTId;
                 try
