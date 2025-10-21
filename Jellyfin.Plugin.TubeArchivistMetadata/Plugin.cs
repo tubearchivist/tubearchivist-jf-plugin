@@ -186,9 +186,16 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
             }
 
             var user = _userManager.GetUserById(eventArgs.UserId);
+            if (user == null)
+            {
+                Logger.LogError("OnWatchedStatusChange callback called without user id for item {ItemName}", eventArgs.Item.Name);
+                return;
+            }
+
+            var userItemData = _userDataManager.GetUserData(user, eventArgs.Item);
             if (Configuration.JFTASync && user != null && Configuration.GetJFUsernamesToArray().Contains(user!.Username))
             {
-                var isPlayed = eventArgs.Item.IsPlayed(user);
+                var isPlayed = eventArgs.Item.IsPlayed(user, userItemData);
                 Logger.LogDebug("User {UserId} changed watched status to {Status} for the item {ItemName}", eventArgs.UserId, isPlayed, eventArgs.Item.Name);
                 string itemYTId;
                 try

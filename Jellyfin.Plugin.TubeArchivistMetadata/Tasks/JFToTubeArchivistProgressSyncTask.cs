@@ -155,10 +155,11 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                                 var videoYTId = Utils.GetVideoNameFromPath(video.Path);
                                 _logger.LogDebug("{VideoYtId}", videoYTId);
                                 HttpStatusCode statusCode;
+                                var userItemData = _userDataManager.GetUserData(user, channel);
 
-                                if (!isChannelCheckedForWatched && channel.IsPlayed(user))
+                                if (!isChannelCheckedForWatched && channel.IsPlayed(user, userItemData))
                                 {
-                                    var isChannelPlayed = channel.IsPlayed(user);
+                                    var isChannelPlayed = channel.IsPlayed(user, userItemData);
                                     statusCode = await taApi.SetWatchedStatus(channelYTId, isChannelPlayed).ConfigureAwait(true);
                                     if (statusCode != System.Net.HttpStatusCode.OK)
                                     {
@@ -174,7 +175,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
 
                                 if (!isChannelWatched)
                                 {
-                                    var isVideoPlayed = video.IsPlayed(user);
+                                    var isVideoPlayed = video.IsPlayed(user, userItemData);
                                     statusCode = await taApi.SetWatchedStatus(videoYTId, isVideoPlayed).ConfigureAwait(true);
                                     if (statusCode != System.Net.HttpStatusCode.OK)
                                     {
