@@ -20,7 +20,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
     /// <summary>
     /// Task to sync Jellyfin playback progresses to TubeArchivist.
     /// </summary>
-    public class JFToTubearchivistProgressSyncTask : IScheduledTask
+    public class JFToTubeArchivistProgressSyncTask : IScheduledTask
     {
         private readonly ILogger<Plugin> _logger;
         private readonly ILibraryManager _libraryManager;
@@ -28,13 +28,13 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
         private readonly IUserDataManager _userDataManager;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="JFToTubearchivistProgressSyncTask"/> class.
+        /// Initializes a new instance of the <see cref="JFToTubeArchivistProgressSyncTask"/> class.
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="libraryManager">Library manager.</param>
         /// <param name="userManager">User manager.</param>
         /// <param name="userDataManager">User data manager.</param>
-        public JFToTubearchivistProgressSyncTask(ILogger<Plugin> logger, ILibraryManager libraryManager, IUserManager userManager, IUserDataManager userDataManager)
+        public JFToTubeArchivistProgressSyncTask(ILogger<Plugin> logger, ILibraryManager libraryManager, IUserManager userManager, IUserDataManager userDataManager)
         {
             _logger = logger;
             _libraryManager = libraryManager;
@@ -58,7 +58,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
         public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
         {
             progress.Report(0);
-            if (Plugin.Instance!.Configuration.JFTASync)
+            if (Plugin.Instance!.Configuration.JFTAProgressSync)
             {
                 var start = DateTime.Now;
                 _logger.LogInformation("Starting Jellyfin->TubeArchivist playback progresses synchronization.");

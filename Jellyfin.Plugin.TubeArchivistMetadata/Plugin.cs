@@ -14,6 +14,7 @@ using MediaBrowser.Common.Plugins;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.TV;
 using MediaBrowser.Controller.Library;
+using MediaBrowser.Controller.Playlists;
 using MediaBrowser.Controller.Session;
 using MediaBrowser.Model.Plugins;
 using MediaBrowser.Model.Serialization;
@@ -40,6 +41,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
         /// <param name="libraryManager">Instance of the <see cref="ILibraryManager"/> interface.</param>
         /// <param name="userManager">Instance of the <see cref="IUserManager"/> interface.</param>
         /// <param name="userDataManager">Instance of the <see cref="IUserDataManager"/> interface.</param>
+        /// <param name="playlistManager">Instance of the <see cref="IPlaylistManager"/> interface.</param>
         public Plugin(
             IApplicationPaths applicationPaths,
             IXmlSerializer xmlSerializer,
@@ -47,7 +49,8 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
             ISessionManager sessionManager,
             ILibraryManager libraryManager,
             IUserManager userManager,
-            IUserDataManager userDataManager)
+            IUserDataManager userDataManager,
+            IPlaylistManager playlistManager)
             : base(applicationPaths, xmlSerializer)
         {
             Instance = this;
@@ -159,7 +162,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
                 return;
             }
 
-            if (Instance!.Configuration.JFTASync && eventArgs.Users.Any(u => Instance!.Configuration.JFUsernameFrom.Equals(u.Username, StringComparison.Ordinal)))
+            if (Instance!.Configuration.JFTAProgressSync && eventArgs.Users.Any(u => Instance!.Configuration.JFUsernameFrom.Equals(u.Username, StringComparison.Ordinal)))
             {
                 BaseItem? season = LibraryManager.GetItemById(eventArgs.Item.ParentId);
                 BaseItem? channel = LibraryManager.GetItemById(season!.ParentId);
@@ -193,7 +196,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
             }
 
             var userItemData = _userDataManager.GetUserData(user, eventArgs.Item);
-            if (Configuration.JFTASync && user != null && Configuration.GetJFUsernamesToArray().Contains(user!.Username))
+            if (Configuration.JFTAProgressSync && user != null && Configuration.GetJFUsernamesToArray().Contains(user!.Username))
             {
                 var isPlayed = eventArgs.Item.IsPlayed(user, userItemData);
                 Logger.LogDebug("User {UserId} changed watched status to {Status} for the item {ItemName}", eventArgs.UserId, isPlayed, eventArgs.Item.Name);
