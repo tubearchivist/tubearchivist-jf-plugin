@@ -1,10 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.TubeArchivistMetadata.Utilities;
+using MediaBrowser.Model.Playlists;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 
@@ -150,7 +152,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
         }
 
         /// <summary>
-        /// Send video playback progress to TubeArchivist.
+        /// Sends video playback progress to TubeArchivist.
         /// </summary>
         /// <param name="videoId">Video id.</param>
         /// <param name="progress">Progress in seconds.</param>
@@ -167,7 +169,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
         }
 
         /// <summary>
-        /// Send video playback progress to TubeArchivist.
+        /// Sends video playback progress to TubeArchivist.
         /// </summary>
         /// <param name="videoId">Video id.</param>
         /// <returns>Video playback progress data.</returns>
@@ -186,7 +188,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
         }
 
         /// <summary>
-        /// Set video/channel/playlist as watched on TubeArchivist.
+        /// Sets video/channel/playlist as watched on TubeArchivist.
         /// </summary>
         /// <param name="itemId">Video/channel/playlist id.</param>
         /// <param name="isWatched">Whether the item has been watched or not.</param>
@@ -200,6 +202,94 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
             var response = await client.PostAsync(url, new StringContent(body, Encoding.UTF8, "application/json")).ConfigureAwait(true);
 
             return response.StatusCode;
+        }
+
+        /// <summary>
+        /// Retrieves the playlists from TubeArchivist.
+        /// </summary>
+        /// <returns>A task.</returns>
+        public async Task<ISet<Playlist>?> GetPlaylists()
+        {
+            ResponseContainer<ISet<Playlist>?>? playlists = null;
+
+            var playlistsEndpoint = "/api/playlist/";
+            var url = new Uri(Utils.SanitizeUrl(Plugin.Instance?.Configuration.TubeArchivistUrl + playlistsEndpoint));
+            var response = await client.GetAsync(url).ConfigureAwait(true);
+            while (response.StatusCode == HttpStatusCode.Moved)
+            {
+                url = response.Headers.Location;
+                _logger.LogInformation("{Message}", "Received redirect to: " + url);
+                response = await client.GetAsync(url).ConfigureAwait(true);
+            }
+
+            _logger.LogInformation("{Message}", url + ": " + response.StatusCode);
+
+            if (response.IsSuccessStatusCode)
+            {
+                string rawData = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
+                playlists = JsonConvert.DeserializeObject<ResponseContainer<ISet<Playlist>?>>(rawData);
+            }
+
+            return playlists?.Data;
+        }
+
+        /// <summary>
+        /// Creates a new custom playlist.
+        /// </summary>
+        /// <param name="creationRequest">Playlist creation request.</param>
+        /// <returns>The created <see cref="Playlist"/>.</returns>
+        public async Task<Playlist?> CreateCustomPlaylist(CustomPlaylistCreation creationRequest)
+        {
+            Playlist? playlist = null;
+            var customPlaylistEndpoint = $"/api/playlist/custom/";
+            var url = new Uri(Utils.SanitizeUrl(Plugin.Instance!.Configuration.TubeArchivistUrl + customPlaylistEndpoint));
+            var body = JsonConvert.SerializeObject(creationRequest);
+            _logger.LogInformation("{Message}", body);
+
+            var response = await client.PostAsync(url, new StringContent(body, Encoding.UTF8, "application/json")).ConfigureAwait(true);
+            _logger.LogInformation("POST {Message}", url + ": " + response.StatusCode);
+
+            if (response.IsSuccessStatusCode)
+            {
+                string rawData = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
+                playlist = JsonConvert.DeserializeObject<Playlist>(rawData);
+            }
+
+            return playlist;
+        }
+
+        /// <summary>
+        /// Creates a new custom playlist.
+        /// </summary>
+        /// <param name="playlistId">Playlist id.</param>
+        /// <param name="entryAction">Playlist creation request.</param>
+        /// <returns>The response <see cref="HttpStatusCode"/>.</returns>
+        public async Task<HttpStatusCode> CustomPlaylistEntryAction(string playlistId, CustomPlaylistEntryAction entryAction)
+        {
+            var customPlaylistEndpoint = $"/api/playlist/custom/";
+            var url = new Uri(Utils.SanitizeUrl(Plugin.Instance!.Configuration.TubeArchivistUrl + customPlaylistEndpoint + playlistId));
+            var body = JsonConvert.SerializeObject(entryAction);
+            _logger.LogDebug("CustomPlaylistEntryAction body: {Message}", body);
+
+            var response = await client.PostAsync(url, new StringContent(body, Encoding.UTF8, "application/json")).ConfigureAwait(true);
+            _logger.LogDebug("Response code: {Message}", response.StatusCode);
+
+            return response.StatusCode;
+        }
+
+        /// <summary>
+        /// Deletes a playlist.
+        /// </summary>
+        /// <param name="playlistId">Playlist id.</param>
+        /// <returns>Whether the playlist has been deleted successfully or not.</returns>
+        public async Task<bool> DeletePlaylist(string playlistId)
+        {
+            var deletePlaylistEndpoint = $"/api/playlist/";
+            var url = new Uri(Utils.SanitizeUrl(Plugin.Instance!.Configuration.TubeArchivistUrl + deletePlaylistEndpoint + playlistId));
+            var response = await client.DeleteAsync(url).ConfigureAwait(true);
+            _logger.LogDebug("Response code: {Message}", response.StatusCode);
+
+            return response.StatusCode == HttpStatusCode.NoContent;
         }
     }
 }

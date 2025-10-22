@@ -20,7 +20,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
     /// <summary>
     /// Task to sync Jellyfin playback progresses to TubeArchivist.
     /// </summary>
-    public class JFToTubearchivistProgressSyncTask : IScheduledTask
+    public class JFToTubeArchivistProgressSyncTask : IScheduledTask
     {
         private readonly ILogger<Plugin> _logger;
         private readonly ILibraryManager _libraryManager;
@@ -28,13 +28,13 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
         private readonly IUserDataManager _userDataManager;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="JFToTubearchivistProgressSyncTask"/> class.
+        /// Initializes a new instance of the <see cref="JFToTubeArchivistProgressSyncTask"/> class.
         /// </summary>
         /// <param name="logger">Logger.</param>
         /// <param name="libraryManager">Library manager.</param>
         /// <param name="userManager">User manager.</param>
         /// <param name="userDataManager">User data manager.</param>
-        public JFToTubearchivistProgressSyncTask(ILogger<Plugin> logger, ILibraryManager libraryManager, IUserManager userManager, IUserDataManager userDataManager)
+        public JFToTubeArchivistProgressSyncTask(ILogger<Plugin> logger, ILibraryManager libraryManager, IUserManager userManager, IUserDataManager userDataManager)
         {
             _logger = logger;
             _libraryManager = libraryManager;
@@ -58,7 +58,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
         public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
         {
             progress.Report(0);
-            if (Plugin.Instance!.Configuration.JFTASync)
+            if (Plugin.Instance!.Configuration.JFTAProgressSync)
             {
                 var start = DateTime.Now;
                 _logger.LogInformation("Starting Jellyfin->TubeArchivist playback progresses synchronization.");
@@ -72,11 +72,13 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                     return;
                 }
 
-                var collectionItem = _libraryManager.GetItemList(new InternalItemsQuery
+                var items = _libraryManager.GetItemList(new InternalItemsQuery
                 {
                     Name = Plugin.Instance?.Configuration.CollectionTitle,
                     IncludeItemTypes = new[] { BaseItemKind.CollectionFolder }
-                }).FirstOrDefault();
+                });
+
+                var collectionItem = items.Count > 0 ? items[0] : null;
 
                 if (collectionItem == null)
                 {
@@ -153,10 +155,11 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                                 var videoYTId = Utils.GetVideoNameFromPath(video.Path);
                                 _logger.LogDebug("Current video extracted YouTube id: {VideoYtId}", videoYTId);
                                 HttpStatusCode statusCode;
+                                var userItemData = _userDataManager.GetUserData(user, channel);
 
-                                if (!isChannelCheckedForWatched && channel.IsPlayed(user))
+                                if (!isChannelCheckedForWatched && channel.IsPlayed(user, userItemData))
                                 {
-                                    var isChannelPlayed = channel.IsPlayed(user);
+                                    var isChannelPlayed = channel.IsPlayed(user, userItemData);
                                     statusCode = await taApi.SetWatchedStatus(channelYTId, isChannelPlayed).ConfigureAwait(true);
                                     if (statusCode != System.Net.HttpStatusCode.OK)
                                     {
@@ -172,7 +175,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
 
                                 if (!isChannelWatched)
                                 {
-                                    var isVideoPlayed = video.IsPlayed(user);
+                                    var isVideoPlayed = video.IsPlayed(user, userItemData);
                                     statusCode = await taApi.SetWatchedStatus(videoYTId, isVideoPlayed).ConfigureAwait(true);
                                     if (statusCode != System.Net.HttpStatusCode.OK)
                                     {
@@ -182,11 +185,14 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                                     _logger.LogDebug("{Message}", isVideoPlayed);
                                     if (!isVideoPlayed)
                                     {
-                                        var playbackProgress = _userDataManager.GetUserData(user, video).PlaybackPositionTicks / TimeSpan.TicksPerSecond;
-                                        statusCode = await taApi.SetProgress(videoYTId, playbackProgress).ConfigureAwait(true);
-                                        if (statusCode != System.Net.HttpStatusCode.OK)
+                                        var playbackProgress = _userDataManager.GetUserData(user, video)?.PlaybackPositionTicks / TimeSpan.TicksPerSecond;
+                                        if (playbackProgress != null)
                                         {
-                                            _logger.LogCritical("{Message}", $"POST /video/{videoYTId}/progress returned {statusCode} for video {video.Name} with progress {progress} seconds");
+                                            statusCode = await taApi.SetProgress(videoYTId, playbackProgress.Value).ConfigureAwait(true);
+                                            if (statusCode != System.Net.HttpStatusCode.OK)
+                                            {
+                                                _logger.LogCritical("{Message}", $"POST /video/{videoYTId}/progress returned {statusCode} for video {video.Name} with progress {progress} seconds");
+                                            }
                                         }
                                     }
                                 }
@@ -215,7 +221,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
             [
                 new TaskTriggerInfo
                 {
-                    Type = TaskTriggerInfo.TriggerStartup,
+                    Type = TaskTriggerInfoType.StartupTrigger,
                 },
             ];
         }

@@ -27,7 +27,7 @@ jobs:
       - name: Setup .Net
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: 9.0.x
 
       - name: Add Jellyfin GitHub Nuget registry to sources
         run: |
@@ -63,7 +63,7 @@ jobs:
         uses: DarkFighterLuke/jellyfin-plugin-repository-manager@7a96768accc155ac7b597351b5033532f3c48173
         id: jprm
         with:
-          dotnet-target: net8.0
+          dotnet-target: net9.0
           version: ${VERSION}
           update-manifest: "true"
 
