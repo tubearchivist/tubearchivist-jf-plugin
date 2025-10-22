@@ -171,14 +171,10 @@
                         document.querySelector('#JFTAPlaylistsSync').checked = config.JFTAPlaylistsSync;
                         document.querySelector('#TAJFPlaylistsSync').checked = config.TAJFPlaylistsSync;
                         document.querySelector('#JFUsernameFrom').value = config.JFUsernameFrom;
-<<<<<<< HEAD
-                        document.querySelector('#TAJFTaskInterval').value = config.TAJFTaskInterval;
                         document.querySelector('#EpisodeNumberingScheme').value = config.EpisodeNumberingScheme;
-=======
                         document.querySelector('#TAJFProgressTaskInterval').value = config.TAJFProgressTaskInterval;
                         document.querySelector('#JFTAPlaylistsSyncTaskInterval').value = config.JFTAPlaylistsSyncTaskInterval;
                         document.querySelector('#TAJFPlaylistsSyncTaskInterval').value = config.TAJFPlaylistsSyncTaskInterval;
->>>>>>> parent/master
                         Dashboard.hideLoadingMsg();
                     });
                 });
@@ -197,14 +193,10 @@
                         config.JFTAPlaylistsSync = document.querySelector('#JFTAPlaylistsSync').checked;
                         config.TAJFPlaylistsSync = document.querySelector('#TAJFPlaylistsSync').checked;
                         config.JFUsernameFrom = document.querySelector('#JFUsernameFrom').value;
-<<<<<<< HEAD
-                        config.TAJFTaskInterval = document.querySelector('#TAJFTaskInterval').value;
                         config.EpisodeNumberingScheme = document.querySelector('#EpisodeNumberingScheme').value;
-=======
                         config.TAJFProgressTaskInterval = document.querySelector('#TAJFProgressTaskInterval').value;
                         config.JFTAPlaylistsSyncTaskInterval = document.querySelector('#JFTAPlaylistsSyncTaskInterval').value;
                         config.TAJFPlaylistsSyncTaskInterval = document.querySelector('#TAJFPlaylistsSyncTaskInterval').value;
->>>>>>> parent/master
                         ApiClient.updatePluginConfiguration(TAMetadataConfig.pluginUniqueId, config).then(function (result) {
                             Dashboard.processPluginConfigurationUpdateResult(result);
                         });
