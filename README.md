@@ -77,23 +77,42 @@ _NOTE: If you are using Docker containers, it is important to mount the TubeArch
 5. Save and come back to Home, you will see the newly added library. Jellyfin will have executed the metadata fetching for you after the collection creation and then you will see the metadata and the images of channels and videos
 
 
-## Playback synchronization
-<p>Starting from v1.3.1 this plugin offers playback progress and watched status bidirectional synchronization, but you can choose to enable only a one way synchronization (Jellyfin->TubeArchivist or TubeArchivist->Jellyfin) too.</p>
+## Synchronization
+This plugin has different bidirectional sycnhronization features, that can be configured in the specific section in the plugin configuration page:
+![Synchronization settings](https://github.com/user-attachments/assets/b0bb556b-fce3-4a3e-bc6c-b0a2b482cedc)
 
-### Jellyfin->TubeArchivist synchronization
+### Playback synchronization
+<p>Starting from v1.3.1 this plugin offers playback progress and watched status bidirectional synchronization, but you can choose to enable only a one way synchronization (Jellyfin -> TubeArchivist or TubeArchivist -> Jellyfin) too.</p>
+
+#### Jellyfin -> TubeArchivist playback synchronization
 <p>This kind of synchronization is done listening for progress and watched status changes while playing the videos for the specified users.<br>Furthermore, there is a task that runs at Jellyfin startup to synchronize the whole library.</p>
-<p>In the plugin configuration you will find these settings:</p>
-
-![JF->TA playback synchronization settings](https://github.com/user-attachments/assets/dc6be82f-e685-4896-a502-317681c47fc7)
 <p>In the text field you can specify one Jellyfin username to synchronize data of to TubeArchivist.</p>
 
-### TubeArchivist->Jellyfin synchronization
+#### TubeArchivist -> Jellyfin playback synchronization
 <p>This kind of synchronization is done using a Jellyfin scheduled task that regularly synchronizes data from TubeArchivist API to Jellyfin.</p>
-<p>In the plugin configuration you will find these settings:</p>
+<p>In the text field you can specify one or more Jellyfin usernames to update data for.</p>
 
-![TA->JF playback synchronization settings](https://github.com/user-attachments/assets/1b4c33af-834f-45b3-9057-71830e7c8b4f)
-<p>In the first text field you can specify one or more Jellyfin usernames to update data for.<br>
-In the second field you can specify the interval in seconds the task should run at, so that you can choose according to your system requirements. The lower is the interval the higher will be the resources consuption on your system.</p>
+### Playlists synchronization
+<p>Starting from v.1.4.1 this plugin offers playlists bidirectional synchronization, but you can choose to enable only a one way synchronization (Jellyfin -> TubeArchivist or TubeArchivist -> Jellyfin) too.</p>
+
+#### Jellyfin -> TubeArchivist playlists synchronization
+<p>There is a task that retrieves playlists and recreates them on TubeArchivist with the videos in the same order. Please note that playlists can also have videos not beloging from TubeArchivist, they will be simply ignored, so you won't find them on TubeArchivist playlist.</p>
+<p>It is present also a setting to automatically delete playlists from TubeArchivist when they are no more available on Jellyfin.</p>
+
+#### TubeArchivist -> Jellyfin playlists synchronization
+<p>There is a task that retrieves playlists from TubeArchivist and recreates them on Jellyfin with videos in the same order.</p>
+<p>It is present, also in this case, a setting to automatically delete playlists from Jellyfin when they are no more present on TubeArchivist, but beware that the will be deleted also if they contain videos not beloning to TubeArchivist.</p>
+
+> [!CAUTION]
+> Pay attention when you enable the automatic deletion options, be sure that is your wanted behavior, especially when playlists contain also other videos not belonging from TubeArchivist, playlists removed won't be available again, there's no undo!
+
+
+## Tasks intervals
+<p>Since many of the feature are implemented as background tasks periodically executing, in the `Tasks intervals` section you will find the settings to adjust this period in seconds.<br>
+Keep in mind that Jellyfin lowest accepted period is of 1 minute (60 seconds).</p>
+<p>Here are the configurable intervals:</p>
+
+![Tasks intervals settings](https://github.com/user-attachments/assets/19db6b83-6715-477d-8ce7-b78526e87ba9)
 
 
 ## Build
