@@ -42,27 +42,42 @@
                             and episodes</div>
                     </div>
                     <div>
-                        <h2>Playback synchronization</h2>
+                        <h2>Synchronization</h2>
                     </div>
-                    <div class="checkboxContainer checkboxContainer-withDescription">
-                        <label class="emby-checkbox-label" for="JFTASync">
-                            <input id="JFTASync" name="JFTASync" type="checkbox" is="emby-checkbox" />
-                            <span>Synchronize Jellyfin playback progress to TubeArchivist</span>
-                        </label>
+                    <div>
+                        <h3>Jellyfin to TubeArchivist</h3>
                     </div>
                     <div class="inputContainer">
                         <label class="inputLabel inputLabelUnfocused" for="JFUsernameFrom">Jellyfin username to sync
-                            playback status from</label>
+                            from</label>
                         <input id="JFUsernameFrom" name="JFUsernameFrom" type="text" is="emby-input"
-                            placeholder="Username1, username2, ..." />
-                        <div class="fieldDescription">This is the Jellyfin username to synchronize data from on
+                            placeholder="Username" />
+                        <div class="fieldDescription">This is the Jellyfin username to synchronize data to
                             TubeArchivist</div>
                     </div>
                     <div class="checkboxContainer checkboxContainer-withDescription">
-                        <label class="emby-checkbox-label" for="TAJFSync">
-                            <input id="TAJFSync" name="TAJFSync" type="checkbox" is="emby-checkbox" />
-                            <span>Synchronize TubeArchivist playback progress to Jellyfin</span>
+                        <label class="emby-checkbox-label" for="JFTAProgressSync">
+                            <input id="JFTAProgressSync" name="JFTAProgressSync" type="checkbox" is="emby-checkbox" />
+                            <span>Synchronize Jellyfin playback progress to TubeArchivist</span>
                         </label>
+                    </div>
+                    <div style="display: flex; gap: 2em;">
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label class="emby-checkbox-label" for="JFTAPlaylistsSync">
+                                <input id="JFTAPlaylistsSync" name="JFTAPlaylistsSync" type="checkbox" is="emby-checkbox" />
+                                <span>Synchronize Jellyfin playlists to TubeArchivist</span>
+                            </label>
+                        </div>
+
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label class="emby-checkbox-label" for="JFTAPlaylistsDelete">
+                                <input id="JFTAPlaylistsDelete" name="JFTAPlaylistsDelete" type="checkbox" is="emby-checkbox" />
+                                <span>Delete TubeArchivist playlists when no more present on Jellyfin</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <h3>TubeArchivist to Jellyfin</h3>
                     </div>
                     <div class="inputContainer">
                         <label class="inputLabel inputLabelUnfocused" for="JFUsernamesTo">Jellyfin usernames to sync
@@ -72,10 +87,34 @@
                         <div class="fieldDescription">These are the (comma separated) Jellyfin usernames to synchronize
                             data from TubeArchivist</div>
                     </div>
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label class="emby-checkbox-label" for="TAJFProgressSync">
+                            <input id="TAJFProgressSync" name="TAJFProgressSync" type="checkbox" is="emby-checkbox" />
+                            <span>Synchronize TubeArchivist playback progress to Jellyfin</span>
+                        </label>
+                    </div>
+                    <div style="display: flex; gap: 2em;">
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label class="emby-checkbox-label" for="TAJFPlaylistsSync">
+                                <input id="TAJFPlaylistsSync" name="TAJFPlaylistsSync" type="checkbox" is="emby-checkbox" />
+                                <span>Synchronize TubeArchivist playlists to Jellyfin</span>
+                            </label>
+                        </div>
+
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label class="emby-checkbox-label" for="TAJFPlaylistsDelete">
+                                <input id="TAJFPlaylistsDelete" name="TAJFPlaylistsDelete" type="checkbox" is="emby-checkbox" />
+                                <span>Delete Jellyfin playlists when no more present on TubeArchivist</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <h2>Tasks intervals</h2>
+                    </div>
                     <div class="inputContainer">
-                        <label class="inputLabel inputLabelUnfocused" for="TAJFTaskInterval">TubeArchivist to Jellyfin
+                        <label class="inputLabel inputLabelUnfocused" for="TAJFProgressTaskInterval">TubeArchivist to Jellyfin
                             playback progress synchronization interval</label>
-                        <input id="TAJFTaskInterval" name="TAJFTaskInterval" type="number" is="emby-input" min="1" />
+                        <input id="TAJFProgressTaskInterval" name="TAJFProgressTaskInterval" type="number" is="emby-input" min="60" />
                         <div class="fieldDescription">This is the TubeArchivist to Jellyfin playback progress
                             synchronization interval in seconds (Jellyfin restart required).</div>
                     </div>
@@ -90,6 +129,20 @@
                         </div>
                         <div class="fieldDescription">This is the numbering scheme for episodes in Jellyfin (IndexNumber). 
                             Default is the same as no numbering which allows Jellyfin to use the fallback numbering scheme.</div>
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="JFTAPlaylistsSyncTaskInterval">Jellyfin to TubeArchivist
+                            playlists synchronization interval</label>
+                        <input id="JFTAPlaylistsSyncTaskInterval" name="JFTAPlaylistsSyncTaskInterval" type="number" is="emby-input" min="60" />
+                        <div class="fieldDescription">This is the Jellyfin to TubeArchivist playlists
+                            synchronization interval in seconds (Jellyfin restart required).</div>
+                    </div>
+                    <div class="inputContainer">
+                        <label class="inputLabel inputLabelUnfocused" for="TAJFPlaylistsSyncTaskInterval">TubeArchivist to Jellyfin
+                            playlists synchronization interval</label>
+                        <input id="TAJFPlaylistsSyncTaskInterval" name="TAJFPlaylistsSyncTaskInterval" type="number" is="emby-input"
+                            min="60" />
+                        <div class="fieldDescription">This is the TubeArchivist to Jellyfin playlists
+                            synchronization interval in seconds (Jellyfin restart required).</div>
                     </div>
                     <div>
                         <button is="emby-button" type="submit" class="raised button-submit block emby-button">
@@ -112,12 +165,20 @@
                         document.querySelector('#TubeArchivistUrl').value = config.TubeArchivistUrl;
                         document.querySelector('#TubeArchivistApiKey').value = config.TubeArchivistApiKey;
                         document.querySelector('#MaxDescriptionLength').value = config.MaxDescriptionLength;
-                        document.querySelector('#JFTASync').checked = config.JFTASync;
+                        document.querySelector('#JFTAProgressSync').checked = config.JFTAProgressSync;
                         document.querySelector('#JFUsernamesTo').value = config.JFUsernamesTo;
-                        document.querySelector('#TAJFSync').checked = config.TAJFSync;
+                        document.querySelector('#TAJFProgressSync').checked = config.TAJFProgressSync;
+                        document.querySelector('#JFTAPlaylistsSync').checked = config.JFTAPlaylistsSync;
+                        document.querySelector('#TAJFPlaylistsSync').checked = config.TAJFPlaylistsSync;
                         document.querySelector('#JFUsernameFrom').value = config.JFUsernameFrom;
+<<<<<<< HEAD
                         document.querySelector('#TAJFTaskInterval').value = config.TAJFTaskInterval;
                         document.querySelector('#EpisodeNumberingScheme').value = config.EpisodeNumberingScheme;
+=======
+                        document.querySelector('#TAJFProgressTaskInterval').value = config.TAJFProgressTaskInterval;
+                        document.querySelector('#JFTAPlaylistsSyncTaskInterval').value = config.JFTAPlaylistsSyncTaskInterval;
+                        document.querySelector('#TAJFPlaylistsSyncTaskInterval').value = config.TAJFPlaylistsSyncTaskInterval;
+>>>>>>> parent/master
                         Dashboard.hideLoadingMsg();
                     });
                 });
@@ -130,12 +191,20 @@
                         config.TubeArchivistUrl = document.querySelector('#TubeArchivistUrl').value;
                         config.TubeArchivistApiKey = document.querySelector('#TubeArchivistApiKey').value;
                         config.MaxDescriptionLength = document.querySelector('#MaxDescriptionLength').value;
-                        config.JFTASync = document.querySelector('#JFTASync').checked;
+                        config.JFTAProgressSync = document.querySelector('#JFTAProgressSync').checked;
                         config.JFUsernamesTo = document.querySelector('#JFUsernamesTo').value;
-                        config.TAJFSync = document.querySelector('#TAJFSync').checked;
+                        config.TAJFProgressSync = document.querySelector('#TAJFProgressSync').checked;
+                        config.JFTAPlaylistsSync = document.querySelector('#JFTAPlaylistsSync').checked;
+                        config.TAJFPlaylistsSync = document.querySelector('#TAJFPlaylistsSync').checked;
                         config.JFUsernameFrom = document.querySelector('#JFUsernameFrom').value;
+<<<<<<< HEAD
                         config.TAJFTaskInterval = document.querySelector('#TAJFTaskInterval').value;
                         config.EpisodeNumberingScheme = document.querySelector('#EpisodeNumberingScheme').value;
+=======
+                        config.TAJFProgressTaskInterval = document.querySelector('#TAJFProgressTaskInterval').value;
+                        config.JFTAPlaylistsSyncTaskInterval = document.querySelector('#JFTAPlaylistsSyncTaskInterval').value;
+                        config.TAJFPlaylistsSyncTaskInterval = document.querySelector('#TAJFPlaylistsSyncTaskInterval').value;
+>>>>>>> parent/master
                         ApiClient.updatePluginConfiguration(TAMetadataConfig.pluginUniqueId, config).then(function (result) {
                             Dashboard.processPluginConfigurationUpdateResult(result);
                         });
