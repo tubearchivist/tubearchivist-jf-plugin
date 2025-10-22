@@ -13,8 +13,8 @@
                 "changelog": "Introduce bidirectional playlists synchronization\n",
                 "targetAbi": "10.11.0.0",
                 "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.4.1/tubearchivistmetadata_1.4.1.0.zip",
-                "checksum": "b5605077e1438f911e80df822e2f52f0",
-                "timestamp": "2025-10-21T21:54:11Z"
+                "checksum": "2dc0b9140472a4f783f093a7ee425493",
+                "timestamp": "2025-10-22T07:00:27Z"
             },
             {
                 "version": "1.4.0.0",
