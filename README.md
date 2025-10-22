@@ -109,7 +109,7 @@ This plugin has different bidirectional sycnhronization features, that can be co
 
 ## Tasks intervals
 <p>Since many of the feature are implemented as background tasks periodically executing, in the `Tasks intervals` section you will find the settings to adjust this period in seconds.<br>
-Keep in mind that Jellyfin lowest accepted period is of 1 minute (60 seconds).</p>
+Keep in mind that Jellyfin lowest accepted period is of 1 minute (60 seconds) and the lower is the interval the higher will be the resources consuption on your system.</p>
 <p>Here are the configurable intervals:</p>
 
 ![Tasks intervals settings](https://github.com/user-attachments/assets/19db6b83-6715-477d-8ce7-b78526e87ba9)
