@@ -153,7 +153,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                             foreach (Episode video in videos)
                             {
                                 var videoYTId = Utils.GetVideoNameFromPath(video.Path);
-                                _logger.LogDebug("{VideoYtId}", videoYTId);
+                                _logger.LogDebug("Current video extracted YouTube id: {VideoYtId}", videoYTId);
                                 HttpStatusCode statusCode;
                                 var userItemData = _userDataManager.GetUserData(user, channel);
 

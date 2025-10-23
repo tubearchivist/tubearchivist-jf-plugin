@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
+using Jellyfin.Plugin.TubeArchivistMetadata.Configuration;
 using Jellyfin.Plugin.TubeArchivistMetadata.Utilities;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.TV;
@@ -126,6 +127,11 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
                 Overview = Utils.FormatDescription(Description),
                 SeasonName = Published.Year.ToString(CultureInfo.CurrentCulture),
                 ParentIndexNumber = Published.Year,
+                IndexNumber = Plugin.Instance?.Configuration?.EpisodeNumberingScheme switch
+                {
+                    NumberingScheme.YYYYMMDD => (Published.Year * 10000) + (Published.Month * 100) + Published.Day,
+                    _ => null
+                },
                 SeriesName = Channel.Name,
                 ProductionYear = Published.Year,
                 PremiereDate = Published,

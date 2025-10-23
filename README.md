@@ -114,6 +114,16 @@ Keep in mind that Jellyfin lowest accepted period is of 1 minute (60 seconds) an
 
 ![Tasks intervals settings](https://github.com/user-attachments/assets/19db6b83-6715-477d-8ce7-b78526e87ba9)
 
+## Episode numbering
+
+<p>There are different ways to number the episodes as they are configured in Jellyfin.<br>
+This changes the number after E in S--E-- (for example S2024E100 for episode number 100 of season 2024).</p>
+
+![Episode numbering scheme options](https://github.com/user-attachments/assets/6d36bc2c-ca9d-4a5c-8021-e15d399316fc)
+
+The options correlate with:
+- Default - leave the numbering to what Jellyfin does by default (this is what the plugin has always done)
+- YYYYMMDD - numbers the episode by the year, month, day (e.g. 20250804 for a video published on the 4th of August 2025)
 
 ## Build
 

@@ -1,6 +1,8 @@
+using System;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.TubeArchivistMetadata.Utilities
 {
@@ -45,6 +47,11 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Utilities
         /// <returns>A string with \n replaced by br tags.</returns>
         public static string FormatDescription(string description)
         {
+            if (description == null)
+            {
+                return "";
+            }
+
             var maxLength = 500;
             if (Plugin.Instance != null)
             {
@@ -54,8 +61,9 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Utilities
             if (description.Length > maxLength)
             {
                 description = description.Substring(0, maxLength);
-                description = description.Replace("\n", "<br>", System.StringComparison.CurrentCulture);
             }
+
+            description = description.Replace("\n", "<br>", System.StringComparison.CurrentCulture);
 
             return description;
         }
