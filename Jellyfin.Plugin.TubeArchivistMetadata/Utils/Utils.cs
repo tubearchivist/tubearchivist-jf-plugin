@@ -49,7 +49,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Utilities
         {
             if (description == null)
             {
-                return "";
+                return string.Empty;
             }
 
             var maxLength = 500;
