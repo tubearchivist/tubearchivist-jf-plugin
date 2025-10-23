@@ -41,6 +41,18 @@
                         <div class="fieldDescription">This is the maximum length of the descriptions showed in series
                             and episodes</div>
                     </div>
+                    <div class="selectContainer">
+                        <label class="selectLabel" for="EpisodeNumberingScheme">Episode numbering scheme</label>
+                        <select is="emby-select" id="EpisodeNumberingScheme" name="EpisodeNumberingScheme" label="Description markup" class="emby-select-withcolor emby-select">
+                            <option value="Default">Default (no specified numbering)</option>
+                            <option value="YYYYMMDD">YYYYMMDD (e.g. 20250804 for August 4th, 2025)</option>
+                        </select>
+                        <div class="selectArrowContainer">
+                            <span class="selectArrow material-icons keyboard_arrow_down" aria-hidden="true"></span>
+                        </div>
+                        <div class="fieldDescription">This is the numbering scheme for episodes in Jellyfin (IndexNumber).
+                            Default is the same as no numbering which allows Jellyfin to use the fallback numbering scheme.
+                    </div>
                     <div>
                         <h2>Synchronization</h2>
                     </div>
@@ -118,17 +130,6 @@
                         <div class="fieldDescription">This is the TubeArchivist to Jellyfin playback progress
                             synchronization interval in seconds (Jellyfin restart required).</div>
                     </div>
-                    <div class="selectContainer">
-                        <label class="selectLabel" for="EpisodeNumberingScheme">Episode numbering scheme</label>
-                        <select is="emby-select" id="EpisodeNumberingScheme" name="EpisodeNumberingScheme" label="Description markup" class="emby-select-withcolor emby-select">
-                            <option value="Default">Default (no specified numbering)</option>
-                            <option value="YYYYMMDD">YYYYMMDD (e.g. 20250804 for August 4th, 2025)</option>
-                        </select>
-                        <div class="selectArrowContainer">
-                            <span class="selectArrow material-icons keyboard_arrow_down" aria-hidden="true"></span>
-                        </div>
-                        <div class="fieldDescription">This is the numbering scheme for episodes in Jellyfin (IndexNumber). 
-                            Default is the same as no numbering which allows Jellyfin to use the fallback numbering scheme.</div>
                     <div class="inputContainer">
                         <label class="inputLabel inputLabelUnfocused" for="JFTAPlaylistsSyncTaskInterval">Jellyfin to TubeArchivist
                             playlists synchronization interval</label>
