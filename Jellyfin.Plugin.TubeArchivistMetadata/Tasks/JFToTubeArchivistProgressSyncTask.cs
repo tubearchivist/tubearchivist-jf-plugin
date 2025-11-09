@@ -177,10 +177,22 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                                 if (!isChannelWatched)
                                 {
                                     var isVideoPlayed = video.IsPlayed(user, videoItemData);
-                                    statusCode = await taApi.SetWatchedStatus(videoYTId, isVideoPlayed).ConfigureAwait(true);
-                                    if (statusCode != System.Net.HttpStatusCode.OK)
+                                    var taVideo = await taApi.GetVideo(videoYTId).ConfigureAwait(true);
+                                    if (taVideo != null)
                                     {
-                                        _logger.LogCritical("{Message}", $"POST /watched returned {statusCode} for video {video.Name} ({videoYTId}) with wacthed status {isVideoPlayed}");
+                                        var isTAVideoPlayed = taVideo?.Player.IsWatched ?? false;
+                                        if (isTAVideoPlayed != isVideoPlayed)
+                                        {
+                                            statusCode = await taApi.SetWatchedStatus(videoYTId, isVideoPlayed).ConfigureAwait(true);
+                                            if (statusCode != System.Net.HttpStatusCode.OK)
+                                            {
+                                                _logger.LogCritical("{Message}", $"POST /watched returned {statusCode} for video {video.Name} ({videoYTId}) with wacthed status {isVideoPlayed}");
+                                            }
+                                            else
+                                            {
+                                                _logger.LogInformation("Video {VideoId} watch status marked as {Status} in TubeArchivist", videoYTId, isVideoPlayed);
+                                            }
+                                        }
                                     }
 
                                     _logger.LogDebug("{Message}", isVideoPlayed);
