@@ -192,8 +192,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
             var user = _userManager.GetUserById(eventArgs.UserId);
             if (
                 Configuration.JFTAProgressSync &&
-                user != null &&
-                Configuration.GetJFUsernamesToArray().Contains(user!.Username) &&
+                user == null &&
                 string.Equals(topParent?.Name, Instance?.Configuration.CollectionTitle, StringComparison.OrdinalIgnoreCase)
             )
             {
