@@ -191,16 +191,21 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
             var topParent = eventArgs.Item.GetTopParent();
             var user = _userManager.GetUserById(eventArgs.UserId);
             if (
-                Configuration.JFTAProgressSync &&
-                user == null &&
-                string.Equals(topParent?.Name, Instance?.Configuration.CollectionTitle, StringComparison.OrdinalIgnoreCase)
+                Configuration.JFTAProgressSync
+                && user == null
+                && string.Equals(topParent?.Name, Instance?.Configuration.CollectionTitle, StringComparison.OrdinalIgnoreCase)
             )
             {
                 Logger.LogError("OnWatchedStatusChange callback called without user id for item {ItemName}", eventArgs.Item.Name);
                 return;
             }
 
-            if (Configuration.JFTAProgressSync && user != null && Configuration.GetJFUsernamesToArray().Contains(user!.Username))
+            if (
+                Configuration.JFTAProgressSync
+                && user != null
+                && string.Equals(Configuration.JFUsernameFrom, user!.Username, StringComparison.Ordinal)
+                && string.Equals(topParent?.Name, Instance?.Configuration.CollectionTitle, StringComparison.OrdinalIgnoreCase)
+            )
             {
                 var userItemData = _userDataManager.GetUserData(user, eventArgs.Item);
                 var isPlayed = eventArgs.Item.IsPlayed(user, userItemData);
