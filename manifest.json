@@ -9,6 +9,14 @@
         "imageUrl": "https://raw.githubusercontent.com/tubearchivist/tubearchivist-jf-plugin/master/images/logo.png",
         "versions": [
             {
+                "version": "1.4.2.0",
+                "changelog": "Introduce episode numbering alternative schema\n",
+                "targetAbi": "10.11.0.0",
+                "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.4.2/tubearchivistmetadata_1.4.2.0.zip",
+                "checksum": "8df142d2f1f0c0dffa302a567b40ef84",
+                "timestamp": "2025-10-23T20:27:32Z"
+            },
+            {
                 "version": "1.4.1.0",
                 "changelog": "Introduce bidirectional playlists synchronization\n",
                 "targetAbi": "10.11.0.0",
