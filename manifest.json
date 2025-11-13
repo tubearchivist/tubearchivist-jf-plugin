@@ -9,6 +9,14 @@
         "imageUrl": "https://raw.githubusercontent.com/tubearchivist/tubearchivist-jf-plugin/master/images/logo.png",
         "versions": [
             {
+                "version": "1.4.3.0",
+                "changelog": "Introduce episode numbering alternative schema\n",
+                "targetAbi": "10.11.0.0",
+                "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.4.3/tubearchivistmetadata_1.4.3.0.zip",
+                "checksum": "297d4f15af1132939f43c905b1ad393e",
+                "timestamp": "2025-11-13T19:31:49Z"
+            },
+            {
                 "version": "1.4.2.0",
                 "changelog": "Introduce episode numbering alternative schema\n",
                 "targetAbi": "10.11.0.0",
