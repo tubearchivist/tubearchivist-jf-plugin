@@ -172,10 +172,17 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
             {
                 long progress = (long)eventArgs.PlaybackPositionTicks / TimeSpan.TicksPerSecond;
                 var videoId = Utils.GetVideoNameFromPath(eventArgs.Item.Path);
-                var statusCode = await TubeArchivistApi.GetInstance().SetProgress(videoId, progress).ConfigureAwait(true);
-                if (statusCode != System.Net.HttpStatusCode.OK)
+                try
                 {
-                    Logger.LogCritical("{Message}", $"POST /video/{videoId}/progress returned {statusCode} for video {eventArgs.Item.Name} with progress {progress} seconds");
+                    var statusCode = await TubeArchivistApi.GetInstance().SetProgress(videoId, progress).ConfigureAwait(true);
+                    if (statusCode != System.Net.HttpStatusCode.OK)
+                    {
+                        Logger.LogCritical("{Message}", $"POST /video/{videoId}/progress returned {statusCode} for video {eventArgs.Item.Name} with progress {progress} seconds");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogCritical("An exception occurred while calling POST /video/{VideoId}/progress for for video {VideoName} with progress {Progress} seconds: {ExceptionMessage}", videoId, eventArgs.Item.Name, progress, ex.Message);
                 }
             }
         }
