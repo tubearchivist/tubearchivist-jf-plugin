@@ -219,7 +219,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
             {
                 url = response.Headers.Location;
                 _logger.LogInformation("{Message}", "Received redirect to: " + url);
-                response = await client.GetAsync(url).ConfigureAwait(true);
+                response = await client.GetAsync(Utils.SanitizeUrl(Plugin.Instance?.Configuration.TubeArchivistUrl + url)).ConfigureAwait(true);
             }
 
             _logger.LogInformation("{Message}", url + ": " + response.StatusCode);
@@ -238,6 +238,13 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
                         var nextPage = playlists.Paginate.CurrentPage + 1;
                         var pagedUrl = new Uri(Utils.SanitizeUrl(Plugin.Instance?.Configuration.TubeArchivistUrl + playlistsEndpoint + "?page=" + nextPage));
                         response = await client.GetAsync(pagedUrl).ConfigureAwait(true);
+                        while (response.StatusCode == HttpStatusCode.Moved)
+                        {
+                            url = response.Headers.Location;
+                            _logger.LogInformation("{Message}", "Received redirect to: " + url);
+                            response = await client.GetAsync(Utils.SanitizeUrl(Plugin.Instance?.Configuration.TubeArchivistUrl + url)).ConfigureAwait(true);
+                        }
+
                         _logger.LogInformation("{Message}", pagedUrl + ": " + response.StatusCode);
 
                         if (response.IsSuccessStatusCode)
@@ -257,6 +264,11 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
                                 playlists.Paginate = nextPagePlaylists.Paginate;
                                 _logger.LogInformation("Pagination info: Current page {CurrentPage} / Last page {LastPage}, Total hits: {TotalHits}", playlists.Paginate.CurrentPage, playlists.Paginate.LastPage, playlists.Paginate.TotalHits);
                             }
+                        }
+                        else
+                        {
+                            _logger.LogCritical("Failed to retrieve page {PageNumber} of playlists during pagination.", nextPage);
+                            break;
                         }
                     }
                 }

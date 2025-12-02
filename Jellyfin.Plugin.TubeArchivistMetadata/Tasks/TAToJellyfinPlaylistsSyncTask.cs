@@ -170,7 +170,15 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                             }
 
                             processedVideosCount += currentPlaylistVideos;
-                            progress.Report(processedVideosCount * 100 / totalVideosCount);
+
+                            if (totalVideosCount == 0)
+                            {
+                                progress.Report(100);
+                            }
+                            else
+                            {
+                                progress.Report(processedVideosCount * 100 / totalVideosCount);
+                            }
                         }
                     }
                 }
