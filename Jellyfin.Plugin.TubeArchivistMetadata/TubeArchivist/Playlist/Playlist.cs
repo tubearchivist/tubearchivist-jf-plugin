@@ -112,5 +112,16 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
         /// <value>One of the <see cref="PlaylistType"/> values indicating the playlist's type.</value>
         [JsonProperty(PropertyName = "playlist_type")]
         public PlaylistType Type { get; set; }
+
+        /// <summary>
+        /// Returns a string of the playlist's key fields for logging.
+        /// </summary>
+        /// <returns>A string containing the playlist id, name, and entries count.</returns>
+        public override string ToString()
+        {
+            return "PlaylistId: " + this.Id +
+                   ", Name: " + this.Name +
+                   ", EntriesCount: " + this.Entries.Count;
+        }
     }
 }
