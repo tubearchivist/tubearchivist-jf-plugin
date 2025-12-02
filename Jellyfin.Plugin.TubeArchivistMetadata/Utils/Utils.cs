@@ -1,8 +1,6 @@
 using System;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Microsoft.Extensions.Logging;
 
 namespace Jellyfin.Plugin.TubeArchivistMetadata.Utilities
 {
@@ -22,20 +20,59 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Utilities
         /// <returns>The URL string without spaces, doubled slashes and with a trailing slash.</returns>
         public static string SanitizeUrl(string inputUrl)
         {
-            // Extract the schema part
-            Match schemaMatch = Regex.Match(inputUrl, @"^(?<schema>https?://)");
+            if (string.IsNullOrWhiteSpace(inputUrl))
+            {
+                return string.Empty;
+            }
 
-            // Remove double slashes and spaces from the remaining part of the URL
-            string cleanedPath = Regex.Replace(inputUrl.Substring(schemaMatch.Length), @"[/\s]+", "/");
+            // Extract the schema part (http:// or https://)
+            Match schemaMatch = Regex.Match(inputUrl, @"^(?<schema>https?://)", RegexOptions.IgnoreCase);
+
+            // If no schema found, treat whole string as the rest
+            int schemaLength = schemaMatch.Success ? schemaMatch.Length : 0;
+
+            // Separate the main part from query (?) and fragment (#)
+            string rest = inputUrl.Substring(schemaLength);
+            string pathPart = rest;
+            string queryAndFragment = string.Empty;
+
+            int qIndex = rest.IndexOf('?', StringComparison.Ordinal);
+            int fIndex = rest.IndexOf('#', StringComparison.Ordinal);
+
+            int splitIndex = -1;
+            if (qIndex >= 0 && fIndex >= 0)
+            {
+                splitIndex = Math.Min(qIndex, fIndex);
+            }
+            else if (qIndex >= 0)
+            {
+                splitIndex = qIndex;
+            }
+            else if (fIndex >= 0)
+            {
+                splitIndex = fIndex;
+            }
+
+            if (splitIndex >= 0)
+            {
+                pathPart = rest.Substring(0, splitIndex);
+                queryAndFragment = rest.Substring(splitIndex);
+            }
+
+            // Remove double slashes and spaces from the path part
+            string cleanedPath = Regex.Replace(pathPart, @"[/\s]+", "/");
 
             // Remove slashes at the start
             cleanedPath = cleanedPath.TrimStart('/');
 
-            // Add a trailing slash if not already present
-            cleanedPath = cleanedPath.TrimEnd('/') + "/";
+            // Add a trailing slash only when there are no query or fragment parts
+            if (string.IsNullOrEmpty(queryAndFragment))
+            {
+                cleanedPath = cleanedPath.TrimEnd('/') + "/";
+            }
 
-            // Combine the schema and cleaned path
-            string cleanedUrl = schemaMatch.Groups["schema"].Value + cleanedPath;
+            // Combine the schema and cleaned path and re-append query/fragment
+            string cleanedUrl = (schemaMatch.Success ? schemaMatch.Groups["schema"].Value : string.Empty) + cleanedPath + queryAndFragment;
 
             return cleanedUrl;
         }
