@@ -15,3 +15,4 @@ artifacts:
 - "Jellyfin.Plugin.TubeArchivistMetadata.dll"
 changelog: >
   Handle TubeArchivist playlists pagination
+  Handle prematurely ended response errors
