@@ -9,6 +9,14 @@
         "imageUrl": "https://raw.githubusercontent.com/tubearchivist/tubearchivist-jf-plugin/master/images/logo.png",
         "versions": [
             {
+                "version": "1.4.4.0",
+                "changelog": "Handle TubeArchivist playlists pagination\n",
+                "targetAbi": "10.11.0.0",
+                "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.4.4/tubearchivistmetadata_1.4.4.0.zip",
+                "checksum": "90f1d388f7363537df8287e996a96bbd",
+                "timestamp": "2025-12-02T13:40:47Z"
+            },
+            {
                 "version": "1.4.3.0",
                 "changelog": "Introduce episode numbering alternative schema\n",
                 "targetAbi": "10.11.0.0",
