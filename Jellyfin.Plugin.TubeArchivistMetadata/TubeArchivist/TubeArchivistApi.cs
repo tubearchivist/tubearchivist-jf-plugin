@@ -60,6 +60,37 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
             return _taApiInstance;
         }
 
+        private static bool IsRedirectStatusCode(HttpStatusCode statusCode)
+        {
+            return statusCode == HttpStatusCode.Moved
+                || statusCode == HttpStatusCode.Redirect
+                || statusCode == HttpStatusCode.RedirectMethod
+                || statusCode == HttpStatusCode.TemporaryRedirect
+                || (int)statusCode == 308;
+        }
+
+        private static Uri ResolveTubeArchivistUri(string? url)
+        {
+            return Utils.ResolveUrl(Plugin.Instance!.Configuration.TubeArchivistUrl, url);
+        }
+
+        private async Task<HttpResponseMessage> GetAsync(string url)
+        {
+            var resolvedUrl = ResolveTubeArchivistUri(url);
+            var response = await client.GetAsync(resolvedUrl).ConfigureAwait(true);
+            var redirectCount = 0;
+
+            while (IsRedirectStatusCode(response.StatusCode) && response.Headers.Location != null && redirectCount < 10)
+            {
+                resolvedUrl = ResolveTubeArchivistUri(response.Headers.Location.OriginalString);
+                _logger.LogDebug("{Message}", "Received redirect to: " + resolvedUrl);
+                response = await client.GetAsync(resolvedUrl).ConfigureAwait(true);
+                redirectCount++;
+            }
+
+            return response;
+        }
+
         /// <summary>
         /// Retrieves the given channel information from TubeArchivist.
         /// </summary>
@@ -70,14 +101,9 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
             Channel? channel = null;
 
             var channelsEndpoint = "/api/channel/";
-            var url = new Uri(Utils.SanitizeUrl(Plugin.Instance?.Configuration.TubeArchivistUrl + channelsEndpoint + channelId));
-            var response = await client.GetAsync(url).ConfigureAwait(true);
-            while (response.StatusCode == HttpStatusCode.Moved)
-            {
-                url = response.Headers.Location;
-                _logger.LogDebug("{Message}", "Received redirect to: " + url);
-                response = await client.GetAsync(url).ConfigureAwait(true);
-            }
+            var requestPath = channelsEndpoint + channelId;
+            var url = ResolveTubeArchivistUri(requestPath);
+            var response = await GetAsync(requestPath).ConfigureAwait(true);
 
             _logger.LogDebug("{Message}", url + ": " + response.StatusCode);
 
@@ -100,14 +126,9 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
             Video? video = null;
 
             var videosEndpoint = "/api/video/";
-            var url = new Uri(Utils.SanitizeUrl(Plugin.Instance?.Configuration.TubeArchivistUrl + videosEndpoint + videoId));
-            var response = await client.GetAsync(url).ConfigureAwait(true);
-            while (response.StatusCode == HttpStatusCode.Moved)
-            {
-                url = response.Headers.Location;
-                _logger.LogDebug("{Message}", "Received redirect to: " + url);
-                response = await client.GetAsync(url).ConfigureAwait(true);
-            }
+            var requestPath = videosEndpoint + videoId;
+            var url = ResolveTubeArchivistUri(requestPath);
+            var response = await GetAsync(requestPath).ConfigureAwait(true);
 
             _logger.LogDebug("{Message}", url + ": " + response.StatusCode);
 
@@ -130,15 +151,8 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
             PingResponse? pong = null;
 
             var pingEndpoint = "/api/ping/";
-            var url = new Uri(Utils.SanitizeUrl(Plugin.Instance!.Configuration.TubeArchivistUrl + pingEndpoint));
-            var response = await client.GetAsync(url).ConfigureAwait(true);
-
-            while (response.StatusCode == HttpStatusCode.Moved)
-            {
-                url = response.Headers.Location;
-                _logger.LogDebug("{Message}", "Received redirect to: " + url);
-                response = await client.GetAsync(url).ConfigureAwait(true);
-            }
+            var url = ResolveTubeArchivistUri(pingEndpoint);
+            var response = await GetAsync(pingEndpoint).ConfigureAwait(true);
 
             _logger.LogDebug("{Message}", url + ": " + response.StatusCode);
 
@@ -213,14 +227,8 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
             ResponseContainer<ISet<Playlist>?>? playlists = null;
 
             var playlistsEndpoint = "/api/playlist/";
-            var url = new Uri(Utils.SanitizeUrl(Plugin.Instance?.Configuration.TubeArchivistUrl + playlistsEndpoint));
-            var response = await client.GetAsync(url).ConfigureAwait(true);
-            while (response.StatusCode == HttpStatusCode.Moved)
-            {
-                url = response.Headers.Location;
-                _logger.LogInformation("{Message}", "Received redirect to: " + url);
-                response = await client.GetAsync(Utils.SanitizeUrl(Plugin.Instance?.Configuration.TubeArchivistUrl + url)).ConfigureAwait(true);
-            }
+            var url = ResolveTubeArchivistUri(playlistsEndpoint);
+            var response = await GetAsync(playlistsEndpoint).ConfigureAwait(true);
 
             _logger.LogInformation("{Message}", url + ": " + response.StatusCode);
 
@@ -236,14 +244,9 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
                     while (playlists.Paginate.CurrentPage < lastPage)
                     {
                         var nextPage = playlists.Paginate.CurrentPage + 1;
-                        var pagedUrl = new Uri(Utils.SanitizeUrl(Plugin.Instance?.Configuration.TubeArchivistUrl + playlistsEndpoint + "?page=" + nextPage));
-                        response = await client.GetAsync(pagedUrl).ConfigureAwait(true);
-                        while (response.StatusCode == HttpStatusCode.Moved)
-                        {
-                            url = response.Headers.Location;
-                            _logger.LogInformation("{Message}", "Received redirect to: " + url);
-                            response = await client.GetAsync(Utils.SanitizeUrl(Plugin.Instance?.Configuration.TubeArchivistUrl + url)).ConfigureAwait(true);
-                        }
+                        var nextPagePath = playlistsEndpoint + "?page=" + nextPage;
+                        var pagedUrl = ResolveTubeArchivistUri(nextPagePath);
+                        response = await GetAsync(nextPagePath).ConfigureAwait(true);
 
                         _logger.LogInformation("{Message}", pagedUrl + ": " + response.StatusCode);
 
