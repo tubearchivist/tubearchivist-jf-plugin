@@ -81,8 +81,12 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Utilities
         /// Resolves a URL against the configured TubeArchivist base URL.
         /// </summary>
         /// <param name="baseUrl">Configured TubeArchivist base URL.</param>
-        /// <param name="url">The relative or absolute URL to resolve.</param>
-        /// <returns>A resolved absolute <see cref="Uri"/>.</returns>
+        /// <param name="url">The relative or absolute URL to resolve. If null or whitespace, the base URL is returned.</param>
+        /// <returns>
+        /// A resolved absolute <see cref="Uri"/>.
+        /// Absolute URLs pointing to a different origin keep only their path, query and fragment,
+        /// so requests stay pinned to the configured TubeArchivist host.
+        /// </returns>
         public static Uri ResolveUrl(string baseUrl, string? url)
         {
             var sanitizedBaseUrl = SanitizeUrl(baseUrl);

@@ -17,6 +17,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
     /// </summary>
     public class TubeArchivistApi
     {
+        private const int MaxRedirectCount = 10;
         private ILogger _logger;
         private HttpClient client;
         private static TubeArchivistApi _taApiInstance = null!;
@@ -62,11 +63,11 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
 
         private static bool IsRedirectStatusCode(HttpStatusCode statusCode)
         {
-            return statusCode == HttpStatusCode.Moved
+                return statusCode == HttpStatusCode.Moved
                 || statusCode == HttpStatusCode.Redirect
                 || statusCode == HttpStatusCode.RedirectMethod
                 || statusCode == HttpStatusCode.TemporaryRedirect
-                || (int)statusCode == 308;
+                || statusCode == HttpStatusCode.PermanentRedirect;
         }
 
         private static Uri ResolveTubeArchivistUri(string? url)
@@ -80,12 +81,17 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
             var response = await client.GetAsync(resolvedUrl).ConfigureAwait(true);
             var redirectCount = 0;
 
-            while (IsRedirectStatusCode(response.StatusCode) && response.Headers.Location != null && redirectCount < 10)
+            while (IsRedirectStatusCode(response.StatusCode) && response.Headers.Location != null && redirectCount < MaxRedirectCount)
             {
                 resolvedUrl = ResolveTubeArchivistUri(response.Headers.Location.OriginalString);
-                _logger.LogDebug("{Message}", "Received redirect to: " + resolvedUrl);
+                _logger.LogDebug("Received redirect to: {ResolvedUrl}", resolvedUrl);
                 response = await client.GetAsync(resolvedUrl).ConfigureAwait(true);
                 redirectCount++;
+            }
+
+            if (redirectCount >= MaxRedirectCount && IsRedirectStatusCode(response.StatusCode) && response.Headers.Location != null)
+            {
+                _logger.LogWarning("Stopped following TubeArchivist redirect chain after {RedirectCount} redirects. Last location: {RedirectLocation}", redirectCount, response.Headers.Location);
             }
 
             return response;
