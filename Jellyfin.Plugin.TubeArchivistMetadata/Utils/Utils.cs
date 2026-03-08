@@ -78,6 +78,38 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Utilities
         }
 
         /// <summary>
+        /// Resolves a URL against the configured TubeArchivist base URL.
+        /// </summary>
+        /// <param name="baseUrl">Configured TubeArchivist base URL.</param>
+        /// <param name="url">The relative or absolute URL to resolve. If null or whitespace, the base URL is returned.</param>
+        /// <returns>
+        /// A resolved absolute <see cref="Uri"/>.
+        /// Absolute URLs pointing to a different origin keep only their path, query and fragment,
+        /// so requests stay pinned to the configured TubeArchivist host.
+        /// </returns>
+        public static Uri ResolveUrl(string baseUrl, string? url)
+        {
+            var sanitizedBaseUrl = SanitizeUrl(baseUrl);
+            var baseUri = new Uri(sanitizedBaseUrl, UriKind.Absolute);
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                return baseUri;
+            }
+
+            if (Uri.TryCreate(url, UriKind.Absolute, out Uri? absoluteUri))
+            {
+                if (Uri.Compare(baseUri, absoluteUri, UriComponents.SchemeAndServer, UriFormat.SafeUnescaped, StringComparison.OrdinalIgnoreCase) == 0)
+                {
+                    return absoluteUri;
+                }
+
+                return new Uri(baseUri, absoluteUri.PathAndQuery + absoluteUri.Fragment);
+            }
+
+            return new Uri(baseUri, url);
+        }
+
+        /// <summary>
         /// Formats episodes and series descriptions replacing newlines with br tags.
         /// </summary>
         /// <param name="description">String to format.</param>
