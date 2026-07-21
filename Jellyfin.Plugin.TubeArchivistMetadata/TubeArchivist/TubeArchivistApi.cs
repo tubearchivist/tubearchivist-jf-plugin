@@ -219,7 +219,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
             {
                 url = response.Headers.Location;
                 _logger.LogInformation("{Message}", "Received redirect to: " + url);
-                response = await client.GetAsync(url).ConfigureAwait(true);
+                response = await client.GetAsync(Utils.SanitizeUrl(Plugin.Instance?.Configuration.TubeArchivistUrl + url)).ConfigureAwait(true);
             }
 
             _logger.LogInformation("{Message}", url + ": " + response.StatusCode);
@@ -228,6 +228,50 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
             {
                 string rawData = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
                 playlists = JsonConvert.DeserializeObject<ResponseContainer<ISet<Playlist>?>>(rawData);
+                if (playlists?.Paginate != null)
+                {
+                    var lastPage = playlists.Paginate.LastPage;
+                    _logger.LogInformation("Pagination info: Current page {CurrentPage} / Last page {LastPage}, Total hits: {TotalHits}", playlists.Paginate.CurrentPage, playlists.Paginate.LastPage, playlists.Paginate.TotalHits);
+
+                    while (playlists.Paginate.CurrentPage < lastPage)
+                    {
+                        var nextPage = playlists.Paginate.CurrentPage + 1;
+                        var pagedUrl = new Uri(Utils.SanitizeUrl(Plugin.Instance?.Configuration.TubeArchivistUrl + playlistsEndpoint + "?page=" + nextPage));
+                        response = await client.GetAsync(pagedUrl).ConfigureAwait(true);
+                        while (response.StatusCode == HttpStatusCode.Moved)
+                        {
+                            url = response.Headers.Location;
+                            _logger.LogInformation("{Message}", "Received redirect to: " + url);
+                            response = await client.GetAsync(Utils.SanitizeUrl(Plugin.Instance?.Configuration.TubeArchivistUrl + url)).ConfigureAwait(true);
+                        }
+
+                        _logger.LogInformation("{Message}", pagedUrl + ": " + response.StatusCode);
+
+                        if (response.IsSuccessStatusCode)
+                        {
+                            rawData = await response.Content.ReadAsStringAsync().ConfigureAwait(true);
+                            var nextPagePlaylists = JsonConvert.DeserializeObject<ResponseContainer<ISet<Playlist>?>>(rawData);
+                            if (nextPagePlaylists?.Data != null)
+                            {
+                                foreach (var playlist in nextPagePlaylists.Data)
+                                {
+                                    playlists.Data?.Add(playlist);
+                                }
+                            }
+
+                            if (nextPagePlaylists?.Paginate != null)
+                            {
+                                playlists.Paginate = nextPagePlaylists.Paginate;
+                                _logger.LogInformation("Pagination info: Current page {CurrentPage} / Last page {LastPage}, Total hits: {TotalHits}", playlists.Paginate.CurrentPage, playlists.Paginate.LastPage, playlists.Paginate.TotalHits);
+                            }
+                        }
+                        else
+                        {
+                            _logger.LogCritical("Failed to retrieve page {PageNumber} of playlists during pagination.", nextPage);
+                            break;
+                        }
+                    }
+                }
             }
 
             return playlists?.Data;

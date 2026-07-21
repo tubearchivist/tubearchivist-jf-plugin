@@ -201,10 +201,17 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                                         var playbackProgress = _userDataManager.GetUserData(user, video)?.PlaybackPositionTicks / TimeSpan.TicksPerSecond;
                                         if (playbackProgress != null)
                                         {
-                                            statusCode = await taApi.SetProgress(videoYTId, playbackProgress.Value).ConfigureAwait(true);
-                                            if (statusCode != System.Net.HttpStatusCode.OK)
+                                            try
                                             {
-                                                _logger.LogCritical("{Message}", $"POST /video/{videoYTId}/progress returned {statusCode} for video {video.Name} with progress {progress} seconds");
+                                                statusCode = await taApi.SetProgress(videoYTId, playbackProgress.Value).ConfigureAwait(true);
+                                                if (statusCode != System.Net.HttpStatusCode.OK)
+                                                {
+                                                    _logger.LogCritical("{Message}", $"POST /video/{videoYTId}/progress returned {statusCode} for video {video.Name} with progress {progress} seconds");
+                                                }
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                _logger.LogCritical("An exception occurred while calling POST /video/{VideoId}/progress for for video {VideoName} with progress {Progress} seconds: {ExceptionMessage}", videoYTId, videoYTId, playbackProgress.Value, ex.Message);
                                             }
                                         }
                                     }

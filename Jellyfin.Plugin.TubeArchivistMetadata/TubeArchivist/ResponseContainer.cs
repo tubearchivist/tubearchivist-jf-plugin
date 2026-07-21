@@ -10,5 +10,10 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
         /// Gets or sets the contained data object.
         /// </summary>
         public T? Data { get; set; }
+
+        /// <summary>
+        /// Gets or sets the pagination info object.
+        /// </summary>
+        public PaginationInfo? Paginate { get; set; }
     }
 }
