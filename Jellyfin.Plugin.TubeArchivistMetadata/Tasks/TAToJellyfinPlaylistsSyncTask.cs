@@ -185,10 +185,6 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
 
                 _logger.LogInformation("Time elapsed: {Time}", DateTime.Now - start);
             }
-            else
-            {
-                _logger.LogInformation("TubeArchivist->Jellyfin playlists synchronization is currently disabled.");
-            }
 
             progress.Report(100);
         }
