@@ -9,180 +9,60 @@
         "imageUrl": "https://raw.githubusercontent.com/tubearchivist/tubearchivist-jf-plugin/master/images/logo.png",
         "versions": [
             {
+                "version": "1.4.5.0",
+                "changelog": "Don't sync channel watch state to TA\n",
+                "targetAbi": "10.11.0.0",
+                "sourceUrl": "https://github.com/Jurrer/tubearchivist-jf-plugin/releases/download/v1.4.5/tubearchivistmetadata_1.4.5.0.zip",
+                "checksum": "3f930fe92a5eac87c512e61491e6d677",
+                "timestamp": "2026-09-22T16:27:33Z"
+            },
+            {
                 "version": "1.4.4.0",
                 "changelog": "Handle TubeArchivist playlists pagination\n",
                 "targetAbi": "10.11.0.0",
-                "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.4.4/tubearchivistmetadata_1.4.4.0.zip",
-                "checksum": "90f1d388f7363537df8287e996a96bbd",
+                "sourceUrl": "https://github.com/Jurrer/tubearchivist-jf-plugin/releases/download/v1.4.4/tubearchivistmetadata_1.4.4.0.zip",
+                "checksum": "d52bfc31ad9bf8ecab59c08d66a97c98",
                 "timestamp": "2025-12-02T13:40:47Z"
             },
             {
                 "version": "1.4.3.0",
-                "changelog": "Introduce episode numbering alternative schema\n",
+                "changelog": "Fix JF->TA watched status sync\n",
                 "targetAbi": "10.11.0.0",
-                "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.4.3/tubearchivistmetadata_1.4.3.0.zip",
-                "checksum": "297d4f15af1132939f43c905b1ad393e",
+                "sourceUrl": "https://github.com/Jurrer/tubearchivist-jf-plugin/releases/download/v1.4.3/tubearchivistmetadata_1.4.3.0.zip",
+                "checksum": "6219c265a75faef54ed5ce09d569541d",
                 "timestamp": "2025-11-13T19:31:49Z"
             },
             {
                 "version": "1.4.2.0",
                 "changelog": "Introduce episode numbering alternative schema\n",
                 "targetAbi": "10.11.0.0",
-                "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.4.2/tubearchivistmetadata_1.4.2.0.zip",
-                "checksum": "8df142d2f1f0c0dffa302a567b40ef84",
+                "sourceUrl": "https://github.com/Jurrer/tubearchivist-jf-plugin/releases/download/v1.4.2/tubearchivistmetadata_1.4.2.0.zip",
+                "checksum": "2a0cd64e500e00192cede8cca2fa752f",
                 "timestamp": "2025-10-23T20:27:32Z"
             },
             {
                 "version": "1.4.1.0",
                 "changelog": "Introduce bidirectional playlists synchronization\n",
                 "targetAbi": "10.11.0.0",
-                "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.4.1/tubearchivistmetadata_1.4.1.0.zip",
-                "checksum": "2dc0b9140472a4f783f093a7ee425493",
+                "sourceUrl": "https://github.com/Jurrer/tubearchivist-jf-plugin/releases/download/v1.4.1/tubearchivistmetadata_1.4.1.0.zip",
+                "checksum": "a7e4ccb907f5e8b754748e860ce663c6",
                 "timestamp": "2025-10-22T07:00:27Z"
             },
             {
                 "version": "1.4.0.0",
-                "changelog": "Introduce bidirectional playlists synchronization\n",
+                "changelog": "Align compatibility with Jellyfin 10.11.x\n",
                 "targetAbi": "10.11.0.0",
-                "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.4.0/tubearchivistmetadata_1.4.0.0.zip",
-                "checksum": "4b81ab60022b532a64bb5eeb7be67dcc",
+                "sourceUrl": "https://github.com/Jurrer/tubearchivist-jf-plugin/releases/download/v1.4.0/tubearchivistmetadata_1.4.0.0.zip",
+                "checksum": "5fa98849ec5cf0676666ec3a83576112",
                 "timestamp": "2025-10-22T06:57:53Z"
             },
             {
                 "version": "1.3.7.0",
                 "changelog": "Fix JF->TA Sync\n",
                 "targetAbi": "10.10.0.0",
-                "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.3.7/tubearchivistmetadata_1.3.7.0.zip",
-                "checksum": "60d8e9f134912f907dccd30b531da4f6",
+                "sourceUrl": "https://github.com/Jurrer/tubearchivist-jf-plugin/releases/download/v1.3.7/tubearchivistmetadata_1.3.7.0.zip",
+                "checksum": "e22c507532f04a21940976baebac8229",
                 "timestamp": "2025-05-27T18:36:55Z"
-            },
-            {
-                "version": "1.3.6.0",
-                "changelog": "Fix TA auth header\n",
-                "targetAbi": "10.10.0.0",
-                "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.3.6/tubearchivistmetadata_1.3.6.0.zip",
-                "checksum": "513cde64268867d0047009eb2d986054",
-                "timestamp": "2025-03-10T22:01:13Z"
-            },
-            {
-                "version": "1.3.5.0",
-                "changelog": "Adapt to the new TA API changes Fix JF crash when setting watched status with TA offline\n",
-                "targetAbi": "10.10.0.0",
-                "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.3.5/tubearchivistmetadata_1.3.5.0.zip",
-                "checksum": "2536622c0ec73e6401860929f24849f7",
-                "timestamp": "2025-03-10T17:47:43Z"
-            },
-            {
-                "version": "1.3.4.0",
-                "changelog": "Merge workaround for JF crashing when scanning Series pull request by wolffshots\n",
-                "targetAbi": "10.10.0.0",
-                "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.3.4/tubearchivistmetadata_1.3.4.0.zip",
-                "checksum": "1ee6041139a6fdc3cecc8b2a427c60a8",
-                "timestamp": "2024-11-04T21:30:24Z"
-            },
-            {
-                "version": "1.3.3.0",
-                "changelog": "Add compatibility with Jellyfin 10.10\n",
-                "targetAbi": "10.10.0.0",
-                "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.3.3/tubearchivistmetadata_1.3.3.0.zip",
-                "checksum": "ee6431d8bdaf844672d167b6f3ee0a73",
-                "timestamp": "2024-11-04T20:41:46Z"
-            },
-            {
-                "version": "1.3.2.0",
-                "changelog": "Add tasks progress status Adjust logs levels\n",
-                "targetAbi": "10.9.1.0",
-                "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.3.2/tubearchivistmetadata_1.3.2.0.zip",
-                "checksum": "6162235807535a5c2a7570276798e69e",
-                "timestamp": "2024-09-14T13:41:58Z"
-            },
-            {
-                "version": "1.3.1.0",
-                "changelog": "Add support for Jellyfin 10.9.1\n",
-                "targetAbi": "10.9.1.0",
-                "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.3.1/tubearchivistmetadata_1.3.1.0.zip",
-                "checksum": "b0b526bbd1702970108e3b9a8c3709de",
-                "timestamp": "2024-09-12T13:36:12Z"
-            },
-            {
-                "version": "1.3.0.0",
-                "changelog": "Add support for Jellyfin 10.9.1\n",
-                "targetAbi": "10.9.1.0",
-                "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.3.0/tubearchivistmetadata_1.3.0.0.zip",
-                "checksum": "e1fde6f75a10a5f17bc9cc5814949180",
-                "timestamp": "2024-05-14T20:20:13Z"
-            },
-            {
-                "version": "1.2.5.0",
-                "changelog": "Ping the TA API to validate connection\n",
-                "targetAbi": "10.8.0.0",
-                "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.2.5/tubearchivistmetadata_1.2.5.0.zip",
-                "checksum": "e4a0d076ffd84c976ad66dde91dfb840",
-                "timestamp": "2024-05-14T17:37:17Z"
-            },
-            {
-                "version": "1.2.4.0",
-                "changelog": "Fix issues with directory separators\n",
-                "targetAbi": "10.8.0.0",
-                "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.2.4/tubearchivistmetadata_1.2.4.0.zip",
-                "checksum": "b418a46d458fe28354580d70748b1ced",
-                "timestamp": "2024-05-09T15:41:00Z"
-            },
-            {
-                "version": "1.2.3.0",
-                "changelog": "Add fix for unclosed HTML breaks\n",
-                "targetAbi": "10.8.0.0",
-                "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.2.3/tubearchivistmetadata_1.2.3.0.zip",
-                "checksum": "f5328a662444739eaa7c59855bfcb203",
-                "timestamp": "2024-04-18T21:45:00Z"
-            },
-            {
-                "version": "1.2.2.0",
-                "changelog": "Fix bug on description length substringing\n",
-                "targetAbi": "10.8.0.0",
-                "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.2.2/tubearchivistmetadata_1.2.2.0.zip",
-                "checksum": "82d04546916e1ba76d56de28e648447a",
-                "timestamp": "2024-03-15T10:12:00Z"
-            },
-            {
-                "version": "1.2.1.0",
-                "changelog": "Make maximum description length configurable\nTruncate descriptions to 500 characters\n",
-                "targetAbi": "10.8.0.0",
-                "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.2.1/tubearchivistmetadata_1.2.1.0.zip",
-                "checksum": "cf68d169956f166a6ee68a06192651c2",
-                "timestamp": "2024-03-14T21:50:00Z"
-            },
-            {
-                "version": "1.2.0.0",
-                "changelog": "Add episodes and series overview\n",
-                "targetAbi": "10.8.0.0",
-                "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.2.0/tubearchivistmetadata_1.2.0.0.zip",
-                "checksum": "75812a4464bf68c43fb9dcdb74d924e3",
-                "timestamp": "2024-03-14T20:00:00Z"
-            },
-            {
-                "version": "1.1.1.0",
-                "changelog": "Handle empty tags for videos and channels\nFix URL by removing trailing slash for images\n",
-                "targetAbi": "10.8.0.0",
-                "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.1.1/tubearchivistmetadata_1.1.1.0.zip",
-                "checksum": "84ce752ce662e834690512c88ba48664",
-                "timestamp": "2024-03-14T16:35:00Z"
-            },
-            {
-                "version": "1.1.0.0",
-                "changelog": "Fix field name and add placeholders\nFix URL in logs after redirection\nAdd schema to TubeArchivist URL if not present in settings\nFix a particular case\nLog configuration settings at initialization\nSanitize URLs\n",
-                "targetAbi": "10.8.0.0",
-                "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.1.0/tubearchivistmetadata_1.1.0.0.zip",
-                "checksum": "de4b6562973b7f75b6afe3a441bb0e19",
-                "timestamp": "2024-03-13T15:02:00Z"
-            },
-            {
-                "version": "1.0.0.0",
-                "changelog": "First release\n",
-                "targetAbi": "10.8.0.0",
-                "sourceUrl": "https://github.com/tubearchivist/tubearchivist-jf-plugin/releases/download/v1.0.0/tubearchivistmetadata_1.0.0.0.zip",
-                "checksum": "444f8980671de494b1875ee7d1657bcf",
-                "timestamp": "2024-03-11T16:02:00Z"
             }
         ]
     }
