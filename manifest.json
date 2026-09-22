@@ -9,6 +9,14 @@
         "imageUrl": "https://raw.githubusercontent.com/tubearchivist/tubearchivist-jf-plugin/master/images/logo.png",
         "versions": [
             {
+                "version": "1.4.5.0",
+                "changelog": "Don't sync channel watch state to TA\n",
+                "targetAbi": "10.11.0.0",
+                "sourceUrl": "https://github.com/Jurrer/tubearchivist-jf-plugin/releases/download/v1.4.5/tubearchivistmetadata_1.4.5.0.zip",
+                "checksum": "3f930fe92a5eac87c512e61491e6d677",
+                "timestamp": "2026-09-22T16:27:33Z"
+            },
+            {
                 "version": "1.4.4.0",
                 "changelog": "Handle TubeArchivist playlists pagination\n",
                 "targetAbi": "10.11.0.0",
