@@ -17,6 +17,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Configuration
         private string _tubeArchivistUrl;
         private string _tubeArchivistApiKey;
         private HashSet<string> _jfUsernamesTo;
+        private HashSet<string> _localMetadataEnabledLibraries;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PluginConfiguration"/> class.
@@ -47,6 +48,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Configuration
             TAJFProgressTaskInterval = 60;
             JFTAPlaylistsSyncTaskInterval = 60;
             TAJFPlaylistsSyncTaskInterval = 60;
+            _localMetadataEnabledLibraries = new HashSet<string>();
         }
 
         /// <summary>
@@ -190,6 +192,42 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Configuration
         /// Gets or sets the preferred numbering scheme for episodes (index number) in Jellyfin.
         /// </summary>
         public NumberingScheme EpisodeNumberingScheme { get; set; } = NumberingScheme.Default;
+
+        /// <summary>
+        /// Gets or sets the collection folder (library names) where local metadata parsing is enabled.
+        /// Default is empty (disabled for all libraries).
+        /// </summary>
+        public string LocalMetadataEnabledLibraries
+        {
+            get
+            {
+                return string.Join(",", _localMetadataEnabledLibraries);
+            }
+
+            set
+            {
+                _localMetadataEnabledLibraries.Clear();
+                if (string.IsNullOrEmpty(value))
+                {
+                    return;
+                }
+
+                var entries = value.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(x => x.Trim())
+                    .Where(x => !string.IsNullOrEmpty(x));
+
+                _localMetadataEnabledLibraries.UnionWith(entries);
+            }
+        }
+
+        /// <summary>
+        /// Get the collection folders (library names) where local metadata parsing is enabled.
+        /// </summary>
+        /// <returns>Set of ids.</returns>
+        public IReadOnlySet<string> GetLocalMetadataEnabledLibrariesSet()
+        {
+            return _localMetadataEnabledLibraries;
+        }
 
         /// <summary>
         /// Gets the playback progress owners Jellyfin usernames to synchronize data from TubeArchivist.
