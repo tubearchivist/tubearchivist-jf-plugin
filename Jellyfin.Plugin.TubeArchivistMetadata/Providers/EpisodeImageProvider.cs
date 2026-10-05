@@ -24,21 +24,28 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
     /// </summary>
     public class EpisodeImageProvider : IRemoteImageProvider
     {
-        private ILogger _logger;
+        private readonly ILogger _logger;
+        private readonly TubeArchivistApi _taApi;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EpisodeImageProvider"/> class.
         /// </summary>
         public EpisodeImageProvider()
+            : this(
+                TubeArchivistApi.GetInstance(),
+                Plugin.Instance?.Logger ?? throw new DataException("Uninitialized plugin!"))
         {
-            if (Plugin.Instance == null)
-            {
-                throw new DataException("Uninitialized plugin!");
-            }
-            else
-            {
-                _logger = Plugin.Instance.Logger;
-            }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EpisodeImageProvider"/> class.
+        /// </summary>
+        /// <param name="taApi">TubeArchivist API client.</param>
+        /// <param name="logger">Logger used for provider diagnostics.</param>
+        internal EpisodeImageProvider(TubeArchivistApi taApi, ILogger logger)
+        {
+            _taApi = taApi ?? throw new ArgumentNullException(nameof(taApi));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         /// <summary>
@@ -59,9 +66,8 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
         public async Task<IEnumerable<RemoteImageInfo>> GetImages(BaseItem item, CancellationToken cancellationToken)
         {
             var list = new List<RemoteImageInfo>();
-            var taApi = TubeArchivistApi.GetInstance();
             var videoTAId = Utils.GetVideoNameFromPath(item.Path);
-            var video = await taApi.GetVideo(videoTAId).ConfigureAwait(true);
+            var video = await _taApi.GetVideo(videoTAId).ConfigureAwait(true);
             _logger.LogDebug("{Message}", string.Format(CultureInfo.CurrentCulture, "Getting images for video: {0} ({1})", video?.Title, videoTAId));
             _logger.LogDebug("{Message}", "Thumb URI: " + video?.VidThumbUrl);
 
@@ -71,7 +77,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
                 {
                     ProviderName = Name,
                     Type = ImageType.Primary,
-                    Url = video.VidThumbUrl
+                    Url = _taApi.BuildImageUrl(video.VidThumbUrl).AbsoluteUri
                 });
             }
 
@@ -87,7 +93,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
             }
             else
             {
-                return await Plugin.Instance.HttpClient.GetAsync(new Uri(Utils.SanitizeUrl(Plugin.Instance.Configuration.TubeArchivistUrl + url).TrimEnd('/')), cancellationToken).ConfigureAwait(false);
+                return await Plugin.Instance.HttpClient.GetAsync(_taApi.BuildImageUrl(url), cancellationToken).ConfigureAwait(false);
             }
         }
     }

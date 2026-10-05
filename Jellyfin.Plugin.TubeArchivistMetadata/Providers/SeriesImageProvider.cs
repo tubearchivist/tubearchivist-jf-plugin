@@ -22,21 +22,28 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
     /// </summary>
     public class SeriesImageProvider : IRemoteImageProvider
     {
-        private ILogger _logger;
+        private readonly ILogger _logger;
+        private readonly TubeArchivistApi _taApi;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SeriesImageProvider"/> class.
         /// </summary>
         public SeriesImageProvider()
+            : this(
+                TubeArchivistApi.GetInstance(),
+                Plugin.Instance?.Logger ?? throw new DataException("Uninitialized plugin!"))
         {
-            if (Plugin.Instance == null)
-            {
-                throw new DataException("Uninitialized plugin!");
-            }
-            else
-            {
-                _logger = Plugin.Instance.Logger;
-            }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SeriesImageProvider"/> class.
+        /// </summary>
+        /// <param name="taApi">TubeArchivist API client.</param>
+        /// <param name="logger">Logger used for provider diagnostics.</param>
+        internal SeriesImageProvider(TubeArchivistApi taApi, ILogger logger)
+        {
+            _taApi = taApi ?? throw new ArgumentNullException(nameof(taApi));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         /// <summary>
@@ -50,16 +57,21 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
         /// <inheritdoc />
         public IEnumerable<ImageType> GetSupportedImages(BaseItem item)
         {
-            return new[] { ImageType.Primary };
+            return new[]
+            {
+                ImageType.Primary,
+                ImageType.Art,
+                ImageType.Banner,
+                ImageType.Backdrop
+            };
         }
 
         /// <inheritdoc />
         public async Task<IEnumerable<RemoteImageInfo>> GetImages(BaseItem item, CancellationToken cancellationToken)
         {
             var list = new List<RemoteImageInfo>();
-            var taApi = TubeArchivistApi.GetInstance();
             var channelTAId = Utils.GetChannelNameFromPath(item.Path);
-            var channel = await taApi.GetChannel(channelTAId).ConfigureAwait(true);
+            var channel = await _taApi.GetChannel(channelTAId).ConfigureAwait(true);
             _logger.LogDebug("{Message}", string.Format(CultureInfo.CurrentCulture, "Getting images for channel: {0} ({1})", channel?.Name, channelTAId));
             _logger.LogDebug("{Message}", "Thumb URI: " + channel?.ThumbUrl);
             _logger.LogDebug("{Message}", "TVArt URI: " + channel?.TvartUrl);
@@ -71,25 +83,25 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
                 {
                     ProviderName = Name,
                     Type = ImageType.Primary,
-                    Url = channel.ThumbUrl
+                    Url = _taApi.BuildImageUrl(channel.ThumbUrl).AbsoluteUri
                 });
                 list.Add(new RemoteImageInfo
                 {
                     ProviderName = Name,
                     Type = ImageType.Art,
-                    Url = channel.TvartUrl
+                    Url = _taApi.BuildImageUrl(channel.TvartUrl).AbsoluteUri
                 });
                 list.Add(new RemoteImageInfo
                 {
                     ProviderName = Name,
                     Type = ImageType.Banner,
-                    Url = channel.BannerUrl
+                    Url = _taApi.BuildImageUrl(channel.BannerUrl).AbsoluteUri
                 });
                 list.Add(new RemoteImageInfo
                 {
                     ProviderName = Name,
                     Type = ImageType.Backdrop,
-                    Url = channel.TvartUrl
+                    Url = _taApi.BuildImageUrl(channel.TvartUrl).AbsoluteUri
                 });
             }
 
@@ -105,7 +117,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
             }
             else
             {
-                return await Plugin.Instance.HttpClient.GetAsync(new Uri(Utils.SanitizeUrl(Plugin.Instance.Configuration.TubeArchivistUrl + url).TrimEnd('/')), cancellationToken).ConfigureAwait(false);
+                return await Plugin.Instance.HttpClient.GetAsync(_taApi.BuildImageUrl(url), cancellationToken).ConfigureAwait(false);
             }
         }
     }

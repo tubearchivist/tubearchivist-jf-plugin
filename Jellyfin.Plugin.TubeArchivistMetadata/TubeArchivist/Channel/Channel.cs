@@ -4,7 +4,6 @@ using System.Linq;
 using Jellyfin.Plugin.TubeArchivistMetadata.Utilities;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.TV;
-using MediaBrowser.Model.Entities;
 using MediaBrowser.Model.Providers;
 using Newtonsoft.Json;
 
@@ -116,14 +115,6 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.TubeArchivist
                 {
                     {
                         Constants.ProviderName, Id
-                    }
-                },
-                ImageInfos = new[]
-                {
-                    new ItemImageInfo
-                    {
-                        Path = ThumbUrl,
-                        Type = ImageType.Primary
                     }
                 },
                 Tags = this.Tags != null ?

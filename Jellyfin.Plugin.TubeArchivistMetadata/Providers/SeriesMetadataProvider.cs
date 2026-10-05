@@ -23,21 +23,28 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
     /// </summary>
     public class SeriesMetadataProvider : IRemoteMetadataProvider<Series, SeriesInfo>
     {
-        private ILogger _logger;
+        private readonly ILogger _logger;
+        private readonly TubeArchivistApi _taApi;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SeriesMetadataProvider"/> class.
         /// </summary>
         public SeriesMetadataProvider()
+            : this(
+                TubeArchivistApi.GetInstance(),
+                Plugin.Instance?.Logger ?? throw new DataException("Uninitialized plugin!"))
         {
-            if (Plugin.Instance == null)
-            {
-                throw new DataException("Uninitialized plugin!");
-            }
-            else
-            {
-                _logger = Plugin.Instance.Logger;
-            }
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SeriesMetadataProvider"/> class.
+        /// </summary>
+        /// <param name="taApi">TubeArchivist API client.</param>
+        /// <param name="logger">Logger used for provider diagnostics.</param>
+        internal SeriesMetadataProvider(TubeArchivistApi taApi, ILogger logger)
+        {
+            _taApi = taApi ?? throw new ArgumentNullException(nameof(taApi));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         /// <summary>
@@ -49,9 +56,8 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
         public async Task<MetadataResult<Series>> GetMetadata(SeriesInfo info, CancellationToken cancellationToken)
         {
             var result = new MetadataResult<Series>();
-            var taApi = TubeArchivistApi.GetInstance();
             var channelTAId = Utils.GetChannelNameFromPath(info.Path);
-            var channel = await taApi.GetChannel(channelTAId).ConfigureAwait(true);
+            var channel = await _taApi.GetChannel(channelTAId).ConfigureAwait(true);
             _logger.LogDebug("{Message}", string.Format(CultureInfo.CurrentCulture, "Getting metadata for channel: {0} ({1})", channel?.Name, channelTAId));
             _logger.LogDebug("{Message}", "Received metadata: \n" + JsonConvert.SerializeObject(channel));
 
@@ -61,7 +67,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
                 PeopleHelper.AddPerson(peopleInfo, new PersonInfo
                 {
                     Name = channel.Name,
-                    ImageUrl = channel.ThumbUrl,
+                    ImageUrl = _taApi.BuildImageUrl(channel.ThumbUrl).AbsoluteUri,
                     Type = Data.Enums.PersonKind.Actor,
                 });
                 result.HasMetadata = true;
@@ -78,12 +84,13 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
         {
             var results = new List<RemoteSearchResult>();
 
-            var taApi = TubeArchivistApi.GetInstance();
             var channelTAId = Utils.GetChannelNameFromPath(searchInfo.Path);
-            var channel = await taApi.GetChannel(channelTAId).ConfigureAwait(true);
+            var channel = await _taApi.GetChannel(channelTAId).ConfigureAwait(true);
             if (channel != null)
             {
-                results.Add(channel.ToSearchResult());
+                var searchResult = channel.ToSearchResult();
+                searchResult.ImageUrl = _taApi.BuildImageUrl(channel.ThumbUrl).AbsoluteUri;
+                results.Add(searchResult);
             }
 
             return results;
@@ -98,7 +105,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
             }
             else
             {
-                return await Plugin.Instance.HttpClient.GetAsync(new Uri(Utils.SanitizeUrl(Plugin.Instance.Configuration.TubeArchivistUrl + url).TrimEnd('/')), cancellationToken).ConfigureAwait(false);
+                return await Plugin.Instance.HttpClient.GetAsync(_taApi.BuildImageUrl(url), cancellationToken).ConfigureAwait(false);
             }
         }
     }
