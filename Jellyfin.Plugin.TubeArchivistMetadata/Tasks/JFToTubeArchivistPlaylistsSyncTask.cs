@@ -83,6 +83,11 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
             return totalVideosCount;
         }
 
+        private void ReportProgress(IProgress<double> progress, int processedVideosCount, int totalVideosCount)
+        {
+            progress.Report(totalVideosCount == 0 ? 100 : processedVideosCount * 100 / totalVideosCount);
+        }
+
         private string GetPlaylistUpdatedName(string playlistName, string newId)
         {
             var index = playlistName.LastIndexOf(" (", StringComparison.CurrentCulture);
@@ -136,7 +141,11 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                     foreach (var taPlaylistToDelete in taPlaylistsToDelete)
                     {
                         _logger.LogInformation("Deleting TubeArchivist playlist {PlaylistName} ({PlaylistId})", taPlaylistToDelete.Name, taPlaylistToDelete.Id);
-                        await taApi.DeletePlaylist(taPlaylistToDelete.Id).ConfigureAwait(true);
+                        var deleted = await taApi.DeletePlaylist(taPlaylistToDelete.Id).ConfigureAwait(true);
+                        if (!deleted)
+                        {
+                            _logger.LogError("Failed to delete TubeArchivist playlist {PlaylistName} ({PlaylistId})", taPlaylistToDelete.Name, taPlaylistToDelete.Id);
+                        }
                     }
                 }
 
@@ -144,11 +153,6 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                 {
                     _logger.LogInformation("Analyzing playlist {PlaylistName}...", jfPlaylist.Name);
                     var taPlaylistId = Utils.GetTAPlaylistIdFromName(jfPlaylist.Name);
-                    if (taPlaylistId == null)
-                    {
-                        _logger.LogDebug("The playlist {PlaylistName} was not a TA playlist: could not find TA playlist id at the end", jfPlaylist.Name);
-                        continue;
-                    }
 
                     // Try to find a TA playlist with matching id
                     // N.B.: only videos with TubeArchivist provider can be synced to TA, if there is a non matching video log a warn
@@ -227,7 +231,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                                 switch (item.Action)
                                 {
                                     case CustomPlaylistAction.Create:
-                                        var success = await AddVideoToTAPlaylist(taApi, jfPlaylist, taPlaylistId, item).ConfigureAwait(true);
+                                        var success = await AddVideoToTAPlaylist(taApi, jfPlaylist, taPlaylistId!, item).ConfigureAwait(true);
                                         if (!success)
                                         {
                                             continue;
@@ -238,22 +242,22 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                                     case CustomPlaylistAction.Top:
                                     case CustomPlaylistAction.Bottom:
                                         _logger.LogDebug("Moving the video {VideoName} to the {Side} of the playlist {PlaylistName}", item.Name, item.Action, jfPlaylist.Name);
-                                        await MoveOrDeleteVideo(taApi, jfPlaylist, taPlaylistId, item).ConfigureAwait(true);
+                                        await MoveOrDeleteVideo(taApi, jfPlaylist, taPlaylistId!, item).ConfigureAwait(true);
                                         break;
 
                                     case CustomPlaylistAction.Remove:
                                         _logger.LogDebug("Removing the video {VideoName} in playlist {PlaylistName}", item.Name, jfPlaylist.Name);
-                                        await MoveOrDeleteVideo(taApi, jfPlaylist, taPlaylistId, item).ConfigureAwait(true);
+                                        await MoveOrDeleteVideo(taApi, jfPlaylist, taPlaylistId!, item).ConfigureAwait(true);
                                         break;
 
                                     default:
                                         _logger.LogDebug("Moving the video {VideoName} {Direction} in playlist {PlaylistName}", item.Name, item.Action, jfPlaylist.Name);
-                                        await MoveOrDeleteVideo(taApi, jfPlaylist, taPlaylistId, item).ConfigureAwait(true);
+                                        await MoveOrDeleteVideo(taApi, jfPlaylist, taPlaylistId!, item).ConfigureAwait(true);
                                         break;
                                 }
 
                                 processedVideosCount++;
-                                progress.Report(processedVideosCount * 100 / totalVideosCount);
+                                ReportProgress(progress, processedVideosCount, totalVideosCount);
                             }
                         }
                         else
@@ -283,6 +287,8 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                             continue;
                         }
 
+                        taPlaylistId = createdTAPlaylist.Id;
+
                         // Update the JF playlist name with the new TA playlist id
                         var newPlaylistName = GetPlaylistUpdatedName(jfPlaylist.Name, createdTAPlaylist.Id);
                         var updateRequest = new PlaylistUpdateRequest
@@ -294,8 +300,14 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                         await _playlistManager.UpdatePlaylist(updateRequest).ConfigureAwait(true);
                         _logger.LogDebug("Updated the playlist name from {NewPlaylistName} to {NewPlaylistName}", playlistName, newPlaylistName);
 
-                        foreach (var jfItem in jfPlaylist.GetItemList(new InternalItemsQuery()))
+                        foreach (var jfItem in jfItemsToAnalyze[jfPlaylist.Id])
                         {
+                            if (!jfItem.ProviderIds.ContainsKey(Constants.ProviderName))
+                            {
+                                _logger.LogError("Could not sync {JFItem} video from playlist {JFPlaylist} because it doesn't belong to TubeArchivist", jfItem.Name, jfPlaylist.Name);
+                                continue;
+                            }
+
                             _logger.LogDebug("Adding the video {VideoName} to the playlist {PlaylistName}", jfItem.Name, jfPlaylist.Name);
                             var action = new CustomPlaylistEntryAction(CustomPlaylistAction.Create, jfItem.ProviderIds[Constants.ProviderName]);
                             var response = await taApi.CustomPlaylistEntryAction(taPlaylistId, action).ConfigureAwait(true);
@@ -306,7 +318,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                             }
 
                             processedVideosCount++;
-                            progress.Report(processedVideosCount * 100 / totalVideosCount);
+                            ReportProgress(progress, processedVideosCount, totalVideosCount);
                         }
                     }
                 }
@@ -379,7 +391,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Tasks
                 new TaskTriggerInfo
                 {
                     Type = TaskTriggerInfoType.IntervalTrigger,
-                    IntervalTicks = TimeSpan.FromSeconds(Plugin.Instance!.Configuration.TAJFProgressTaskInterval).Ticks
+                    IntervalTicks = TimeSpan.FromSeconds(Plugin.Instance!.Configuration.JFTAPlaylistsSyncTaskInterval).Ticks
                 },
             ];
         }
