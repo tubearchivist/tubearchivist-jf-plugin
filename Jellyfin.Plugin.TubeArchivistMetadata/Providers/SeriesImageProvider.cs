@@ -94,6 +94,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
                         Url = _taApi.BuildImageUrl(channel.BannerUrl).AbsoluteUri
                     });
                 }
+
                 if (channel.TvartUrl != null)
                 {
                     list.Add(new RemoteImageInfo
