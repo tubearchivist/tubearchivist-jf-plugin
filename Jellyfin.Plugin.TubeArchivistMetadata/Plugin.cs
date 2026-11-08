@@ -156,7 +156,21 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
 
         private async void OnPlaybackProgress(object? sender, PlaybackProgressEventArgs eventArgs)
         {
-            if (eventArgs == null || eventArgs.Item.Id == Guid.Empty)
+            // An exception escaping an async void handler is raised on the thread pool and terminates the whole
+            // Jellyfin process, so this handler must never throw (e.g. for events reported with null media info).
+            try
+            {
+                await OnPlaybackProgressCore(eventArgs).ConfigureAwait(true);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Unhandled exception while processing a PlaybackProgress event");
+            }
+        }
+
+        private async Task OnPlaybackProgressCore(PlaybackProgressEventArgs eventArgs)
+        {
+            if (eventArgs?.Item is null || eventArgs.Item.Id == Guid.Empty)
             {
                 Logger.LogDebug("Skipping progress synchronization: PlaybackProgress event triggered with null or empty Guid.");
                 return;
@@ -165,7 +179,7 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
             var topParent = eventArgs.Item.GetTopParent();
             if (
                 Instance!.Configuration.JFTAProgressSync &&
-                eventArgs.Users.Any(u => Instance!.Configuration.JFUsernameFrom.Equals(u.Username, StringComparison.Ordinal)) &&
+                eventArgs.Users?.Any(u => Instance!.Configuration.JFUsernameFrom.Equals(u.Username, StringComparison.Ordinal)) == true &&
                 eventArgs.PlaybackPositionTicks.HasValue &&
                 string.Equals(topParent?.Name, Instance?.Configuration.CollectionTitle, StringComparison.OrdinalIgnoreCase)
             )
@@ -189,7 +203,20 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata
 
         private async void OnWatchedStatusChange(object? sender, UserDataSaveEventArgs eventArgs)
         {
-            if (eventArgs == null || eventArgs.Item.Id == Guid.Empty)
+            // See OnPlaybackProgress: an exception escaping an async void handler terminates the Jellyfin process.
+            try
+            {
+                await OnWatchedStatusChangeCore(eventArgs).ConfigureAwait(true);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ex, "Unhandled exception while processing a UserDataSaved event");
+            }
+        }
+
+        private async Task OnWatchedStatusChangeCore(UserDataSaveEventArgs eventArgs)
+        {
+            if (eventArgs?.Item is null || eventArgs.Item.Id == Guid.Empty)
             {
                 Logger.LogDebug("Skipping watched status synchronization: WatchedStatusChange event triggered with null or empty Guid.");
                 return;
