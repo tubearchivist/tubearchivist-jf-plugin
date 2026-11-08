@@ -85,24 +85,30 @@ namespace Jellyfin.Plugin.TubeArchivistMetadata.Providers
                     Type = ImageType.Primary,
                     Url = _taApi.BuildImageUrl(channel.ThumbUrl).AbsoluteUri
                 });
-                list.Add(new RemoteImageInfo
+                if (channel.BannerUrl != null)
                 {
-                    ProviderName = Name,
-                    Type = ImageType.Art,
-                    Url = _taApi.BuildImageUrl(channel.TvartUrl).AbsoluteUri
-                });
-                list.Add(new RemoteImageInfo
+                    list.Add(new RemoteImageInfo
+                    {
+                        ProviderName = Name,
+                        Type = ImageType.Banner,
+                        Url = _taApi.BuildImageUrl(channel.BannerUrl).AbsoluteUri
+                    });
+                }
+                if (channel.TvartUrl != null)
                 {
-                    ProviderName = Name,
-                    Type = ImageType.Banner,
-                    Url = _taApi.BuildImageUrl(channel.BannerUrl).AbsoluteUri
-                });
-                list.Add(new RemoteImageInfo
-                {
-                    ProviderName = Name,
-                    Type = ImageType.Backdrop,
-                    Url = _taApi.BuildImageUrl(channel.TvartUrl).AbsoluteUri
-                });
+                    list.Add(new RemoteImageInfo
+                    {
+                        ProviderName = Name,
+                        Type = ImageType.Art,
+                        Url = _taApi.BuildImageUrl(channel.TvartUrl).AbsoluteUri
+                    });
+                    list.Add(new RemoteImageInfo
+                    {
+                        ProviderName = Name,
+                        Type = ImageType.Backdrop,
+                        Url = _taApi.BuildImageUrl(channel.TvartUrl).AbsoluteUri
+                    });
+                }
             }
 
             return list;
